@@ -2,30 +2,33 @@
 
 ## Getting Started
 
-### Build
-
-Just make sure you set up correctly your environment
+Just make sure you set up correctly your environment.
 
 * Python3 (>3.11)
-* run `pip3 install -r requirements.txt`
+
+Then use the `Makefile`
+
+### Build
+
+* run `make init`
 
 to update the requirements.txt: `pip3 freeze > requirements.txt`
 
 ### Test
 
-to be completed
+run `make test`
 
 ### Run
 
-run `python3 Scraper.py`
+run `make run`
 
 ## Business Objective
 
-This projet contains automations scripts to automatize administrative tasks within O2Do.
+This project contains automation scripts to automatize administrative tasks within O2Do.
 
 ### Scraping opportunities automatically
 
-The first goal is to scrape opportunities for new assignment automatically so we don't have to read them all by logging into multiple platforms and scrolling to get only the newest and interesting offers.
+The first goal is to scrape opportunities for a new assignment automatically so we don't have to read them all by logging into multiple platforms and scrolling to get only the newest and interesting offers.
 
 In the future, it will allow
 
@@ -37,4 +40,4 @@ In the future, it will allow
 
 Infrabel sends emails with PDF files attached to it containing all the information about the opportunity.
 With PowerAutomate, we can place any PDF received into a dedicated folder on Sharepoint.
-This workflow can then run and parse the PDF in order to persist the info.
+This workflow can then run and parse the PDF in order to save the info.
