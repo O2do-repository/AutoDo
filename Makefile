@@ -5,7 +5,7 @@ test:
 	pytest
 
 run:
-	python Scraper.py
+	python WebScraper.py
 
 clean:
 	rm -rf __pycache__

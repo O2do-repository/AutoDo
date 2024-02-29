@@ -14,6 +14,7 @@ class Opportunity:
     description: str = "not provided"
     experience: str = "not provided"
     skills: str = "not provided"
+    url: str = "not provided"
 
     def save(self):
         print(self)
