@@ -161,16 +161,21 @@ class InfrabelPDFScraper:
         return opportunity
 
 
-# # Chemin vers le dossier contenant le fichier PDF
-# folder_path = "tests/test_files"
+def main():
+    # Chemin vers le dossier contenant le fichier PDF
+    folder_path = "tests/test_files"
 
-# # Nom du fichier PDF à lire
-# file_name = "Offerteaanvraag 00691.pdf"
+    # Nom du fichier PDF à lire
+    file_name = "Offerteaanvraag 00691.pdf"
 
-# # Chemin complet vers le fichier PDF
-# file_path = os.path.join(folder_path, file_name)
+    # Chemin complet vers le fichier PDF
+    file_path = os.path.join(folder_path, file_name)
 
-# scraper = InfrabelPDFScraper()
-# opportunity = scraper.scrapePDF(file_path)
+    scraper = InfrabelPDFScraper()
+    opportunity = scraper.scrapePDF(file_path)
 
-# opportunity.save()
+    opportunity.save()
+
+
+if "__main__":
+    main()
