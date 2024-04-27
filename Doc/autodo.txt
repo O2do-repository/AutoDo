@@ -1,0 +1,98 @@
+workspace {
+
+    model {
+        com = person "O2DO commercials"
+        prof = person "Profiles"
+        client = person "Clients"
+        email = softwaresystem "E-mail System"
+        plats = softwaresystem "3rd Party Platform"
+        auto = softwareSystem "AutoDo" {
+            api = container "API Application" {
+                emailc = component "email component"
+                rfp = component "proposal component"
+                stor = component "Storage component"
+                match = component "matching component"
+                peop = component "people component"
+                scrap = component "scrap component"
+                contract = component "contract component"
+            }
+            store = container "Storage" 
+        }
+        
+        # relationships between people and software systems
+        auto -> email "trigger email"
+        email -> prof "send Email"
+        email -> com "send Email"
+        com -> prof "send Newsletter"
+        prof -> com "send CV"
+        com -> prof "send RFP"
+        client -> com "invite to interview"
+        client -> com "send interview feedback"
+        client -> com "propose contract"
+        client -> com "reject proposal
+        prof -> com "send confirmation"
+        prof -> com "send interview feedback"
+        
+        # relationships to/from containers
+        api -> plats "scrap RFP"
+        api -> email "ask email contents"
+        api -> email "RFP To Newsletter"
+        api -> email "notify Archive RFP"
+        api -> com "send Proposal"
+        com -> api "save Profile"
+        com -> api "update Proposal"
+        com -> api "create Contract"
+        com -> api "introduce Contract Details"
+        api -> email "invite to Interview"
+        api -> email "send Contract Terms"
+        api -> email "notify Rejection"
+        api -> store "Store RFP"
+        
+        # relationships to/from components
+        emailc -> email "trigger email"
+        com -> rfp "launch"
+        com -> rfp "read proposal history"
+        com -> rfp "update proposal
+        match -> stor "read people"
+        stor -> store "store RFP"
+        store -> stor "read RFP"
+        rfp -> match "get match"
+        rfp -> email "send match"
+        rfp -> stor "store proposal"
+        rfp -> email "read email"
+        rfp -> scrap "read rfp"
+        com -> peop "update people"
+        peop -> stor "stor people"
+        rfp -> emailc "send proposal"
+        scrap -> plats "scrap rfp"
+        com -> contract "update contract"
+        contract -> emailc "send contract"
+        contract -> stor "store contract"
+        
+        
+    }
+
+    views {
+            systemlandscape "SystemLandscape" {
+            include *
+            autoLayout
+        }
+        systemContext auto {
+            include *
+            autolayout tb
+        }
+
+        container auto {
+            include *
+            autolayout tb
+        }
+        
+        component api {
+            include *
+            autolayout lr
+        }
+
+        theme default
+    }
+
+}
