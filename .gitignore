@@ -161,7 +161,7 @@ cython_debug/
 
 #vs config
 
-.vs/
+.vs
 *opt/*
 bin/
 AutoDo/
