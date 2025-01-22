@@ -5,7 +5,6 @@ bin/
 obj/
 
 # Ignorer les fichiers spécifiques aux IDE
-.vscode/
 .idea/
 
 # Ignorer les fichiers de configuration locaux
