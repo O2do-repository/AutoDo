@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'AutoDo'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D4F7B95E9056415B8FC5CE24B2B5BC25 }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFIL }}
           package: .
