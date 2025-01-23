@@ -12,7 +12,7 @@ To launch the application, go to 'Run and Debug' and click the green button.
 ![Capture d'écran 2025-01-23 135406](https://github.com/user-attachments/assets/74d27991-fdee-44b5-a3ca-359844d0dac1)
 
 
-You can see your changes reflected at the localhost address in the terminal or via the pop up."
+You can see your changes reflected at the localhost address in the terminal or via the pop-up.
 
 
 ![image](https://github.com/user-attachments/assets/595ff43b-51f9-4fce-9436-977e5e93886f)
