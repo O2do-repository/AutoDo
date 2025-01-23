@@ -15,7 +15,8 @@ To launch the application, go to 'Run and Debug' and click the green button.
 You can see your changes reflected at the localhost address in the terminal or via the pop up."
 
 
-![image](https://github.com/user-attachments/assets/67620ebd-38f1-4161-9154-3e75605e10c2)
+![image](https://github.com/user-attachments/assets/595ff43b-51f9-4fce-9436-977e5e93886f)
+
 
 
 You can access the application deployed on Azure via this link :
