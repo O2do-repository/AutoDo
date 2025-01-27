@@ -4,7 +4,7 @@
 	"name": "C# (.NET)",
 
 	"build": {
-		"dockerfile": "Dockerfile"
+		"dockerfile": "DockerFile"
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "dotnet dev-certs https --trust && npm install",

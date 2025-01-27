@@ -9,5 +9,6 @@ RUN apt-get update && apt-get install -y \
 # Vérification des versions installées
 RUN node -v && npm -v && dotnet --version
 
+
 # Définir le répertoire de travail
 WORKDIR /workspaces
