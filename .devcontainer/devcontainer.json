@@ -8,7 +8,8 @@
 		"dockerfile": "DockerFile"
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet dev-certs https --trust && npm install",
+	"postCreateCommand": "dotnet dev-certs https --trust && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
+	
 
 	// Configure tool-specific properties.
 	"customizations": {
