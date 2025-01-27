@@ -8,7 +8,7 @@
 		"dockerfile": "DockerFile"
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet dev-certs https --trust && npm install",
+	"postCreateCommand": "dotnet dev-certs https --trust && npm install && npm install vite --save-dev",
 
 	// Configure tool-specific properties.
 	"customizations": {
