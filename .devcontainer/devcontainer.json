@@ -5,7 +5,18 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0",
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet dev-certs https --trust",
+	"postCreateCommand": "dotnet dev-certs https --trust && npm install --prefix frontend",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",     // Formatage Vue.js
+				"dbaeumer.vscode-eslint",     // Linter JS/TS
+				"streetsidesoftware.code-spell-checker"
+			]
+		}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -21,9 +32,8 @@
 
 
 
-	// Configure tool-specific properties.
-	// "customizations": {},
 
+	
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }
