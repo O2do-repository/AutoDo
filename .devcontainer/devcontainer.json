@@ -15,10 +15,11 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"esbenp.prettier-vscode",     // Formatage Vue.js
-				"dbaeumer.vscode-eslint",     // Linter JS/TS
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint",
 				"streetsidesoftware.code-spell-checker",
-				"antfu.vite"
+				"antfu.vite",
+				"Vue.volar"
 			]
 		}
 	},
