@@ -1,5 +1,5 @@
 # Image de base combinant .NET et Node.js
-FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0
+FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0-node
 
 # Installation supplémentaire si nécessaire (optionnel)
 RUN apt-get update && apt-get install -y \

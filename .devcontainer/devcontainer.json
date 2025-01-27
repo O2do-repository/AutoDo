@@ -4,7 +4,7 @@
 	"name": "C# (.NET)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 
-		"build": {
+	"build": {
 		"dockerfile": "DockerFile"
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
