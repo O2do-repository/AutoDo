@@ -23,3 +23,6 @@ You can access the application deployed on Azure via this link :
 https://autodo-fpe3azgvbvcxbgcx.westeurope-01.azurewebsites.net/
 
 
+
+
+
