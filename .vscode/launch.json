@@ -28,6 +28,23 @@
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
+        },
+        {
+            "name": "Vite Dev Server (frontend)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/srcFrontend/AutoDoUI/node_modules/vite/bin/vite.js",
+            "cwd": "${workspaceFolder}/srcFrontend/AutoDoUI",
+            "runtimeArgs": ["--host"],
+            "env": {
+              "NODE_ENV": "development"
+            }
         }
-    ]
+    ],
+    "compounds": [
+        {
+          "name": "Launch Backend and Frontend",
+          "configurations": [".NET Core Launch (web)", "Vite Dev Server (frontend)"]
+        }
+      ]
 }

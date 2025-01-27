@@ -36,6 +36,31 @@
                 "${workspaceFolder}/src/AutoDo.sln"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "install-frontend",
+            "command": "npm",
+            "type": "process",
+            "args": [
+                "install"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/srcFrontend/AutoDoUI"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "dev-frontend",
+            "command": "npm",
+            "type": "process",
+            "args": [
+                "run",
+                "dev"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/srcFrontend/AutoDoUI"
+            },
+            "problemMatcher": []
         }
     ]
 }
