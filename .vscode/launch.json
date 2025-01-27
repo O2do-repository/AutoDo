@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
@@ -35,7 +36,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/srcFrontend/AutoDoUI/node_modules/vite/bin/vite.js",
             "cwd": "${workspaceFolder}/srcFrontend/AutoDoUI",
-            "runtimeArgs": ["--host"],
+            "args": ["--host", "0.0.0.0"],
             "env": {
               "NODE_ENV": "development"
             }
