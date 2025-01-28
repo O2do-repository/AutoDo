@@ -22,6 +22,10 @@ You can see your changes reflected at the localhost address in the terminal or v
 You can access the application deployed on Azure via this link :
 https://autodo-fpe3azgvbvcxbgcx.westeurope-01.azurewebsites.net/
 
+You can access the user interface deployed with this link : 
+https://o2do-repository.github.io/AutoDo/
+
+
 
 
 
