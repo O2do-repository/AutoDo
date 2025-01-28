@@ -7,13 +7,20 @@ app.MapGet("/generate-error", (ILogger<Program> logger) =>
 {
     try
     {
+        // Force une exception volontaire
         throw new Exception("Ceci est une exception de test !");
     }
     catch (Exception ex)
     {
+        // Loguer l'exception avec sa pile d'appels
         logger.LogError(ex, "Une erreur est survenue");
 
-        return Results.StatusCode(500);
+        // Retourner une réponse HTTP 500 avec un message simple
+        return Results.Problem(
+            title: "Une erreur interne est survenue.",
+            detail: ex.Message,
+            statusCode: 500
+        );
     }
 });
 app.Run();
