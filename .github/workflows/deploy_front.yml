@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - master # Déclenche le workflow lors d'un push sur la branche master
+      - main # Déclenche le workflow lors d'un push sur la branche master
     paths:
       - 'srcFrontend/**'  
 jobs:
