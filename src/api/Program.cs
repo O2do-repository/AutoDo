@@ -1,26 +1,19 @@
 var builder = WebApplication.CreateBuilder(args);
+
+// Ajout du logging pour capturer les exceptions
+builder.Logging.AddConsole(); // Permet de loguer dans la console et Azure Log Stream
+
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello AutoDo, Eric is the best !");
+// Route de base
+app.MapGet("/", () => "Hello AutoDo, Eric is the best!");
 
-app.MapGet("/generate-error", (ILogger<Program> logger) =>
+// Route pour tester une exception
+app.MapGet("/throw", (ILogger<Program> logger) =>
 {
-    try
-    {
-        // Force une exception volontaire
-        throw new Exception("Ceci est une exception de test !");
-    }
-    catch (Exception ex)
-    {
-        // Loguer l'exception avec sa pile d'appels
-        logger.LogError(ex, "Une erreur est survenue");
-
-        // Retourner une réponse HTTP 500 avec un message simple
-        return Results.Problem(
-            title: "Une erreur interne est survenue.",
-            detail: ex.Message,
-            statusCode: 500
-        );
-    }
+    // Logger un message avant de lancer l'exception
+    logger.LogError("Une exception de test est sur le point d'être déclenchée.");
+    throw new Exception("Ceci est une exception de test pour Log Stream.");
 });
+
 app.Run();
