@@ -3,7 +3,7 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello AutoDo, Eric is the best !");
 
-app.MapGet("/generate-error", () =>
+app.MapGet("/generate-error", (ILogger<Program> logger) =>
 {
     try
     {
@@ -11,7 +11,9 @@ app.MapGet("/generate-error", () =>
     }
     catch (Exception ex)
     {
-        return Results.Problem(detail: ex.Message, statusCode: 500);
+        logger.LogError(ex, "Une erreur est survenue");
+
+        return Results.StatusCode(500);
     }
 });
 app.Run();
