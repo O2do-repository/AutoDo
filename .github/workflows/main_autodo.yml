@@ -1,15 +1,18 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - AutoDo
+name: Build and Deploy ASP.Net Core app to Azure Web App - AutoDo
 
 on:
+  pull_request:
+    branches:
+      - main  # Ajout : déclencher sur une PR vers main
+    paths:
+      - 'src/**'
+      - '.github/workflows/main_autodo.yml'
   push:
     branches:
       - main
-    paths:
-      - 'src/**'  
-      - '.github/workflows/main_autodo.yml'
   workflow_dispatch:
 
 jobs:
@@ -25,19 +28,28 @@ jobs:
           dotnet-version: '9.x'
           include-prerelease: true
 
+      - name: Restore dependencies
+        run: dotnet restore src
+
       - name: Build with dotnet
-        run: dotnet build src --configuration Release
+        run: dotnet build src --configuration Release --no-restore
+
+      # - name: Run tests
+      #   run: dotnet test src --no-restore --verbosity normal
 
       - name: dotnet publish
+        if: github.event_name == 'push'  # Ne publie que sur push, pas sur PR
         run: dotnet publish src -c Release -o ${{env.DOTNET_ROOT}}/myapp 
 
       - name: Upload artifact for deployment job
+        if: github.event_name == 'push'  # Ne télécharge que pour le déploiement
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
+    if: github.event_name == 'push'  # Ne déploie que si c'est un push, pas une PR
     runs-on: windows-latest
     needs: build
     environment:
@@ -58,3 +70,4 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFIL }}
           package: .
+
