@@ -4,7 +4,7 @@ builder.Logging.AddConsole();
 var app = builder.Build();
 
 // Route de base
-app.MapGet("/", () => "Hello AutoDo, Eric is the best !"); 
+app.MapGet("/", () => "Hello AutoDo, Eric is the best !")
 
 app.MapGet("/throw", (ILogger<Program> logger) =>
 {
