@@ -8,4 +8,4 @@ dotnet add src/Tests/Tests.csproj package xunit.runner.visualstudio
 
 
 cd /workspaces/AutoDo/srcFrontend/AutoDoUI
-npm install"
+npm install
