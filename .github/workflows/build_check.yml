@@ -23,6 +23,6 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build src --configuration Release --no-restore
-
+      
       - name: Run unit tests
-        run: dotnet test src --no-restore --verbosity normal
+        run: dotnet test src/tests --no-restore --logger trx --verbosity normal
