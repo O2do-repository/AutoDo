@@ -1,0 +1,11 @@
+# Ignorer les fichiers binaires et les builds
+*.exe
+*.dll
+bin/
+obj/
+
+# Ignorer les fichiers spécifiques aux IDE
+.idea/
+
+# Ignorer les fichiers de configuration locaux
+*.env

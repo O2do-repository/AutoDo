@@ -1,0 +1,39 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main # Déclenche le workflow lors d'un push sur la branche master
+    paths:
+      - 'srcFrontend/**'  
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout le code source
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Configurer Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      # 3. Installer les dépendances et construire le projet
+      - name: Install Dependencies and Build
+        run: |
+          cd srcFrontend/AutoDoUI
+          npm install
+          npm run build
+
+      # 4. Déployer le dossier /dist vers gh-pages
+      # doc : https://github.com/JamesIves/github-pages-deploy-action
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: srcFrontend/AutoDoUI/dist # Le dossier construit à déployer
+          
