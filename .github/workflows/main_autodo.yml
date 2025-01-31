@@ -28,6 +28,9 @@ jobs:
       - name: Build with dotnet
         run: dotnet build src --configuration Release --no-restore
 
+      - name: Run unit tests
+        run: dotnet test src/tests
+
       - name: dotnet publish
         run: dotnet publish src -c Release -o ${{env.DOTNET_ROOT}}/myapp 
 
