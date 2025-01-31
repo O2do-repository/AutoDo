@@ -3,8 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 var app = builder.Build();
 
-// Route de base
-app.MapGet("/", () => "Hello AutoDo, Lucien is the best !");
+app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
 
 app.MapGet("/throw", (ILogger<Program> logger) =>
 {
