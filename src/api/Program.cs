@@ -15,6 +15,7 @@ if (!string.IsNullOrEmpty(appInsightsConnectionString))
 
 var app = builder.Build();
 
+
 app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best ! ");
 
 
