@@ -2,7 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddConsole();
 
-var appInsightsConnectionString = Environment.GetEnvironmentVariable("APPINSIGHTS_CONNECTION_STRING");
+var appInsightsConnectionString = Environment.GetEnvironmentVariable("APPINSIGHTS_KEY");
 
 // activer Application Insights
 if (!string.IsNullOrEmpty(appInsightsConnectionString))
