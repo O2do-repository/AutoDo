@@ -6,7 +6,11 @@
 
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0",
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet dev-certs https --trust && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
+	"postCreateCommand": "dotnet dev-certs https --trust && cd /workspaces/AutoDo/src/api && dotnet add package Microsoft.ApplicationInsights.AspNetCore && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
+	"remoteEnv": {
+    	"APPINSIGHTS_KEY": "${APPINSIGHTS_KEY}"
+	},
+
 	
 
 	// Configure tool-specific properties.
