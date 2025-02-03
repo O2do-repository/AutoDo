@@ -15,7 +15,7 @@ if (!string.IsNullOrEmpty(appInsightsConnectionString))
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
+app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best ! ");
 
 
 app.MapGet("/throw", (ILogger<Program> logger) =>
