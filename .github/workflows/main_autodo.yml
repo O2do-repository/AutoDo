@@ -61,3 +61,6 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFIL }}
           package: .
+      - name: Set Application Insights Connection String
+        run: az webapp config appsettings set --name AutoDo --resource-group lucas-group --settings APPINSIGHTS_KEY=${{ secrets.APPINSIGHTS_KEY }}
+
