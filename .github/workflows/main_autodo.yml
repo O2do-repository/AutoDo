@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      APPINSIGHTS_KEY: ${{ secrets.APPINSIGHTS_KEY }}
 
     steps:
       - uses: actions/checkout@v4
