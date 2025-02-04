@@ -4,7 +4,7 @@ builder.Logging.AddConsole();
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+//app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Route de test
 app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best ! ");
