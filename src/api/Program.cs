@@ -1,23 +1,15 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Ajouter le middleware de gestion des exceptions
+builder.Services.AddTransient<ExceptionHandlingMiddleware>();
+
 builder.Logging.AddConsole();
-
-var appInsightsConnectionString = Environment.GetEnvironmentVariable("APPINSIGHTS_KEY");
-
-// activer Application Insights
-if (!string.IsNullOrEmpty(appInsightsConnectionString))
-{
-    builder.Services.AddApplicationInsightsTelemetry(options =>
-    {
-        options.ConnectionString = appInsightsConnectionString;
-    });
-}
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best ! ");
-
 
 app.MapGet("/throw", (ILogger<Program> logger) =>
 {
