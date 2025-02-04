@@ -1,14 +1,12 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Ajouter le middleware de gestion des exceptions
-builder.Services.AddTransient<ExceptionHandlingMiddleware>();
-
 builder.Logging.AddConsole();
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+// Route de test
 app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best ! ");
 
 app.MapGet("/throw", (ILogger<Program> logger) =>
