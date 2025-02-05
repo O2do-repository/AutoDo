@@ -1,14 +1,15 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.AddConsole();
+// Ajouter Azure Monitor Logger
+builder.Logging.ClearProviders();
+builder.Logging.AddProvider(new AzureMonitorLoggerProvider());
 
 var app = builder.Build();
 
-//app.UseMiddleware<ExceptionHandlingMiddleware>();
-
 // Route de test
-app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best ! ");
+app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
 
+// Simuler une exception
 app.MapGet("/throw", (ILogger<Program> logger) =>
 {
     logger.LogError("Une exception de test est sur le point d'être déclenchée.");
