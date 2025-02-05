@@ -55,6 +55,13 @@ jobs:
         with:
           name: .net-app
 
+      - name: Inject environment variables from GitHub Secrets
+        run: |
+          echo "AZURE_MONITOR_DCE=${{ secrets.AZURE_MONITOR_DCE }}" >> $GITHUB_ENV
+          echo "AZURE_MONITOR_DCR_ID=${{ secrets.AZURE_MONITOR_DCR_ID }}" >> $GITHUB_ENV
+          echo "AZURE_MONITOR_TABLE=${{ secrets.AZURE_MONITOR_TABLE }}" >> $GITHUB_ENV
+
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
