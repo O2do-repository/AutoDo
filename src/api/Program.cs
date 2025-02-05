@@ -7,7 +7,7 @@ builder.Logging.AddProvider(new AzureMonitorLoggerProvider());
 var app = builder.Build();
 
 // Route de test
-app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
+app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best  !");
 
 // Simuler une exception
 app.MapGet("/throw", (ILogger<Program> logger) =>
