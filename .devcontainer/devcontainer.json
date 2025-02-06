@@ -6,7 +6,7 @@
 
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0",
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet dev-certs https --trust && cd /workspaces/AutoDo/src/api && dotnet add package Azure.Identity && dotnet add package Azure.Monitor.Ingestion && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
+	"postCreateCommand": "dotnet dev-certs https --trust && dotnet restore && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
 
 	
 
