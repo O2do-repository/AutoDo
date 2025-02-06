@@ -38,11 +38,11 @@ public class AzureMonitorLogger : ILogger
         {
             var logs = new List<object> { logEntry };
             await _client.UploadAsync(_dcrImmutableId, _tableName, logs);
-            Console.WriteLine($"✅ Log envoyé à Azure Monitor : {logEntry.Message}");
+            Console.WriteLine($"Log envoyé à Azure Monitor : {logEntry.Message}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Erreur d'envoi du log : {ex.Message}");
+            Console.WriteLine($"Erreur d'envoi du log : {ex.Message}");
         }
     }
 
@@ -63,6 +63,6 @@ public class AzureMonitorLogger : ILogger
             }
         }
 
-        return "Source inconnue";
+        return "Source unknown";
     }
 }
