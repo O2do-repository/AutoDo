@@ -94,9 +94,14 @@ const fetchRFPList = async () => {
 
 onMounted(fetchRFPList);
 
-const viewRFP = (Uuid: string) => {
+const viewRFP = (Uuid?: string) => {
+  if (!Uuid) {
+    console.error("UUID non défini !");
+    return;
+  }
   window.location.href = `/rfp/${Uuid}`;
 };
+
 </script>
 
 <style scoped>
