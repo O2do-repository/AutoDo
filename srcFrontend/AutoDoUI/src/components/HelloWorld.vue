@@ -31,7 +31,7 @@
       </template>
 
       <template v-slot:item.actions="{ item }">
-        <v-btn color="primary" small disabled>
+        <v-btn color="primary" small @click="viewRFP(item.Uuid)">
           <v-icon left>mdi-eye</v-icon> Voir plus
         </v-btn>
       </template>
@@ -64,14 +64,14 @@ const error = ref<string | null>(null);
 const search = ref('');
 
 const headers = ref([
-  { key: 'jobTitle', title: 'Titre du poste', align: 'start' },
-  { key: 'publicationDate', title: 'Publiée le', sortable: true },
-  { key: 'deadlineDate', title: 'Date limite', sortable: true },
-  { key: 'experienceLevel', title: 'Expérience' },
-  { key: 'rfpPriority', title: 'Priorité' },
-  { key: 'workplace', title: 'Lieu' },
-  { key: 'rfpUrl', title: 'Lien', sortable: false },
-  { key: 'actions', title: 'Actions', sortable: false },
+  { key: 'jobTitle', title: 'Titre du poste', align: 'start' as const },
+  { key: 'publicationDate', title: 'Publiée le', align: 'end' as const, sortable: true },
+  { key: 'deadlineDate', title: 'Date limite', align: 'end' as const, sortable: true },
+  { key: 'experienceLevel', title: 'Expérience', align: 'start' as const },
+  { key: 'rfpPriority', title: 'Priorité', align: 'center' as const },
+  { key: 'workplace', title: 'Lieu', align: 'start' as const },
+  { key: 'rfpUrl', title: 'Lien', align: 'center' as const, sortable: false },
+  { key: 'actions', title: 'Actions', align: 'center' as const, sortable: false },
 ]);
 
 const fetchRFPList = async () => {
