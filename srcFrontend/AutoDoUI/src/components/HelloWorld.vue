@@ -1,157 +1,116 @@
 <template>
-  <v-container class="fill-height">
-    <v-responsive
-      class="align-centerfill-height mx-auto"
-      max-width="900"
+  <v-container>
+    <h1 class="text-center mb-6">Liste des RFP</h1>
+
+    <v-alert v-if="error" type="error" variant="outlined" class="mb-4">
+      {{ error }}
+    </v-alert>
+
+    <!-- Barre de recherche -->
+    <v-text-field
+      v-model="search"
+      label="Rechercher un RFP"
+      prepend-inner-icon="mdi-magnify"
+      variant="outlined"
+      hide-details
+      single-line
+      class="mb-4"
+    ></v-text-field>
+
+    <v-data-table
+      :headers="headers"
+      :items="rfps"
+      :search="search"
+      item-value="Uuid"
+      class="elevation-2"
+      dense
     >
-      <v-img
-        class="mb-4"
-        height="150"
-        src="@/assets/logo.png"
-      />
+      <template v-slot:item.rfpUrl="{ item }">
+        <a v-if="item.rfpUrl" :href="item.rfpUrl" target="_blank">Voir l'offre</a>
+        <span v-else>Non disponible</span>
+      </template>
 
-      <div class="text-center">
-        <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
+      <template v-slot:item.actions="{ item }">
+        <v-btn color="primary" small disabled>
+          <v-icon left>mdi-eye</v-icon> Voir plus
+        </v-btn>
+      </template>
+    </v-data-table>
 
-        <h1 class="text-h2 font-weight-bold">AutoDo</h1>
-      </div>
-
-      <div class="py-4" />
-
-      <v-row>
-        <v-col cols="12">
-          <v-card
-            class="py-4"
-            color="surface-variant"
-            image="https://cdn.vuetifyjs.com/docs/images/one/create/feature.png"
-            prepend-icon="mdi-rocket-launch-outline"
-            rounded="lg"
-            variant="outlined"
-          >
-            <template #image>
-              <v-img position="top right" />
-            </template>
-
-            <template #title>
-              <h2 class="text-h5 font-weight-bold">Get started</h2>
-            </template>
-
-            <template #subtitle>
-              <div class="text-subtitle-1">
-                Replace this page by removing <v-kbd>{{ `<HelloWorld />` }}</v-kbd> in <v-kbd>pages/index.vue</v-kbd>.
-              </div>
-            </template>
-
-            <v-overlay
-              opacity=".12"
-              scrim="primary"
-              contained
-              model-value
-              persistent
-            />
-          </v-card>
-        </v-col>
-
-        <v-col cols="6">
-          <v-card
-            append-icon="mdi-open-in-new"
-            class="py-4"
-            color="surface-variant"
-            href="https://vuetifyjs.com/"
-            prepend-icon="mdi-text-box-outline"
-            rel="noopener noreferrer"
-            rounded="lg"
-            subtitle="Learn about all things Vuetify in our documentation."
-            target="_blank"
-            title="Documentation"
-            variant="text"
-          >
-            <v-overlay
-              opacity=".06"
-              scrim="primary"
-              contained
-              model-value
-              persistent
-            />
-          </v-card>
-        </v-col>
-
-        <v-col cols="6">
-          <v-card
-            append-icon="mdi-open-in-new"
-            class="py-4"
-            color="surface-variant"
-            href="https://vuetifyjs.com/introduction/why-vuetify/#feature-guides"
-            prepend-icon="mdi-star-circle-outline"
-            rel="noopener noreferrer"
-            rounded="lg"
-            subtitle="Explore available framework Features."
-            target="_blank"
-            title="Features"
-            variant="text"
-          >
-            <v-overlay
-              opacity=".06"
-              scrim="primary"
-              contained
-              model-value
-              persistent
-            />
-          </v-card>
-        </v-col>
-
-        <v-col cols="6">
-          <v-card
-            append-icon="mdi-open-in-new"
-            class="py-4"
-            color="surface-variant"
-            href="https://vuetifyjs.com/components/all"
-            prepend-icon="mdi-widgets-outline"
-            rel="noopener noreferrer"
-            rounded="lg"
-            subtitle="Discover components in the API Explorer."
-            target="_blank"
-            title="Components"
-            variant="text"
-          >
-            <v-overlay
-              opacity=".06"
-              scrim="primary"
-              contained
-              model-value
-              persistent
-            />
-          </v-card>
-        </v-col>
-
-        <v-col cols="6">
-          <v-card
-            append-icon="mdi-open-in-new"
-            class="py-4"
-            color="surface-variant"
-            href="https://discord.vuetifyjs.com"
-            prepend-icon="mdi-account-group-outline"
-            rel="noopener noreferrer"
-            rounded="lg"
-            subtitle="Connect with Vuetify developers."
-            target="_blank"
-            title="Community"
-            variant="text"
-          >
-            <v-overlay
-              opacity=".06"
-              scrim="primary"
-              contained
-              model-value
-              persistent
-            />
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-responsive>
+    <v-alert v-if="!rfps.length && !error" type="info" class="mt-4">
+      Aucun RFP disponible.
+    </v-alert>
   </v-container>
 </template>
 
 <script setup lang="ts">
-  //
+import { ref, onMounted } from 'vue';
+
+interface RFP {
+  Uuid: string;
+  deadlineDate: string;
+  descriptionBrut: string;
+  experienceLevel: string;
+  jobTitle: string;
+  publicationDate: string;
+  rfpPriority: string;
+  rfpUrl: string;
+  skills: string[];
+  workplace: string;
+}
+
+const rfps = ref<RFP[]>([]);
+const error = ref<string | null>(null);
+const search = ref('');
+
+const headers = ref([
+  { key: 'jobTitle', title: 'Titre du poste', align: 'start' },
+  { key: 'publicationDate', title: 'Publiée le', sortable: true },
+  { key: 'deadlineDate', title: 'Date limite', sortable: true },
+  { key: 'experienceLevel', title: 'Expérience' },
+  { key: 'rfpPriority', title: 'Priorité' },
+  { key: 'workplace', title: 'Lieu' },
+  { key: 'rfpUrl', title: 'Lien', sortable: false },
+  { key: 'actions', title: 'Actions', sortable: false },
+]);
+
+const fetchRFPList = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/rfp`);
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de la récupération des RFP");
+    }
+
+    const data = await response.json();
+    console.log("Données reçues du backend :", data);
+
+    rfps.value = Array.isArray(data) ? data : [data];
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "Une erreur inconnue est survenue";
+    console.error(error.value);
+  }
+};
+
+onMounted(fetchRFPList);
+
+const viewRFP = (Uuid: string) => {
+  window.location.href = `/rfp/${Uuid}`;
+};
 </script>
+
+<style scoped>
+.v-container {
+  margin: auto;
+}
+
+a {
+  text-decoration: none;
+  color: #1976d2;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+</style>
