@@ -14,7 +14,7 @@ var app = builder.Build();
 app.UseCors("all");
 
 // API /rfp avec données
-app.MapGet("/rfp", () =>
+app.MapGet("/rfp",  () =>
 {
     var receivedDataList = new List<ReceivedRequestInfoOutputModel>
     {
