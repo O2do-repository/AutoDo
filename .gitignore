@@ -7,5 +7,3 @@ obj/
 # Ignorer les fichiers spécifiques aux IDE
 .idea/
 
-# Ignorer les fichiers de configuration locaux
-*.env
