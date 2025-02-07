@@ -79,7 +79,7 @@ const fetchRFPList = async () => {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/rfp`);
 
     if (!response.ok) {
-      throw new Error("Erreur lors de la récupération des RFP");
+      throw new Error("Erreur lors de la récupération des RFP ");
     }
 
     const data = await response.json();
