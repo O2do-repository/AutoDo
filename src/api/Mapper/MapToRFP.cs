@@ -7,10 +7,10 @@ public static class MapToRFP
         if (source == null)
             throw new ArgumentNullException(nameof(source));
 
-        return new RFP
+        return new RFP  
         {
             Uuid = source.Uuid,
-            
+
             DeadlineDate = source.ResponseDate.UtcDateTime,
             
             DescriptionBrut = source.Description,
