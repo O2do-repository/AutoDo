@@ -2,64 +2,84 @@ using models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ajouter Azure Monitor Logger
-// builder.Logging.ClearProviders();
-// builder.Logging.AddProvider(new AzureMonitorLoggerProvider());
-
 // Ajouter CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()  // Permet l'accès depuis n'importe quelle origine
-              .AllowAnyMethod()  // Permet toutes les méthodes HTTP
-              .AllowAnyHeader(); // Permet tous les en-têtes
-    });
+    options.AddPolicy("all", builder => { builder.SetIsOriginAllowed(s 
+    => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials(); });
 });
 
 var app = builder.Build();
 
-// Applique la politique CORS à toutes les routes
-app.UseCors("AllowAll");
+app.UseCors("all");
 
 // API /rfp avec données
 app.MapGet("/rfp", () =>
 {
-    var receivedData = new ReceivedRequestInfoOutputModel
+    var receivedDataList = new List<ReceivedRequestInfoOutputModel>
     {
-        Uuid = "123e4567-e89b-12d3-a456-426614174000",  // ID unique
-        Reference = "YPTO001377",  // Référence spécifique de l'offre
-        Title = "Functional analyst YPR8916",  // Titre du poste
-        Description = "Please upload the candidates on this platform (Connecting Expertise) and also on our platform (Recruitee), by using this link: https://ypto.recruitee.com/o/ypr8916/c/new",  // Description du projet
-        Context = "Onderhandelingsprocedure...",  // Contexte
-        Customer = new CompanyReferenceModel { Name = "YPT0" },  // Nom du client
-        AssignedPositions = 2,  // Nombre de personnes nécessaires
-        PublishedProposals = 5,  // Nombre de propositions publiées
-        ResponseDate = DateTimeOffset.Parse("2025-02-19T00:00:00Z"),  // Date limite de réponse
-        ExternalStatus = new RequestExternalStatusReferenceModel { TranslatedName = "Senior" },  // Statut externe
-        Department = new DepartmentReferenceModel { Name = "Transport Operations" },  // Département
-        Location = new LocationReferenceModel { Name = "Bruxelles" },  // Lieu de travail
-        AssignmentType = new AssignmentTypeReferenceModel { Code = "Time & Material" },  // Type de contrat
-        AssignmentCategory = new AssignmentCategoryReferenceModel { Code = "PS" },  // Catégorie
-        ProjectRequest = new ProjectRequestReferenceModel { ResourceUri = "https://example.com/rfp/001", Reference = "RFP-001" },  // Référence du projet
-        CreatedAt = DateTimeOffset.UtcNow,  // Date de création
-        PreferredStartDate = DateTimeOffset.Parse("2025-03-03T00:00:00Z"),  // Date de début
-        CostCenter = new CostCenterReferenceModel { Name = "CostCenter1" },  // Centre de coût
-        StartTime = "09:00",  // Heure de début
-        EndTime = "17:00",  // Heure de fin
-        Pause = "1h",  // Pause
-        Type = new ReceivedRequestTypeReferenceModel { Code = "TypeA" },  // Type de la demande
-        IsProposalPublicationAllowed = true  // Publication des propositions autorisée
+        new ReceivedRequestInfoOutputModel
+        {
+            Uuid = "123e4567-e89b-12d3-a456-426614174000",
+            Reference = "YPTO001377",
+            Title = "Functional analyst YPR8916",
+            Description = "Please upload the candidates on this platform...",
+            Context = "Onderhandelingsprocedure...",
+            Customer = new CompanyReferenceModel { Name = "YPT0" },
+            AssignedPositions = 2,
+            PublishedProposals = 5,
+            ResponseDate = DateTimeOffset.Parse("2025-02-19T00:00:00Z"),
+            ExternalStatus = new RequestExternalStatusReferenceModel { TranslatedName = "Senior" },
+            Department = new DepartmentReferenceModel { Name = "Transport Operations" },
+            Location = new LocationReferenceModel { Name = "Bruxelles" },
+            AssignmentType = new AssignmentTypeReferenceModel { Code = "Time & Material" },
+            AssignmentCategory = new AssignmentCategoryReferenceModel { Code = "PS" },
+            ProjectRequest = new ProjectRequestReferenceModel { ResourceUri = "https://example.com/rfp/001", Reference = "RFP-001" },
+            CreatedAt = DateTimeOffset.UtcNow,
+            PreferredStartDate = DateTimeOffset.Parse("2025-03-03T00:00:00Z"),
+            CostCenter = new CostCenterReferenceModel { Name = "CostCenter1" },
+            StartTime = "09:00",
+            EndTime = "17:00",
+            Pause = "1h",
+            Type = new ReceivedRequestTypeReferenceModel { Code = "TypeA" },
+            IsProposalPublicationAllowed = true
+        },
+        new ReceivedRequestInfoOutputModel
+        {
+            Uuid = "223e4567-e89b-12d3-a456-426614174111",
+            Reference = "YPTO001378",
+            Title = "Project Manager",
+            Description = "Manage projects with agile methodology...",
+            Context = "Onderhandelingsprocedure...",
+            Customer = new CompanyReferenceModel { Name = "YPT0" },
+            AssignedPositions = 3,
+            PublishedProposals = 4,
+            ResponseDate = DateTimeOffset.Parse("2025-03-01T00:00:00Z"),
+            ExternalStatus = new RequestExternalStatusReferenceModel { TranslatedName = "Medior" },
+            Department = new DepartmentReferenceModel { Name = "IT Operations" },
+            Location = new LocationReferenceModel { Name = "Anvers" },
+            AssignmentType = new AssignmentTypeReferenceModel { Code = "Fixed Price" },
+            AssignmentCategory = new AssignmentCategoryReferenceModel { Code = "IT" },
+            ProjectRequest = new ProjectRequestReferenceModel { ResourceUri = "https://example.com/rfp/002", Reference = "RFP-002" },
+            CreatedAt = DateTimeOffset.UtcNow,
+            PreferredStartDate = DateTimeOffset.Parse("2025-04-01T00:00:00Z"),
+            CostCenter = new CostCenterReferenceModel { Name = "CostCenter2" },
+            StartTime = "08:30",
+            EndTime = "16:30",
+            Pause = "45min",
+            Type = new ReceivedRequestTypeReferenceModel { Code = "TypeB" },
+            IsProposalPublicationAllowed = false
+        }
     };
 
-    // Mappez vers l'objet RFP
-    RFP rfp = receivedData.ToRFP();
+    // Mapper la liste vers une liste de RFP
+    var rfpList = receivedDataList.Select(data => data.ToRFP()).ToList();
 
-    // Renvoie le résultat en JSON
-    return Results.Json(rfp);
+    // Retourner la liste en JSON
+    return Results.Json(rfpList);
 });
 
 // Route de test
-app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best  !");
+app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
 
 app.Run();

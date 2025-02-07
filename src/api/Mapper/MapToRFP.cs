@@ -9,6 +9,8 @@ public static class MapToRFP
 
         return new RFP
         {
+            Uuid = source.Uuid,
+            
             DeadlineDate = source.ResponseDate.UtcDateTime,
             
             DescriptionBrut = source.Description,
@@ -27,7 +29,6 @@ public static class MapToRFP
             
             Workplace = source.Location?.Name,
             
-            RfpId = source.Reference
         };
     }
 }
