@@ -83,7 +83,7 @@ const fetchRFPList = async () => {
 
     rfps.value = Array.isArray(data) ? data : [data];
   } catch (err) {
-    error.value = err instanceof Error ? err.message : "Une erreur inconnue est survenue";
+    error.value = err instanceof Error ? err.message : "Une erreur inconnue  est survenue";
     console.error(error.value);
   }
 };
