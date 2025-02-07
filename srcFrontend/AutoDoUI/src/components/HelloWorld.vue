@@ -30,11 +30,7 @@
         <span v-else>Non disponible</span>
       </template>
 
-      <template v-slot:item.actions="{ item }">
-        <v-btn color="primary" small @click="viewRFP(item.Uuid)">
-          <v-icon left>mdi-eye</v-icon> Voir plus
-        </v-btn>
-      </template>
+
     </v-data-table>
 
     <v-alert v-if="!rfps.length && !error" type="info" class="mt-4">
@@ -87,20 +83,14 @@ const fetchRFPList = async () => {
 
     rfps.value = Array.isArray(data) ? data : [data];
   } catch (err) {
-    error.value = err instanceof Error ? err.message : "Une erreur inconnue est survenue";
+    error.value = err instanceof Error ? err.message : "Une erreur inconnue  est survenue";
     console.error(error.value);
   }
 };
 
 onMounted(fetchRFPList);
 
-const viewRFP = (Uuid?: string) => {
-  if (!Uuid) {
-    console.error("UUID non défini !");
-    return;
-  }
-  window.location.href = `/rfp/${Uuid}`;
-};
+
 
 </script>
 
