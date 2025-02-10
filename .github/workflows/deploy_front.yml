@@ -20,8 +20,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+          
+      # 4. Copier .env.production dans .env 
+      - name: Configure Environment Variables
+        run: |
+          cd srcFrontend/AutoDoUI
+          cp .env.production .env
 
-      # 3. Installer les dépendances et construire le projet
+      # 5. Installer les dépendances et construire le projet
       - name: Install Dependencies and Build
         run: |
           cd srcFrontend/AutoDoUI
