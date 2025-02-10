@@ -6,6 +6,7 @@ on:
       - main # Déclenche le workflow lors d'un push sur la branche master
     paths:
       - 'srcFrontend/**'  
+      - '.github/workflows/deploy_front.yml'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
       # 4. Copier .env.production dans .env 
       - name: Configure Environment Variables
         run: |
-          cd srcFrontend/AutoDoUI
+          cd srcFrontend/AutoDoUI/src
           cp .env.production .env
 
       # 5. Installer les dépendances et construire le projet
