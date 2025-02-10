@@ -26,7 +26,7 @@ jobs:
       - name: Configure Environment Variables
         run: |
           cd srcFrontend/AutoDoUI
-          echo "${{ secrets.ENV_PRODUCTION }}" > .env
+          cp .env.production .env
 
 
 
