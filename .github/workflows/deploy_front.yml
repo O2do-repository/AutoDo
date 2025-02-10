@@ -22,6 +22,11 @@ jobs:
         with:
           node-version: 18.x
           
+      - name: Vérifier la présence du fichier .env.production
+        run: |
+          cd srcFrontend/AutoDoUI
+          ls -la
+ 
       # 4. Copier .env.production dans .env 
       - name: Configure Environment Variables
         run: |
