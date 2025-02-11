@@ -5,13 +5,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Ajouter CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("all", builder => { builder.SetIsOriginAllowed(s 
-    => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials(); });
+    options.AddPolicy("all", builder =>
+    {
+        builder.SetIsOriginAllowed(_ => true)  // Allow any origin
+               .AllowAnyMethod()              // Allow any HTTP method
+               .AllowAnyHeader()              // Allow any headers
+               .AllowCredentials();           // Allow credentials
+    });
 });
+
 
 var app = builder.Build();
 
-app.UseCors("all");
+
 
 // API /rfp avec données
 app.MapGet("/rfp",  () =>
@@ -80,6 +86,8 @@ app.MapGet("/rfp",  () =>
 });
 
 // Route de test
-app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
+app.MapGet("/", () => "Hello AutoDo , Lucien and Eric are the best !");
+
+app.UseCors("all");
 
 app.Run();
