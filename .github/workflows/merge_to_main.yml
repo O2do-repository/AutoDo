@@ -1,0 +1,30 @@
+name: Merge Preproduction into Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Branche source (ex. preproduction)'
+        required: true
+        default: 'pre-production'
+      target:
+        description: 'Branche cible (ex. main)'
+        required: true
+        default: 'main'
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configurer Git
+        run: |
+          git config --global user.email "ci-bot@example.com"
+          git config --global user.name "CI Bot"
+      - name: Checkout target branch
+        run: |
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+          git checkout ${{ github.event.inputs.target }}
+          git pull origin ${{ github.event.inputs.target }}
+          git merge --no-ff ${{ github.event.inputs.source }} -m "Merge from ${{ github.event.inputs.source }} into ${{ github.event.inputs.target }}"
+          git push origin ${{ github.event.inputs.target }}

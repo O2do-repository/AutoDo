@@ -1,10 +1,13 @@
-name: Build and Deploy Backend
+name: Build and Deploy to Production
 
 on:
   push:
     branches:
-      - prod-testing  # Déploiement automatique en pré-prod
-  workflow_dispatch:  # Permet le déclenchement manuel si besoin
+      - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -31,19 +34,19 @@ jobs:
         run: dotnet test src/tests
 
       - name: dotnet publish
-        run: dotnet publish src -c Release -o ${{env.DOTNET_ROOT}}/myapp 
+        run: dotnet publish src -c Release -o ${{ env.DOTNET_ROOT }}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{ env.DOTNET_ROOT }}/myapp
 
-  deploy-to-preprod:
+  deploy:
     runs-on: windows-latest
     needs: build
     environment:
-      name: 'Pre-Production'
+      name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -52,54 +55,13 @@ jobs:
         with:
           name: .net-app
 
-
-      - name: Deploy to Azure Web App (Pre-Prod)
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'AutoDo'
-          slot-name: 'Pre-Production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFIL }}
-          package: .
-
-  wait-for-validation:
-    runs-on: ubuntu-latest
-    needs: deploy-to-preprod
-    steps:
-      - name: Manually approve before merging to main
+      - name: Inject environment variables from GitHub Secrets
         run: |
-          echo "Validation nécessaire avant de merger dans main"
-          exit 1  # Bloque le pipeline pour validation manuelle
-    environment:
-      name: 'Manual Approval Required'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+          echo "AZURE_MONITOR_DCE=${{ secrets.AZURE_MONITOR_DCE }}" >> $GITHUB_ENV
+          echo "AZURE_MONITOR_DCR_ID=${{ secrets.AZURE_MONITOR_DCR_ID }}" >> $GITHUB_ENV
+          echo "AZURE_MONITOR_TABLE=${{ secrets.AZURE_MONITOR_TABLE }}" >> $GITHUB_ENV
 
-  merge-to-main:
-    runs-on: ubuntu-latest
-    needs: wait-for-validation
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Merge `prod-testing` into `main`
-        run: |
-          git config --global user.email "ci-bot@example.com"
-          git config --global user.name "CI Bot"
-          git fetch origin
-          git checkout main
-          git pull origin main
-          git merge --no-ff prod-testing -m "Merging prod-testing into main"
-          git push origin main
-
-  deploy-to-main:
-    runs-on: windows-latest
-    needs: merge-to-main
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Deploy to Azure Web App (Production)
+      - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
