@@ -3,7 +3,8 @@ name: Build and Deploy Backend
 on:
   push:
     branches:
-      - prod-testing  # Déploiement automatique en pré-prod
+      - pre-production
+
   workflow_dispatch:  # Permet le déclenchement manuel si besoin
 
 jobs:
