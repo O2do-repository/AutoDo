@@ -86,7 +86,7 @@ app.MapGet("/rfp",  () =>
 });
 
 // Route de test
-app.MapGet("/", () => "Hello AutoDo, Lucien and Eric are the best !");
+app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
 app.UseCors("all");
 
