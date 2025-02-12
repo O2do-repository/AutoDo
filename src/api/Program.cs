@@ -37,8 +37,9 @@ app.MapGet("/rfp",  () =>
     return Results.Json(rfpList);
 });
 
-// Route de test
+
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
+
 
 app.UseCors("all");
 

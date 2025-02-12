@@ -1,13 +1,12 @@
-name: Build and Deploy to Production
+name: Build and Deploy Feature Branch
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - '.github/workflows/**'
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+      
 
 jobs:
   build:
@@ -16,7 +15,10 @@ jobs:
       APPINSIGHTS_KEY: ${{ secrets.APPINSIGHTS_KEY }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
