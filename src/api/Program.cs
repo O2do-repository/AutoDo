@@ -1,5 +1,3 @@
-using models;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Ajouter CORS
