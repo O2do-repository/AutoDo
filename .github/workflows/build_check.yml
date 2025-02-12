@@ -1,0 +1,28 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches:
+      - main  
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '9.x'
+          include-prerelease: true
+
+      - name: Restore dependencies
+        run: dotnet restore src
+
+      - name: Build with dotnet
+        run: dotnet build src --configuration Release --no-restore
+      
+      - name: Run unit tests
+        run: dotnet test src/tests
