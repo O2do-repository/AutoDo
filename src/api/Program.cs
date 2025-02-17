@@ -17,26 +17,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Créer une instance de RfpServices
+var rfpServices = new RfpServices();
 
-
-
-
-// API /rfp avec données
-app.MapGet("/rfp",  () =>
+app.MapGet("/rfp", () =>
 {
-  var receivedDataList = DummyRfpData.GetDummyRfpList();
+    // Récupérer la liste de RFPs
+    var receivedDataList = DummyRfpData.GetDummyRfpList();
+    var rfpList = receivedDataList.Select(data => data.ToRFP()).ToList();
 
+    // Filtrer les RFPs en fonction de la date limite
+    var filteredRfps = rfpServices.FilterRfpDeadlineNotReachedYet(rfpList);
 
-    var filteredDataList = receivedDataList
-        .Where(data => data.ResponseDate.UtcDateTime > DateTime.UtcNow) // Deadline non expirée
-        .ToList();
-
-
-    // Mapper la liste vers une liste de RFP
-    var rfpList = filteredDataList.Select(data => data.ToRFP()).ToList();
-
-    // Retourner la liste en JSON
-    return Results.Json(rfpList);
+    // Retourner la liste filtrée en JSON
+    return Results.Json(filteredRfps);
 });
 
 
