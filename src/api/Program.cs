@@ -17,6 +17,8 @@ var app = builder.Build();
 
 
 
+
+
 // API /rfp avec données
 app.MapGet("/rfp",  () =>
 {
@@ -37,6 +39,10 @@ app.MapGet("/rfp",  () =>
 
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
+
+app.MapGet("/log", () => new AzureMonitorLoggerProvider().CreateLogger("test"
+
+).LogCritical("cool"));
 
 
 app.UseCors("all");
