@@ -36,7 +36,7 @@ app.MapGet("/rfp", () =>
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
-app.MapGet("/log", () => new AzureMonitorLoggerProvider().CreateLogger("test"
+app.MapGet("/log", () => new AzureMonitorLoggerConnection().CreateLogger("test"
 
 ).LogCritical("cool"));
 

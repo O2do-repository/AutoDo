@@ -1,19 +1,17 @@
-﻿namespace tests;
+﻿
+
+namespace tests;
 
 using FluentAssertions;
 using models;
 using Xunit;
 
-
 public class RfpTest
 {
-    private List<RFP> filterRrfpDeadlineNotReachedYet(List<RFP> rfps)
-    {
-        return rfps.Where(data => data.DeadlineDate.CompareTo(DateTime.Today) >= 0).ToList();
-    }
+    private readonly RfpServices rfpServices = new RfpServices();
 
     [Fact]
-    public void ShouldNotReturnObsoleteRfp()
+    public void Test_filterRrfpDeadlineNotReachedYet_does_not_return_rfp_with_deadline_in_the_past()
     {
         // Arrange
         var rfps = new List<RFP>
@@ -23,14 +21,28 @@ public class RfpTest
         };
 
         // Act
-        var result = filterRrfpDeadlineNotReachedYet(rfps);
+        var result = rfpServices.FilterRfpDeadlineNotReachedYet(rfps);
 
         // Assert
         result.Should().NotContain(rfp => rfp.DeadlineDate <= DateTime.Today);
     }
 
     [Fact]
-    public void ShouldReturnListRfp()
+    public void Test_filterRrfpDeadlineNotReachedYet_should_return_rfp_with_deadline_today()
+    {
+        // Arrange
+        var rfpToBeReturned = new RFP { Uuid = "2", DeadlineDate = DateTime.Today }; // Valide
+        var rfps = new List<RFP> { rfpToBeReturned };
+
+        // Act
+        var result = rfpServices.FilterRfpDeadlineNotReachedYet(rfps);
+
+        // Assert
+        result.Should().Contain(rfpToBeReturned);
+    }
+
+    [Fact]
+    public void Test_filterRrfpDeadlineNotReachedYet_should_return_rfp_with_deadline_in_the_future()
     {
         // Arrange
         var rfps = new List<RFP>
@@ -40,34 +52,19 @@ public class RfpTest
         };
 
         // Act
-        var result = filterRrfpDeadlineNotReachedYet(rfps);
+        var result = rfpServices.FilterRfpDeadlineNotReachedYet(rfps);
 
         // Assert
-        result.Should().NotBeEmpty().And.HaveCount(2);
-    }
-        [Fact]
-    public void Test_filterRrfpDeadlineNotReachedYet_should_return_rfp_with_deadline_is_today()
-    {
-
-        var rfp_to_be_returned = new RFP { Uuid = "2", DeadlineDate = DateTime.Today }; // Valide
-        // Arrange
-        var rfps = new List<RFP>
-        {
-            rfp_to_be_returned
-        };
-
-        // Act
-        var result = filterRrfpDeadlineNotReachedYet(rfps);
-
-        // Assert
-        result.Should().Contain(rfp_to_be_returned);
+        result.Should().NotBeEmpty()
+          .And.HaveCount(2)
+          .And.OnlyContain(rfp => rfp.DeadlineDate >= DateTime.Today);
     }
 
     [Fact]
     public void Test_filterRrfpDeadlineNotReachedYet_should_return_rfp_with_no_deadline()
     {
 
-        var rfp_to_be_returned = new RFP { Uuid = "2" }; // Valide
+        var rfp_to_be_returned = new RFP { Uuid = "2" };
         // Arrange
         var rfps = new List<RFP>
         {
@@ -75,13 +72,10 @@ public class RfpTest
         };
 
         // Act
-        var result = filterRrfpDeadlineNotReachedYet(rfps);
+        var result = rfpServices.FilterRfpDeadlineNotReachedYet(rfps);
 
         // Assert
         result.Should().Contain(rfp_to_be_returned);
     }
-    
-
 }
-
 
