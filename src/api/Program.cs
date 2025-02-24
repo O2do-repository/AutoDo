@@ -12,25 +12,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers();
+
+builder.Services.AddScoped<IRfpService, RfpService>();
+builder.Services.AddScoped<IProfilService, ProfilService>();
 
 var app = builder.Build();
-
-// Créer une instance de RfpServices
-var rfpServices = new RfpServices();
-
-app.MapGet("/rfp", () =>
-{
-    // Récupérer la liste de RFPs
-    var receivedDataList = DummyRfpData.GetDummyRfpList();
-    var rfpList = receivedDataList.Select(data => data.ToRFP()).ToList();
-
-    // Filtrer les RFPs en fonction de la date limite
-    var filteredRfps = rfpServices.FilterRfpDeadlineNotReachedYet(rfpList);
-
-    // Retourner la liste filtrée en JSON
-    return Results.Json(filteredRfps);
-});
-
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
@@ -38,6 +25,8 @@ app.MapGet("/log", () => new AzureMonitorLoggerConnection().CreateLogger("test"
 
 ).LogCritical("cool"));
 
+
+app.MapControllers();
 
 app.UseCors("all");
 

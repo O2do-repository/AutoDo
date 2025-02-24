@@ -15,7 +15,7 @@ public static class MapToRFP
             
             DescriptionBrut = source.Description,
             
-            ExperienceLevel = source.ExternalStatus?.TranslatedName ?? string.Empty,
+            Experience_level = source.ExternalStatus?.TranslatedName ?? string.Empty,
             
             RfpPriority = source.AssignmentCategory?.Code ?? string.Empty,
             
