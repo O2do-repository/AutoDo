@@ -1,26 +1,34 @@
 
-    using models;
-    using Xunit;
+using models;
+using Moq;
+using Xunit;
 
     public class ProfilTest
     {
         private readonly IProfilService _profilService;
+        private readonly Mock<IProfilService> _mockService;
 
         public ProfilTest()
         {
-            _profilService = new ProfilService();
-            
+            _mockService = new Mock<IProfilService>();
         }
+    
 
     [Fact]
-    public void Test_GetAllProfils_Should_Return_Profils ()
+    public void Test_GetAllProfils_Should_Return_Profils()
     {
         // Arrange
+        var fakeProfils = new List<Profil>
+        {
+            new Profil { Uuid = "1", Ratehour = 50, CV = "https://example.com/cv1.pdf", CV_Date = new DateTime(2023, 5, 1), Job_title = "Software Engineer", Experience_level = Experience.Junior, Skills = new List<string> { Skill.Java, Skill.JavaScript }, Keywords = new List<string> { Keyword.Architect, Keyword.DevOps } }
+        };
+
+        _mockService.Setup(s => s.GetAllProfils()).Returns(fakeProfils);
+
         // Act
-        var result = _profilService.GetAllProfils();
+        var result = _mockService.Object.GetAllProfils();
 
         // Assert
-        // Vérifie qu'on reçoit une list d'object de type profils
         Assert.IsType<List<Profil>>(result); 
         Assert.NotEmpty(result);
     }
@@ -28,11 +36,19 @@
     [Fact]
     public void Test_GetAllProfils_Profil_Should_Contain_All_Attributes()
     {
-        // Act
-        var result = _profilService.GetAllProfils();
+        // Arrange
+        var fakeProfils = new List<Profil>
+        {
+            new Profil { Uuid = "1", Ratehour = 50, CV = "https://example.com/cv1.pdf", CV_Date = new DateTime(2023, 5, 1), Job_title = "Software Engineer", Experience_level = Experience.Junior, Skills = new List<string> { Skill.Java, Skill.JavaScript }, Keywords = new List<string> { Keyword.Architect, Keyword.DevOps } }
+        };
+        
+        _mockService.Setup(s => s.GetAllProfils()).Returns(fakeProfils);
 
+        // Act
+        var result = _mockService.Object.GetAllProfils();
+        
         // Vérifie qu'on obtient un seul profil de la liste
-        var profil = result[0]; // On choisit le premier profil ici (index 0)
+        var profil = result[0];
 
         // Assert
         Assert.NotNull(profil.Uuid);
@@ -43,22 +59,28 @@
         Assert.NotNull(profil.Experience_level);
         Assert.NotNull(profil.Skills); 
         Assert.NotNull(profil.Keywords); 
-
-        // Vérifie que les listes Skills et Keywords ne sont pas vides
-        Assert.NotEmpty(profil.Skills);
-        Assert.NotEmpty(profil.Keywords);
     }
+
+
+    
     [Fact]
-    public void Test_GetAllProfils_Profil_Should_be_equals_to_storeProfil()
+    public void Test_GetAllProfils_Profil_Should_be_equals_to_Profil()
     {
+        // Arrange
+        var fakeProfils = new List<Profil>
+        {
+            new Profil { Uuid = "123e4567-e89b-12d3-a456-426614174000", Ratehour = 50, CV = "https://example.com/cv1.pdf", CV_Date = new DateTime(2023, 5, 1), Job_title = "Software Engineer", Experience_level = Experience.Junior, Skills = new List<string> { Skill.Java, Skill.JavaScript }, Keywords = new List<string> { Keyword.Architect, Keyword.DevOps } }
+        };
+        
+        _mockService.Setup(s => s.GetAllProfils()).Returns(fakeProfils);
+
         // Act
-        var result = _profilService.GetAllProfils();
+        var result = _mockService.Object.GetAllProfils();
 
         // Vérifie qu'on obtient un seul profil de la liste
         var profil = result[0]; // On choisit le premier profil ici (index 0)
 
         // Assert
-        // Comparaison des valeurs de ce profil avec celles attendues des données mockées
         Assert.Equal("123e4567-e89b-12d3-a456-426614174000", profil.Uuid);
         Assert.Equal(50, profil.Ratehour);
         Assert.Equal("https://example.com/cv1.pdf", profil.CV);

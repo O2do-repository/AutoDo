@@ -1,3 +1,5 @@
+using Api;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Ajouter CORS
@@ -17,7 +19,16 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IRfpService, RfpService>();
 builder.Services.AddScoped<IProfilService, ProfilService>();
 
+builder.Services.AddScoped<AutoDoDbContext>();
+
+builder.Services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+
+// Charger la configuration
+var configuration = builder.Configuration;
+
+
 var app = builder.Build();
+
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
