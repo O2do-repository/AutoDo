@@ -18,10 +18,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IRfpService, RfpService>();
 builder.Services.AddScoped<IProfilService, ProfilService>();
+builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
 
 builder.Services.AddScoped<AutoDoDbContext>();
 
-builder.Services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+
 
 // Charger la configuration
 var configuration = builder.Configuration;

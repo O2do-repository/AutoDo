@@ -1,7 +1,16 @@
-public static class Keyword
+using System.Runtime.Serialization;
+
+public enum Keyword
 {
-    public const string Architect = "Architect";
-    public const string CyberSecurity = "CyberSecurity";
-    public const string DevOps = "DevOps";
-    public const string DataScience = "DataScience";
+    [EnumMember(Value = "Architect")]
+    Architect,
+
+    [EnumMember(Value = "CyberSecurity")]
+    CyberSecurity,
+
+    [EnumMember(Value = "DevOps")]
+    DevOps,
+
+    [EnumMember(Value = "DataScience")]
+    DataScience
 }

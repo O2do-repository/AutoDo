@@ -1,6 +1,14 @@
-public static class Experience
+using System.Runtime.Serialization;
+
+public enum Experience
 {
-    public const string Junior = "Junior";
-    public const string Medior = "Medior";
-    public const string Senior = "Senior";
+    [EnumMember(Value = "Junior")]
+    Junior,
+
+    [EnumMember(Value = "Medior")]
+    Medior,
+
+    [EnumMember(Value = "Senior")]
+    Senior
 }
+    
