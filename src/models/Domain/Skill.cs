@@ -1,7 +1,17 @@
-public static class Skill
+using System.Runtime.Serialization;
+
+
+public enum Skill
 {
-    public const string Java = "Java";
-    public const string Csharp = "C#";
-    public const string Python = "Python";
-    public const string JavaScript = "JavaScript";
+    [EnumMember(Value = "Java")]
+    Java,
+
+    [EnumMember(Value = "C#")]
+    Csharp,
+
+    [EnumMember(Value = "Python")]
+    Python,
+
+    [EnumMember(Value = "JavaScript")]
+    JavaScript
 }

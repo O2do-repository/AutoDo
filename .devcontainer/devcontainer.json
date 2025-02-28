@@ -7,7 +7,10 @@
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0",
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "dotnet dev-certs https --trust && dotnet restore && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
-	
+
+	"env": {
+		"DB_PATH": "DB_PATH"
+	},
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -38,14 +41,7 @@
 	// }
 
 
-	"remoteEnv": {
-		"AZURE_TENANT_ID":"${secrets.AZURE_TENANT_ID}",
-		"AZURE_CLIENT_ID":"${secrets.AZURE_CLIENT_ID}",
-		"AZURE_CLIENT_SECRET":"${secrets.AZURE_CLIENT_SECRET}",
-		"AZURE_MONITOR_DCE":"${secrets.AZURE_MONITOR_DCE}",
-		"AZURE_MONITOR_DCR_ID":"${secrets.AZURE_MONITOR_DCR_ID}",
-		"AZURE_MONITOR_TABLE":"${secrets.AZURE_MONITOR_TABLE}"
-	}
+
 	
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"

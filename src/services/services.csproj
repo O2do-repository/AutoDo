@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\models\models.csproj" />
+    <ProjectReference Include="..\data\data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
