@@ -8,7 +8,7 @@ interface Profile {
   CVDate: string;
   JobTitle: string;
   ExperienceLevel: string;
-  Skills: string[];
+  skills: string[];
   keywords: string[];
 }
 
