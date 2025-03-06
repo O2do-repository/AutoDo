@@ -1,6 +1,6 @@
 ﻿namespace tests
 {
-    using models;
+
     using Xunit;
 
     public class RfpTest
@@ -13,8 +13,8 @@
             // Arrange
             var rfps = new List<RFP>
             {
-                new RFP { Uuid = "1", DeadlineDate = DateTime.Today.AddDays(-1) }, // Obsolète
-                new RFP { Uuid = "2", DeadlineDate = DateTime.Today.AddDays(5) }   // Valide
+                new RFP { RFPUuid = new Guid("123e4567-e89b-12d3-a456-426614174000") , DeadlineDate = DateTime.Today.AddDays(-1) }, // Obsolète
+                new RFP { RFPUuid = new Guid("123e4567-e89b-12d3-a456-426614174002"), DeadlineDate = DateTime.Today.AddDays(5) }   // Valide
             };
 
             // Act
@@ -29,7 +29,7 @@
         public void Test_filterRrfpDeadlineNotReachedYet_should_return_rfp_with_deadline_today()
         {
             // Arrange
-            var rfpToBeReturned = new RFP { Uuid = "2", DeadlineDate = DateTime.Today }; // Valide
+            var rfpToBeReturned = new RFP { RFPUuid = new Guid("123e4567-e89b-12d3-a456-426614174002"), DeadlineDate = DateTime.Today }; // Valide
             var rfps = new List<RFP> { rfpToBeReturned };
 
             // Act
@@ -37,7 +37,7 @@
 
             // Assert
             // Vérifie que le RFP attendu est dans le résultat
-            Assert.Contains(result, rfp => rfp.Uuid == rfpToBeReturned.Uuid && rfp.DeadlineDate == rfpToBeReturned.DeadlineDate);
+            Assert.Contains(result, rfp => rfp.RFPUuid == rfpToBeReturned.RFPUuid && rfp.DeadlineDate == rfpToBeReturned.DeadlineDate);
         }
 
         [Fact]
@@ -46,8 +46,8 @@
             // Arrange
             var rfps = new List<RFP>
             {
-                new RFP { Uuid = "1", DeadlineDate = DateTime.Today.AddDays(5) },
-                new RFP { Uuid = "2", DeadlineDate = DateTime.Today.AddDays(10) }
+                new RFP { RFPUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"), DeadlineDate = DateTime.Today.AddDays(5) },
+                new RFP { RFPUuid = new Guid("123e4567-e89b-12d3-a456-426614174002"), DeadlineDate = DateTime.Today.AddDays(10) }
             };
 
             // Act
@@ -64,7 +64,7 @@
         public void Test_filterRrfpDeadlineNotReachedYet_should_return_rfp_with_no_deadline()
         {
             // Arrange
-            var rfpToBeReturned = new RFP { Uuid = "2" }; // Pas de deadline
+            var rfpToBeReturned = new RFP { RFPUuid = new Guid("123e4567-e89b-12d3-a456-426614174002") }; // Pas de deadline
             var rfps = new List<RFP> { rfpToBeReturned };
 
             // Act
@@ -72,7 +72,7 @@
 
             // Assert
             // Vérifie que le RFP attendu est dans le résultat
-            Assert.Contains(result, rfp => rfp.Uuid == rfpToBeReturned.Uuid);
+            Assert.Contains(result, rfp => rfp.RFPUuid == rfpToBeReturned.RFPUuid);
         }
     }
 }

@@ -1,3 +1,4 @@
-public interface IProfilService{
-    List<Profil> GetAllProfils();
+public interface IProfileService{
+    List<Profile> GetAllProfiles();
+    Profile AddProfile(Profile profile);
 }

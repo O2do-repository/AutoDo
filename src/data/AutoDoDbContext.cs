@@ -1,27 +1,30 @@
-﻿﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+
 public class AutoDoDbContext : DbContext
 {
-    public DbSet<Profil> Profils { get; set; }
+    public DbSet<Profile> Profiles { get; set; }
+    public DbSet<Consultant> Consultants { get; set; }
+    public DbSet<RFP> Rfps { get; set; }
+    public DbSet<Skill> Skills { get; set; }
+    public DbSet<Keyword> Keywords { get; set; }
 
-    private readonly string? _connectionString;
     private readonly bool _useInMemory;
+    private readonly IConnectionStringProvider _connectionStringProvider;
 
-    // Constructeur pour l'application
     public AutoDoDbContext(IConnectionStringProvider connectionStringProvider)
     {
-        _connectionString = connectionStringProvider.Get("DefaultConnection");
+        _connectionStringProvider = connectionStringProvider;
         _useInMemory = false;
     }
 
-    // Constructeur pour les tests (utilise InMemory)
     public AutoDoDbContext(DbContextOptions<AutoDoDbContext> options) : base(options)
     {
         _useInMemory = true;
     }
 
-    // Ajout d'un constructeur sans paramètre pour éviter l'erreur avec EF CLI
     public AutoDoDbContext() : base(new DbContextOptions<AutoDoDbContext>())
     {
     }
@@ -29,45 +32,97 @@ public class AutoDoDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
-        {
-            if (!_useInMemory && !string.IsNullOrEmpty(_connectionString))
-            {
-                optionsBuilder.UseSqlite(_connectionString);
-            }
-        }
+            optionsBuilder.UseSqlServer("Server=O2DO_LAPTOP_2\\SQLEXPRESS;Database=AutoDo;Trusted_Connection=True;TrustServerCertificate=True;");
     }
+    
 
-protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Profil>(entity =>
+        // Configuration de RFP
+        modelBuilder.Entity<RFP>(entity =>
         {
-            entity.HasKey(p => p.Uuid);
-            entity.Property(p => p.Ratehour).IsRequired();
-            entity.Property(p => p.CV).IsRequired();
-            entity.Property(p => p.CV_Date).IsRequired();
-            entity.Property(p => p.Job_title).IsRequired();
-            
-            entity.Property(p => p.Experience_level)
-                .HasConversion(
-                    v => v.ToString(),  // Convertir l'enum en string
-                    v => Enum.Parse<Experience>(v)  // Convertir le string en enum
-                );
-
-
-
-            // Conversion de la liste de Skills en string (CSV)
-            entity.Property(p => p.Skills)
-                .HasConversion(
-                    v => string.Join(",", v),  // Liste -> string
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // String -> Liste
-                );
-
-            // Conversion de la liste de Keywords en string (CSV)
-            entity.Property(p => p.Keywords)
-                .HasConversion(
-                    v => string.Join(",", v),
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-                );
+            entity.ToTable("RFP");
+            entity.HasKey(r => r.RFPUuid);
+            entity.Property(r => r.RFPUuid).HasColumnName("RFPUuid").IsRequired();
+            entity.Property(r => r.DeadlineDate).HasColumnName("DeadlineDate").IsRequired();
+            entity.Property(r => r.DescriptionBrut).HasColumnName("DescriptionBrut").HasMaxLength(5000);
+            entity.Property(r => r.ExperienceLevel).HasConversion<string>();
+            entity.Property(r => r.RfpPriority).HasColumnName("RfpPriority");
+            entity.Property(r => r.PublicationDate).HasColumnName("PublicationDate").IsRequired();
+            entity.Property(r => r.JobTitle).HasColumnName("JobTitle").HasMaxLength(255);
+            entity.Property(r => r.RfpUrl).HasColumnName("RfpUrl").HasMaxLength(500);
+            entity.Property(r => r.Workplace).HasColumnName("Workplace").HasMaxLength(255);
         });
-    }
+
+
+        // Configuration de Consultant
+        modelBuilder.Entity<Consultant>(entity =>
+        {
+            entity.ToTable("Consultant");
+            entity.HasKey(c => c.ConsultantUuid);
+            entity.Property(c => c.ConsultantUuid).HasColumnName("ConsultantUuid").IsRequired();
+            entity.Property(c => c.Email).HasColumnName("Email").HasMaxLength(255).IsRequired();
+            entity.Property(c => c.Intern).HasColumnName("Intern").IsRequired();
+            entity.Property(c => c.Name).HasColumnName("Name").HasMaxLength(150).IsRequired();
+            entity.Property(c => c.Surname).HasColumnName("Surname").HasMaxLength(150).IsRequired();
+            entity.Property(c => c.Phone).HasColumnName("Phone").HasMaxLength(50).IsRequired();
+            entity.Property(c => c.AvailabilityDate).HasColumnName("AvailabilityDate").IsRequired();
+            entity.Property(c => c.ExpirationDateCI).HasColumnName("ExpirationDateCI").IsRequired();
+
+            entity.HasMany(c => c.Profiles)
+                .WithOne(p => p.Consultant)
+                .HasForeignKey(p => p.ConsultantUuid)
+                .OnDelete(DeleteBehavior.Cascade);
+
+        });
+
+        // Configuration de Profile
+        modelBuilder.Entity<Profile>(entity =>
+        {
+            entity.ToTable("Profile");
+            entity.HasKey(p => p.ProfileUuid);
+            entity.Property(p => p.ProfileUuid).HasColumnName("ProfileUuid").IsRequired();
+            entity.Property(p => p.Ratehour).HasColumnName("Ratehour").IsRequired();
+            entity.Property(p => p.CV).HasColumnName("CV").HasMaxLength(500);
+            entity.Property(p => p.CVDate).HasColumnName("CVDate").IsRequired();
+            entity.Property(p => p.JobTitle).HasColumnName("JobTitle").HasMaxLength(150).IsRequired();
+            entity.Property(p => p.ExperienceLevel)
+                .HasConversion(x => x.ToString(), x => (Experience)Enum.Parse(typeof(Experience), x));
+
+
+        });
+
+            modelBuilder.Entity<Profile>()
+        .Property(p => p.Skills)
+        .HasConversion(
+            v => JsonConvert.SerializeObject(v),
+            v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
+        );
+
+    modelBuilder.Entity<Profile>()
+        .Property(p => p.Keywords)
+        .HasConversion(
+            v => JsonConvert.SerializeObject(v),
+            v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
+        );
+
+        modelBuilder.Entity<Keyword>(entity =>
+        {
+            entity.ToTable("Keyword");
+            entity.HasKey(k => k.KeywordUuid);
+            entity.Property(k => k.KeywordUuid).HasColumnName("KeywordUuid").IsRequired();
+            entity.Property(k => k.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+        });
+
+        modelBuilder.Entity<Skill>(entity =>
+        {
+            entity.ToTable("Skill");
+            entity.HasKey(s => s.SkillUuid);
+            entity.Property(s => s.SkillUuid).HasColumnName("SkillUuid").IsRequired();
+            entity.Property(s => s.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+        });
+
+
+    } 
 }
+

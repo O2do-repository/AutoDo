@@ -1,17 +1,9 @@
-using System.Runtime.Serialization;
+using System.ComponentModel.DataAnnotations;
 
-
-public enum Skill
+public class Skill
 {
-    [EnumMember(Value = "Java")]
-    Java,
+    [Key]
+    public Guid SkillUuid { get; set; }
+    public string Name { get; set; }
 
-    [EnumMember(Value = "C#")]
-    Csharp,
-
-    [EnumMember(Value = "Python")]
-    Python,
-
-    [EnumMember(Value = "JavaScript")]
-    JavaScript
 }
