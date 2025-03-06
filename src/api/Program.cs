@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IRfpService, RfpService>();
-builder.Services.AddScoped<IProfilService, ProfilService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
 
 builder.Services.AddScoped<AutoDoDbContext>();

@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
-public class Keyword
+public class DtoOutputSkill
 {
-    [Key]
-    public Guid KeywordUuid { get; set; }
+    [Required]
     public string Name { get; set; }
 }

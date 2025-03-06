@@ -1,4 +1,4 @@
-using models;
+
 
 public static class MapToRFP
 {
@@ -9,13 +9,13 @@ public static class MapToRFP
 
         return new RFP  
         {
-            Uuid = source.Uuid,
+            RFPUuid = Guid.TryParse(source.Uuid, out var guid) ? guid : Guid.Empty,
 
             DeadlineDate = source.ResponseDate.UtcDateTime,
             
             DescriptionBrut = source.Description,
             
-            Experience_level = source.ExternalStatus?.TranslatedName ?? string.Empty,
+            ExperienceLevel = Enum.TryParse<Experience>(source.ExternalStatus?.TranslatedName, out var level) ? level : Experience.Junior,
             
             RfpPriority = source.AssignmentCategory?.Code ?? string.Empty,
             
@@ -28,7 +28,7 @@ public static class MapToRFP
             RfpUrl = source.ProjectRequest?.ResourceUri,
             
             Workplace = source.Location?.Name,
-            
         };
     }
+
 }
