@@ -19,7 +19,7 @@ const search = ref('');
 const headers = ref([
   { key: 'jobTitle', title: 'Titre du poste', align: 'start' as const },
   { key: 'experienceLevel', title: 'Expérience', align: 'start' as const },
-  { key: 'ratehour', title: 'Tarif / heure', align: 'end' as const },
+  { key: 'rateHour', title: 'Tarif / heure', align: 'end' as const },
   { key: 'cv', title: 'Lien CV', align: 'center' as const },
   { key: 'cvDate', title: 'Date CV', align: 'end' as const },
   { key: 'skills', title: 'Compétences', align: 'start' as const },

@@ -11,12 +11,25 @@ public class ProfileController : ControllerBase
         _profileService = profileService;
     }
 
-    [HttpGet]
-    public IActionResult GetAllProfils()
-    {
-        var profiles = _profileService.GetAllProfiles();
-        return Ok(profiles);
+[HttpGet]
+public IActionResult GetAllProfils()
+{
+    var profiles = _profileService.GetAllProfiles();
+
+        var outputProfiles = profiles.Select(profile => new DtoOutputProfile
+        {
+            RateHour = profile.Ratehour,
+            Cv = profile.CV,
+            CvDate = profile.CVDate,
+            JobTitle = profile.JobTitle,
+            ExperienceLevel = profile.ExperienceLevel,  // 🔹 Grâce au JsonStringEnumConverter, ça renverra une string
+            Skills = profile.Skills ?? new List<string>(),
+            Keywords = profile.Keywords ?? new List<string>()
+        }).ToList();
+
+        return Ok(outputProfiles);
     }
+
 
 
     [HttpPost]

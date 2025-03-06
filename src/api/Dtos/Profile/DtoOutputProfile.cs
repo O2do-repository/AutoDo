@@ -13,7 +13,7 @@ public class DtoOutputProfile
     public string JobTitle { get; set; }
 
     [Required]
-    [JsonConverter(typeof(JsonStringEnumConverter))] 
+    [JsonConverter(typeof(JsonStringEnumConverter))]    
     public Experience ExperienceLevel { get; set; }
 
     public List<string> Skills { get; set; }
