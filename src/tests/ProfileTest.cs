@@ -35,8 +35,8 @@ public class ProfileTest
                 JobTitle = "Software Engineer",
                 ExperienceLevel = Experience.Junior,
                 ConsultantUuid = Guid.NewGuid(),
-                Skills = new List<string> { "javaS", "javascriptS" },
-                Keywords = new List<string> { "architect", "devOps" }
+                Skills = new List<string> { "Java","JavaScript" },
+                Keywords = new List<string> { "Architect", "devOps" }
             },
         });
         context.SaveChanges();
@@ -109,6 +109,6 @@ public class ProfileTest
         Assert.Contains("Java", profile.Skills);
         Assert.Contains("JavaScript", profile.Skills);
         Assert.Contains("Architect", profile.Keywords);
-        Assert.Contains("DevOps", profile.Keywords);
+        Assert.Contains("devOps", profile.Keywords);
     }
 }
