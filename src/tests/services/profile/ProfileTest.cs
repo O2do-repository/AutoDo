@@ -42,6 +42,8 @@ public class ProfileTest
         context.SaveChanges();
     }
 
+
+    // list of profiles
     [Fact]
     public void Test_GetAllProfiles_Should_Return_Profiles()
     {
@@ -86,6 +88,8 @@ public class ProfileTest
         Assert.NotEqual(Guid.Empty, profile.ConsultantUuid);
     }
 
+
+    // Add profile
     [Fact]
     public void Test_GetAllProfiles_Profile_Should_be_equals_to_storeProfile()
     {
@@ -111,4 +115,108 @@ public class ProfileTest
         Assert.Contains("Architect", profile.Keywords);
         Assert.Contains("devOps", profile.Keywords);
     }
+
+    [Fact]
+    public void Test_AddProfile_Should_Throw_Exception_When_Consultant_Does_Not_Exist()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var profileService = new ProfileService(context);
+        
+
+        var newProfile = new Profile
+        {
+            ConsultantUuid = Guid.NewGuid(), // UUID inexistant
+            Ratehour = 55,
+            JobTitle = "Data Scientist",
+            ExperienceLevel = Experience.Senior
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() => profileService.AddProfile(newProfile));
+        Assert.Contains("n'existe pas", exception.Message);
+    }
+
+
+    [Fact]
+    public void Test_AddProfile_Should_Successfully_Add_Profile()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+
+
+        var consultantUuid = Guid.NewGuid();
+        context.Consultants.Add(new Consultant
+        {
+            ConsultantUuid = consultantUuid,
+            Name = "John Doe",
+            Email = "john.doe@example.com", 
+            Phone = "1234567890",          
+            Surname = "Doe"                 
+        });
+        context.SaveChanges();  
+
+        // Créer un profil et l'associer au consultant existant
+        var profileService = new ProfileService(context);
+        var newProfile = new Profile
+        {
+            Ratehour = 50,
+            CV = "https://example.com/cv1.pdf",
+            CVDate = new DateTime(2023, 5, 1),
+            JobTitle = "Software Engineer",
+            ExperienceLevel = Experience.Junior,
+            ConsultantUuid = consultantUuid,  
+            Skills = new List<string> { "Java", "JavaScript" },
+            Keywords = new List<string> { "Architect", "devOps" }
+        };
+
+        // Act
+        var addedProfile = profileService.AddProfile(newProfile);
+
+        var storedProfile = context.Profiles.FirstOrDefault(p => p.ProfileUuid == addedProfile.ProfileUuid);
+
+        // Assert
+        Assert.NotNull(storedProfile); 
+        Assert.Equal(consultantUuid, storedProfile.ConsultantUuid);  
+    }
+
+    [Fact]
+    public void Test_AddProfile_Should_Associate_Consultant_To_Profile()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var consultantUuid = Guid.NewGuid();
+        context.Consultants.Add(new Consultant
+        {
+            ConsultantUuid = consultantUuid,
+            Name = "John Doe",
+            Email = "john.doe@example.com", 
+            Phone = "1234567890",          
+            Surname = "Doe"                 
+        });
+        context.SaveChanges();  
+
+        var profileService = new ProfileService(context);
+        var newProfile = 
+        new Profile
+        {
+            ProfileUuid = Guid.NewGuid(),
+            Ratehour = 50,
+            CV = "https://example.com/cv1.pdf",
+            CVDate = new DateTime(2023, 5, 1),
+            JobTitle = "Software Engineer",
+            ExperienceLevel = Experience.Junior,
+            ConsultantUuid = consultantUuid,
+            Skills = new List<string> { "Java","JavaScript" },
+            Keywords = new List<string> { "Architect", "devOps" }
+        };
+        // Act
+        var addedProfile = profileService.AddProfile(newProfile);
+        var storedProfile = context.Profiles.FirstOrDefault(p => p.ProfileUuid == addedProfile.ProfileUuid);
+
+        // Assert
+        Assert.NotNull(storedProfile);
+        Assert.Equal(consultantUuid, storedProfile.ConsultantUuid);
+    }
+
 }
