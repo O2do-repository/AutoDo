@@ -22,7 +22,7 @@ public IActionResult GetAllProfils()
             Cv = profile.CV,
             CvDate = profile.CVDate,
             JobTitle = profile.JobTitle,
-            ExperienceLevel = profile.ExperienceLevel,  // 🔹 Grâce au JsonStringEnumConverter, ça renverra une string
+            ExperienceLevel = profile.ExperienceLevel, 
             Skills = profile.Skills ?? new List<string>(),
             Keywords = profile.Keywords ?? new List<string>()
         }).ToList();
