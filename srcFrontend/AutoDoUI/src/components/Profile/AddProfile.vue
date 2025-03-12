@@ -28,14 +28,17 @@ const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
 const availableSkills: string[] = ['C#', 'ASP.NET', 'Vue.js', 'SQL'];
 const availableKeywords: string[] = ['Backend', 'Frontend', 'API'];
 
-// Utiliser le router pour la redirection
+const errorMessage = ref<string | null>(null); 
+
 const router = useRouter();
 
 const submitProfile = async () => {
+  
+  errorMessage.value = null;
   if (!profile.value.JobTitle || !profile.value.CV || !profile.value.CVDate || !profile.value.ExperienceLevel) {
-    console.log('Please fill all required fields');
-    return;
-  }
+        errorMessage.value = 'Veuillez remplir tous les champs obligatoires.';
+        return;
+    }
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
@@ -60,38 +63,41 @@ const submitProfile = async () => {
 </script>
 
 <template>
-    <v-container>
-      <v-card class="pa-4">
-        <v-card-title>Nouvel Profil</v-card-title>
-        <v-card-text>
-          <v-text-field label="Job Title*" v-model="profile.JobTitle" required></v-text-field>
-          <v-select label="Niveau d'expérience" v-model="profile.ExperienceLevel" :items="experienceLevels" required></v-select>
-          <v-text-field label="Tarif / heure" v-model.number="profile.RateHour" type="number"></v-text-field>
-          <v-text-field label="CV URL*" v-model="profile.CV" required></v-text-field>
-          <v-text-field label="Date CV*" v-model="profile.CVDate" type="datetime-local" required></v-text-field>
-          <v-select
-            label="Compétences"
-            v-model="profile.Skills"
-            :items="availableSkills"
-            item-text="name"
-            item-value="name"
-            multiple
-            required
-          ></v-select>
-          <v-select
-            label="Mots-clés"
-            v-model="profile.keywords"
-            :items="availableKeywords"
-            item-text="name"
-            item-value="name"
-            multiple
-            required
-          ></v-select>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" @click="submitProfile()">Publier</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-container>
-  </template>
+  <v-container>
+    <v-alert closable v-if="errorMessage" type="error" variant="outlined">
+        {{ errorMessage }}
+    </v-alert>  
+    <v-card class="pa-4">
+      <v-card-title>Nouvel Profil</v-card-title>
+      <v-card-text>
+        <v-text-field label="Job Title *" v-model="profile.JobTitle" required></v-text-field>
+        <v-select label="Niveau d'expérience *" v-model="profile.ExperienceLevel" :items="experienceLevels" required></v-select>
+        <v-text-field label="Tarif / heure *" v-model.number="profile.RateHour" type="number"></v-text-field>
+        <v-text-field label="CV URL *" v-model="profile.CV" required></v-text-field>
+        <v-text-field label="Date CV *" v-model="profile.CVDate" type="datetime-local" required></v-text-field>
+        <v-select
+          label="Compétences"
+          v-model="profile.Skills"
+          :items="availableSkills"
+          item-text="name"
+          item-value="name"
+          multiple
+          required
+        ></v-select>
+        <v-select
+          label="Mots-clés"
+          v-model="profile.keywords"
+          :items="availableKeywords"
+          item-text="name"
+          item-value="name"
+          multiple
+          required
+        ></v-select>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" @click="submitProfile()">Publier</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>
+</template>
   

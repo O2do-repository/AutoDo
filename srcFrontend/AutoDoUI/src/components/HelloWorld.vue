@@ -6,7 +6,6 @@
       {{ error }}
     </v-alert>
 
-    <!-- Barre de recherche -->
     <v-text-field
       v-model="search"
       label="Rechercher un RFP"

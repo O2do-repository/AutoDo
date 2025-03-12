@@ -20,6 +20,7 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/add-profile': RouteRecordInfo<'/add-profile', '/add-profile', Record<never, never>, Record<never, never>>,
+    '/edit-profile/[profileUuid]': RouteRecordInfo<'/edit-profile/[profileUuid]', '/edit-profile/:profileUuid', { profileUuid: ParamValue<true> }, { profileUuid: ParamValue<false> }>,
     '/table-profile': RouteRecordInfo<'/table-profile', '/table-profile', Record<never, never>, Record<never, never>>,
   }
 }
