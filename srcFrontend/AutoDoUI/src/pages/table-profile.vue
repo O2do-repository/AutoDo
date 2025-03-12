@@ -1,5 +1,5 @@
 <template>
-    <TableProfile />
+    <TableProfile /> 
 </template>
   
 <script lang="ts" setup>

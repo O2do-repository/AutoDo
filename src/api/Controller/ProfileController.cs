@@ -18,6 +18,8 @@ public IActionResult GetAllProfils()
 
         var outputProfiles = profiles.Select(profile => new DtoOutputProfile
         {
+            ProfileUuid = profile.ProfileUuid,
+            ConsultantUuid = profile.ConsultantUuid,
             RateHour = profile.Ratehour,
             Cv = profile.CV,
             CvDate = profile.CVDate,
@@ -66,11 +68,44 @@ public IActionResult GetAllProfils()
             var newProfile = _profileService.AddProfile(profile);
             return CreatedAtAction(nameof(GetAllProfils), new { id = newProfile.ProfileUuid }, newProfile);
         }
-catch (Exception ex)
-{
-    return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
-}
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+        }
+    }
 
+    [HttpPut]
+    public IActionResult UpdateProfile([FromBody] DtoUpdateProfile profileDto)
+    {
+        if (profileDto == null)
+        {
+            return BadRequest("Données de profil invalides.");
+        }
+        
+        try
+        {
+            var profile = new Profile
+            {
+                ProfileUuid = profileDto.ProfileUuid,
+                ConsultantUuid = profileDto.ConsultantUuid,
+                Ratehour = profileDto.RateHour,
+                CV = profileDto.Cv,
+                CVDate = profileDto.CvDate,
+                JobTitle = profileDto.JobTitle,
+                ExperienceLevel = profileDto.ExperienceLevel,
+                Skills = profileDto.Skills?.ToList() ?? new List<string>(),
+                Keywords = profileDto.Keywords?.ToList() ?? new List<string>()
+            };
+            
+            var updatedProfile = _profileService.UpdateProfile(profile);
+            return Ok(updatedProfile);
+        }
+        catch (Exception ex)
+        {
+            return ex.Message.Contains("n'existe pas") 
+                ? NotFound(ex.Message) 
+                : BadRequest(ex.Message);
+        }
     }
 
 }

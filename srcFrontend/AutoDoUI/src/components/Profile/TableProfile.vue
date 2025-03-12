@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 interface Profile {
+  profileUuid: string,
   consultantUuid: string;
   RateHour: number;
   CV: string;
@@ -12,6 +14,7 @@ interface Profile {
   keywords: string[];
 }
 
+const router = useRouter();
 const profiles = ref<Profile[]>([]);
 const error = ref<string | null>(null);
 const search = ref('');
@@ -23,7 +26,8 @@ const headers = ref([
   { key: 'cv', title: 'Lien CV', align: 'center' as const },
   { key: 'cvDate', title: 'Date CV', align: 'end' as const },
   { key: 'skills', title: 'Compétences', align: 'start' as const },
-  { key: 'keywords', title: 'Mots-clés', align: 'start' as const }
+  { key: 'keywords', title: 'Mots-clés', align: 'start' as const },
+  { key: 'actions', title: 'Modifier', align: 'center' as const }
 ]);
 
 const fetchProfiles = async () => {
@@ -33,12 +37,18 @@ const fetchProfiles = async () => {
       throw new Error("Erreur lors de la récupération des profils");
     }
     const data = await response.json();
-    console.log("Données reçues :", data); // Vérifier le format ici
+    console.log("Données reçues :", data); 
     profiles.value = Array.isArray(data) ? data : [data];
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Une erreur est survenue";
   }
 };
+
+const editProfile = (profile: Profile) => {
+  localStorage.setItem('selectedProfile', JSON.stringify(profile));
+  router.push({ path: `/edit-profile/${profile.profileUuid}` });
+};
+
 
 
 onMounted(fetchProfiles);
@@ -48,7 +58,7 @@ onMounted(fetchProfiles);
   <v-container>
     <h1 class="text-center mb-6">Liste des Profils</h1>
     
-    <v-btn to="/add-profile" color="primary" class="mb-4">Ajouter un profil</v-btn>
+    <v-btn  @click="$router.push('/add-profile')" color="primary" class="mb-4" >Ajouter un profil</v-btn>
 
     <v-alert v-if="error" type="error" variant="outlined" class="mb-4">
       {{ error }}
@@ -56,7 +66,7 @@ onMounted(fetchProfiles);
 
     <v-text-field v-model="search" label="Rechercher un profil" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line class="mb-4"></v-text-field>
 
-    <v-data-table :headers="headers" :items="profiles" :search="search" item-value="consultantUuid" class="elevation-2" dense>
+    <v-data-table :headers="headers" :items="profiles" :search="search" item-value="consultantUuid" class="elevation-2">
       <template v-slot:item.CV="{ item }">
         <a v-if="item.CV" :href="item.CV" target="_blank">Voir le CV</a>
         <span v-else>Non disponible</span>
@@ -68,6 +78,10 @@ onMounted(fetchProfiles);
 
       <template v-slot:item.keywords="{ item }">
         {{ item.keywords && item.keywords.length ? item.keywords.join(', ') : 'Aucun mot-clé' }}
+      </template>
+
+      <template v-slot:item.actions="{ item }">
+        <v-btn color="primary" @click="editProfile(item)" icon="mdi-pencil" density="comfortable"></v-btn>
       </template>
     </v-data-table>
 
@@ -81,6 +95,7 @@ onMounted(fetchProfiles);
 .v-container {
   margin: auto;
 }
+
 
 a {
   text-decoration: none;

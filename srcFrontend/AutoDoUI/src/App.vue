@@ -1,14 +1,15 @@
 <template>
   <v-app>
-    <v-container>
-      <v-btn to="/table-profile" class="mr-2">Liste des Profils</v-btn>
-      <v-btn to="/add-profile" color="primary">Ajouter un Profil</v-btn>
-    <router-view />
+    <SideMenu />
+    <SideImage />
+    <v-container fluid>
+      <router-view />
     </v-container>
     
   </v-app>
 </template>
 
 <script lang="ts" setup>
-  //
+import SideMenu from './components/utils/SideMenu.vue';
+import SideImage from './components/utils/SiteImage.vue'; 
 </script>
