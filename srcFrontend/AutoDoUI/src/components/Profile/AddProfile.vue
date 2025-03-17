@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router'; // Importer le router pour la redirection
+import { useRouter } from 'vue-router';
 
 interface Profile {
   consultantUuid: string;
@@ -14,7 +14,7 @@ interface Profile {
 }
 
 const profile = ref<Profile>({
-  consultantUuid: '50bcf3a7-d5d9-4017-9df4-f0da847bfe5a',
+  consultantUuid: '50bcf3a7-d5d9-4017-9df4-f0da847bfe88',
   RateHour: null,
   CV: '',
   CVDate: '',
@@ -28,18 +28,11 @@ const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
 const availableSkills: string[] = ['C#', 'ASP.NET', 'Vue.js', 'SQL'];
 const availableKeywords: string[] = ['Backend', 'Frontend', 'API'];
 
-const errorMessage = ref<string | null>(null); 
 
 const router = useRouter();
 
 const submitProfile = async () => {
   
-  errorMessage.value = null;
-  if (!profile.value.JobTitle || !profile.value.CV || !profile.value.CVDate || !profile.value.ExperienceLevel) {
-        errorMessage.value = 'Veuillez remplir tous les champs obligatoires.';
-        return;
-    }
-
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
       method: 'POST',
@@ -51,9 +44,8 @@ const submitProfile = async () => {
       throw new Error('Erreur lors de l\'ajout du profil');
     }
 
-    // Redirection vers la liste des profils après un délai de 1 seconde
     setTimeout(() => {
-      router.push('/table-profile'); // Remplacer '/table-profil' par la route correcte de ta liste des profils
+      router.push('/table-profile'); 
     }, 1000);
 
   } catch (error) {
@@ -64,11 +56,8 @@ const submitProfile = async () => {
 
 <template>
   <v-container>
-    <v-alert closable v-if="errorMessage" type="error" variant="outlined">
-        {{ errorMessage }}
-    </v-alert>  
     <v-card class="pa-4">
-      <v-card-title>Nouvel Profil</v-card-title>
+      <v-card-title>Nouveau Profil</v-card-title>
       <v-card-text>
         <v-text-field label="Job Title *" v-model="profile.JobTitle" required></v-text-field>
         <v-select label="Niveau d'expérience *" v-model="profile.ExperienceLevel" :items="experienceLevels" required></v-select>

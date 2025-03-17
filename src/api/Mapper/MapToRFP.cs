@@ -28,6 +28,8 @@ public static class MapToRFP
             RfpUrl = source.ProjectRequest?.ResourceUri,
             
             Workplace = source.Location?.Name,
+
+            Reference = source.Reference
         };
     }
 

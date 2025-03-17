@@ -8,8 +8,8 @@
         <v-divider></v-divider>
   
         <!-- Admin -->
-        <v-list-item link>
-          <v-list-item-title class="font-weight-bold">Admin</v-list-item-title>
+        <v-list-item to="/" link>
+          <v-list-item-title class="font-weight-bold">RFP</v-list-item-title>
         </v-list-item>
   
         <!-- Consultant avec sous-menu -->
@@ -29,7 +29,7 @@
         </v-list-group>
   
         <!-- Dashboard -->
-        <v-list-item link>
+        <v-list-item to="/table-matching" link>
           <v-list-item-title class="font-weight-bold">Dashboard</v-list-item-title>
         </v-list-item>
       </v-list>

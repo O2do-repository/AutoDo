@@ -55,7 +55,8 @@ namespace data.Migrations
                     Skills = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     JobTitle = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     RfpUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Workplace = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                    Workplace = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Reference = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -99,6 +100,44 @@ namespace data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Matching",
+                columns: table => new
+                {
+                    MatchingUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ProfileUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RfpUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Matching", x => x.MatchingUuid);
+                    table.ForeignKey(
+                        name: "FK_Matching_Profile_ProfileUuid",
+                        column: x => x.ProfileUuid,
+                        principalTable: "Profile",
+                        principalColumn: "ProfileUuid",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Matching_RFP_RfpUuid",
+                        column: x => x.RfpUuid,
+                        principalTable: "RFP",
+                        principalColumn: "RFPUuid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Matching_ProfileUuid",
+                table: "Matching",
+                column: "ProfileUuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Matching_RfpUuid_ProfileUuid",
+                table: "Matching",
+                columns: new[] { "RfpUuid", "ProfileUuid" },
+                unique: true);
+
             migrationBuilder.CreateIndex(
                 name: "IX_Profile_ConsultantUuid",
                 table: "Profile",
@@ -112,13 +151,16 @@ namespace data.Migrations
                 name: "Keyword");
 
             migrationBuilder.DropTable(
+                name: "Matching");
+
+            migrationBuilder.DropTable(
+                name: "Skill");
+
+            migrationBuilder.DropTable(
                 name: "Profile");
 
             migrationBuilder.DropTable(
                 name: "RFP");
-
-            migrationBuilder.DropTable(
-                name: "Skill");
 
             migrationBuilder.DropTable(
                 name: "Consultant");
