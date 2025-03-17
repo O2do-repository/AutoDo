@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
+    private readonly IMatchingService _matchingService;
 
-    public ProfileController(IProfileService profileService)
+    public ProfileController(IProfileService profileService, IMatchingService matchingService)
     {
         _profileService = profileService;
+        _matchingService = matchingService;
     }
 
 [HttpGet]
@@ -35,37 +37,42 @@ public IActionResult GetAllProfils()
 
 
     [HttpPost]
-    public IActionResult CreateProfile([FromBody] DtoInputProfile profileDto)
+    public async Task<IActionResult> CreateProfile([FromBody] DtoInputProfile profileDto)
     {
         if (profileDto == null || profileDto.ConsultantUuid == Guid.Empty)
         {
             return BadRequest("Le profil est invalide ou le consultant est manquant.");
         }
+
         Console.WriteLine($"Consultant UUID reçu : {profileDto.ConsultantUuid}");
         try
         {
             if (profileDto.ConsultantUuid == Guid.Empty)
-        {
-            throw new ArgumentException("ConsultantUuid is empty or invalid");
-        }
+            {
+                throw new ArgumentException("ConsultantUuid is empty or invalid");
+            }
 
-                var profile = new Profile
-                {
-                    ProfileUuid = Guid.NewGuid(),
-                    ConsultantUuid = profileDto.ConsultantUuid,
-                    Ratehour = profileDto.RateHour,
-                    CV = profileDto.Cv,
-                    CVDate = profileDto.CvDate,
-                    JobTitle = profileDto.JobTitle,
-                    ExperienceLevel = profileDto.ExperienceLevel,
-                    Skills = profileDto.Skills.ToList(),
-                    Keywords = profileDto.Keywords.ToList()
+            var profile = new Profile
+            {
+                ProfileUuid = Guid.NewGuid(),
+                ConsultantUuid = profileDto.ConsultantUuid,
+                Ratehour = profileDto.RateHour,
+                CV = profileDto.Cv,
+                CVDate = profileDto.CvDate,
+                JobTitle = profileDto.JobTitle,
+                ExperienceLevel = profileDto.ExperienceLevel,
+                Skills = profileDto.Skills.ToList(),
+                Keywords = profileDto.Keywords.ToList()
+            };
 
-                };
 
-                
-
+            // Ajouter le profil à la base de données
             var newProfile = _profileService.AddProfile(profile);
+
+            //temporaire -> switch vers un bus
+            // Appeler la méthode de matching après la création du profil
+            var matchings = await _matchingService.MatchingsForProfileAsync(newProfile);
+
             return CreatedAtAction(nameof(GetAllProfils), new { id = newProfile.ProfileUuid }, newProfile);
         }
         catch (Exception ex)
@@ -73,9 +80,8 @@ public IActionResult GetAllProfils()
             return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
         }
     }
-
     [HttpPut]
-    public IActionResult UpdateProfile([FromBody] DtoUpdateProfile profileDto)
+    public async Task<IActionResult> UpdateProfile([FromBody] DtoUpdateProfile profileDto)
     {
         if (profileDto == null)
         {
@@ -98,6 +104,9 @@ public IActionResult GetAllProfils()
             };
             
             var updatedProfile = _profileService.UpdateProfile(profile);
+
+            var matchings = await _matchingService.MatchingsForProfileAsync(updatedProfile);
+
             return Ok(updatedProfile);
         }
         catch (Exception ex)
@@ -107,5 +116,6 @@ public IActionResult GetAllProfils()
                 : BadRequest(ex.Message);
         }
     }
+
 
 }

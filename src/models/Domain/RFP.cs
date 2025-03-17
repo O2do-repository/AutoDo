@@ -15,4 +15,5 @@ public class RFP
     public string JobTitle { get; set; }
     public string RfpUrl { get; set; }
     public string Workplace { get; set; }
+    public string Reference {get;set;}
 }

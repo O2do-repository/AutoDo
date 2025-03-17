@@ -19,6 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IRfpService, RfpService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
+builder.Services.AddScoped<IMatchingService, MatchingService>();
 
 builder.Services.AddScoped<AutoDoDbContext>();
 

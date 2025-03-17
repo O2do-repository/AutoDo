@@ -90,6 +90,39 @@ namespace data.Migrations
                     b.ToTable("Keyword", (string)null);
                 });
 
+            modelBuilder.Entity("Matching", b =>
+                {
+                    b.Property<Guid>("MatchingUuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("MatchingUuid");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("Comment");
+
+                    b.Property<Guid>("ProfileUuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RfpUuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int")
+                        .HasColumnName("Score");
+
+                    b.HasKey("MatchingUuid");
+
+                    b.HasIndex("ProfileUuid");
+
+                    b.HasIndex("RfpUuid", "ProfileUuid")
+                        .IsUnique();
+
+                    b.ToTable("Matching", (string)null);
+                });
+
             modelBuilder.Entity("Profile", b =>
                 {
                     b.Property<Guid>("ProfileUuid")
@@ -170,6 +203,12 @@ namespace data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PublicationDate");
 
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Reference");
+
                     b.Property<string>("RfpPriority")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -212,6 +251,25 @@ namespace data.Migrations
                     b.HasKey("SkillUuid");
 
                     b.ToTable("Skill", (string)null);
+                });
+
+            modelBuilder.Entity("Matching", b =>
+                {
+                    b.HasOne("Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RFP", "Rfp")
+                        .WithMany()
+                        .HasForeignKey("RfpUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+
+                    b.Navigation("Rfp");
                 });
 
             modelBuilder.Entity("Profile", b =>

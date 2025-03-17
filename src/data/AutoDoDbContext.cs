@@ -7,9 +7,11 @@ public class AutoDoDbContext : DbContext
 {
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<Consultant> Consultants { get; set; }
+    public DbSet<Matching> Matchings { get; set; } 
     public DbSet<RFP> Rfps { get; set; }
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Keyword> Keywords { get; set; }
+    
 
     private readonly bool _useInMemory;
     private readonly IConnectionStringProvider _connectionStringProvider;
@@ -52,6 +54,7 @@ public class AutoDoDbContext : DbContext
             entity.Property(r => r.JobTitle).HasColumnName("JobTitle").HasMaxLength(255);
             entity.Property(r => r.RfpUrl).HasColumnName("RfpUrl").HasMaxLength(500);
             entity.Property(r => r.Workplace).HasColumnName("Workplace").HasMaxLength(255);
+            entity.Property(r => r.Reference).HasColumnName("Reference").HasMaxLength(255);
         });
 
 
@@ -92,7 +95,7 @@ public class AutoDoDbContext : DbContext
 
         });
 
-            modelBuilder.Entity<Profile>()
+        modelBuilder.Entity<Profile>()
         .Property(p => p.Skills)
         .HasConversion(
             v => JsonConvert.SerializeObject(v),
@@ -121,6 +124,30 @@ public class AutoDoDbContext : DbContext
             entity.Property(s => s.SkillUuid).HasColumnName("SkillUuid").IsRequired();
             entity.Property(s => s.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
         });
+
+
+        // Configuration du matching
+        modelBuilder.Entity<Matching>(entity =>
+        {
+            entity.ToTable("Matching");
+            entity.HasKey(m => m.MatchingUuid);
+            entity.Property(m => m.MatchingUuid).HasColumnName("MatchingUuid").IsRequired();
+            entity.Property(m => m.Comment).HasColumnName("Comment").HasMaxLength(500);
+            entity.Property(m => m.Score).HasColumnName("Score").IsRequired();
+
+            entity.HasOne(m => m.Profile)
+                .WithMany()
+                .HasForeignKey(m => m.ProfileUuid)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.Rfp)
+                .WithMany()
+                .HasForeignKey(m => m.RfpUuid)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(m => new { m.RfpUuid, m.ProfileUuid }).IsUnique();
+        });
+
 
 
     } 
