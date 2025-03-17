@@ -117,5 +117,20 @@ public IActionResult GetAllProfils()
         }
     }
 
+    [HttpDelete("{profileUuid}")]
+    public IActionResult DeleteProfile(Guid profileUuid)
+    {
+        try
+        {
+            _profileService.DeleteProfile(profileUuid);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+
 
 }

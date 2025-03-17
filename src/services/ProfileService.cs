@@ -63,4 +63,19 @@ public class ProfileService : IProfileService
         return existingProfile;
     }
 
+    // Delete profile
+    public void DeleteProfile(Guid profileUuid)
+    {
+        var existingProfile = _context.Profiles
+            .FirstOrDefault(p => p.ProfileUuid == profileUuid);
+
+        if (existingProfile == null)
+        {
+            throw new Exception($"Le profil avec UUID {profileUuid} n'existe pas.");
+        }
+
+        _context.Profiles.Remove(existingProfile);
+        _context.SaveChanges();
+    }
+
 }

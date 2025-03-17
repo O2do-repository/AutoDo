@@ -219,4 +219,109 @@ public class ProfileTest
         Assert.Equal(consultantUuid, storedProfile.ConsultantUuid);
     }
 
+
+
+    [Fact]
+    public void Test_UpdateProfile_Should_Update_Profile_Successfully()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var profileService = new ProfileService(context);
+
+        var existingProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000");
+        var updatedProfile = new Profile
+        {
+            ProfileUuid = existingProfileUuid,
+            Ratehour = 60,
+            CV = "https://example.com/cv2.pdf",
+            CVDate = new DateTime(2024, 1, 1),
+            JobTitle = "Senior Software Engineer",
+            ExperienceLevel = Experience.Senior,
+            Skills = new List<string> { "Python", "C#" },
+            Keywords = new List<string> { "AI", "Cloud" }
+        };
+
+        // Act
+        profileService.UpdateProfile(updatedProfile);
+        var storedProfile = context.Profiles.FirstOrDefault(p => p.ProfileUuid == existingProfileUuid);
+
+        // Assert
+        Assert.NotNull(storedProfile);
+        Assert.Equal(updatedProfile.ProfileUuid, storedProfile.ProfileUuid);
+        Assert.Equal(updatedProfile.Ratehour, storedProfile.Ratehour);
+        Assert.Equal(updatedProfile.CV, storedProfile.CV);
+        Assert.Equal(updatedProfile.CVDate, storedProfile.CVDate);
+        Assert.Equal(updatedProfile.JobTitle, storedProfile.JobTitle);
+        Assert.Equal(updatedProfile.ExperienceLevel, storedProfile.ExperienceLevel);
+        Assert.Equal(updatedProfile.Skills, storedProfile.Skills);
+        Assert.Equal(updatedProfile.Keywords, storedProfile.Keywords);
+        Assert.InRange(storedProfile.Ratehour, 10, 500);
+        Assert.StartsWith("https://", storedProfile.CV);
+    }
+    
+    [Fact]
+    public void Test_UpdateProfile_Should_Throw_Exception_When_Profile_Not_Found()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var profileService = new ProfileService(context);
+
+        var nonExistingProfile = new Profile
+        {
+            ProfileUuid = Guid.NewGuid(),
+            Ratehour = 60,
+            CV = "https://example.com/cv2.pdf",
+            CVDate = new DateTime(2024, 1, 1),
+            JobTitle = "Senior Software Engineer",
+            ExperienceLevel = Experience.Senior,
+            Skills = new List<string> { "Python", "C#" },
+            Keywords = new List<string> { "AI", "Cloud" }
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() => profileService.UpdateProfile(nonExistingProfile));
+        Assert.Contains("n'existe pas", exception.Message);
+    }
+
+    [Fact]
+    public void Test_DeleteProfile_Should_Remove_Profile_Successfully()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var profileService = new ProfileService(context);
+
+        var existingProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000");
+
+        // Vérifier que le profil existe avant suppression
+        var profileBeforeDelete = context.Profiles.FirstOrDefault(p => p.ProfileUuid == existingProfileUuid);
+        Assert.NotNull(profileBeforeDelete); // Il doit exister
+
+        // Act
+        profileService.DeleteProfile(existingProfileUuid);
+
+        // Assert
+        var profileAfterDelete = context.Profiles.FirstOrDefault(p => p.ProfileUuid == existingProfileUuid);
+        Assert.Null(profileAfterDelete); // Il ne doit plus exister
+    }
+
+    [Fact]
+    public void Test_DeleteProfile_Should_Throw_Exception_When_Profile_Not_Found()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var profileService = new ProfileService(context);
+
+        var nonExistingProfileUuid = Guid.NewGuid(); // UUID qui n'existe pas
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() => profileService.DeleteProfile(nonExistingProfileUuid));
+        Assert.Contains("n'existe pas", exception.Message);
+    }
+
+
+
 }
