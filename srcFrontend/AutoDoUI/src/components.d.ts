@@ -14,6 +14,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SideMenu: typeof import('./components/utils/SideMenu.vue')['default']
     SiteImage: typeof import('./components/utils/SiteImage.vue')['default']
+    StatusMatching: typeof import('./components/Matching/StatusMatching.vue')['default']
     TableMatching: typeof import('./components/Matching/TableMatching.vue')['default']
     TableProfile: typeof import('./components/Profile/TableProfile.vue')['default']
     UpdateProfile: typeof import('./components/Profile/UpdateProfile.vue')['default']

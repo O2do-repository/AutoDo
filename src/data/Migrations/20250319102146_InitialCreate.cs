@@ -108,7 +108,8 @@ namespace data.Migrations
                     Comment = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     ProfileUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RfpUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Score = table.Column<int>(type: "int", nullable: false)
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    StatutMatching = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

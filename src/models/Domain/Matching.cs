@@ -14,7 +14,10 @@ public class Matching
     [Required]
     public Guid RfpUuid { get; set; }
 
+    [Required]
     public int Score { get; set; }
+    [Required]
+    public StatutMatching StatutMatching{get; set;} = StatutMatching.New;
 
     [ForeignKey("ProfileUuid")]
     public Profile Profile { get; set; }

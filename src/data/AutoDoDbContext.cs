@@ -134,6 +134,9 @@ public class AutoDoDbContext : DbContext
             entity.Property(m => m.MatchingUuid).HasColumnName("MatchingUuid").IsRequired();
             entity.Property(m => m.Comment).HasColumnName("Comment").HasMaxLength(500);
             entity.Property(m => m.Score).HasColumnName("Score").IsRequired();
+            entity.Property(m => m.StatutMatching)
+                .HasConversion(mx => mx.ToString(), mx => (StatutMatching)Enum.Parse(typeof(StatutMatching), mx));
+
 
             entity.HasOne(m => m.Profile)
                 .WithMany()

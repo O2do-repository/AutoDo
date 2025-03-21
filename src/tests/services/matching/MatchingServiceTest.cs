@@ -132,7 +132,8 @@ public class MatchingServiceTest
             ProfileUuid= new Guid("123e4567-e89b-12d3-a456-426614174000"),
             RfpUuid=new Guid("123e4567-e89b-12d3-a456-426614174235"),
             Score = 100,
-            Comment = "test"
+            Comment = "test",
+            StatutMatching = StatutMatching.New
         };
 
         dbContext.Matchings.Add(matching);
@@ -211,4 +212,68 @@ public class MatchingServiceTest
             Assert.NotNull(m.Rfp);
         });
     }
+
+    [Fact]
+public async Task Test_UpdateMatchingAsync_Should_Update_Existing_Matching()
+{
+    // Arrange
+    var dbContext = GetInMemoryDbContext();
+    var service = new MatchingService(dbContext);
+
+    var matchingId = Guid.NewGuid();
+    var existingMatching = new Matching
+    {
+        MatchingUuid = matchingId,
+        StatutMatching = StatutMatching.New,
+        Comment = "Old Comment",
+        Score = 50,
+        ProfileUuid = Guid.NewGuid(),
+        RfpUuid = Guid.NewGuid()
+    };
+
+    dbContext.Matchings.Add(existingMatching);
+    await dbContext.SaveChangesAsync();
+
+    var updatedMatching = new Matching
+    {
+        MatchingUuid = matchingId,
+        StatutMatching = StatutMatching.Apply,
+        Comment = "Updated Comment",
+        Score = 90,
+        ProfileUuid = existingMatching.ProfileUuid,
+        RfpUuid = existingMatching.RfpUuid
+    };
+
+    // Act
+    var result = await service.UpdateMatchingAsync(matchingId, updatedMatching);
+
+    // Assert
+    Assert.Equal(updatedMatching.StatutMatching, result.StatutMatching);
+    Assert.Equal(updatedMatching.Comment, result.Comment);
+    Assert.Equal(updatedMatching.Score, result.Score);
+}
+
+[Fact]
+public async Task Test_UpdateMatchingAsync_Should_Throw_Exception_When_Matching_Not_Found()
+{
+    // Arrange
+    var dbContext = GetInMemoryDbContext();
+    var service = new MatchingService(dbContext);
+    var nonExistentId = Guid.NewGuid();
+    var updatedMatching = new Matching
+    {
+        MatchingUuid = nonExistentId,
+        StatutMatching = StatutMatching.Apply,
+        Comment = "Updated Comment",
+        Score = 90,
+        ProfileUuid = Guid.NewGuid(),
+        RfpUuid = Guid.NewGuid()
+    };
+
+    // Act & Assert
+    var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        await service.UpdateMatchingAsync(nonExistentId, updatedMatching));
+    
+    Assert.Contains("n'existe pas", exception.Message);
+}
 }

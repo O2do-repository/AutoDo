@@ -113,6 +113,10 @@ namespace data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Score");
 
+                    b.Property<string>("StatutMatching")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("MatchingUuid");
 
                     b.HasIndex("ProfileUuid");
