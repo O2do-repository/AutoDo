@@ -57,7 +57,8 @@ public class MatchingService :IMatchingService
             ProfileUuid = profile.ProfileUuid,
             RfpUuid = rfp.RFPUuid,
             Score = CalculateMatchingScore(profile, rfp),
-            Comment = ""
+            Comment = "",
+            StatutMatching = StatutMatching.New
         }).ToList();
 
         // Supprimer les anciens matchings du profil (on écrase l'existant)
@@ -78,6 +79,28 @@ public class MatchingService :IMatchingService
                 .ThenInclude(p => p.Consultant) 
             .ToListAsync();
     }
+    public async Task<Matching> UpdateMatchingAsync(Guid id,Matching updatedMatching)
+    {
+        var matching = await _context.Matchings.FirstOrDefaultAsync(m => m.MatchingUuid == id);
+
+        if (matching == null)
+        {
+            throw new Exception($"Le matching avec UUID {updatedMatching.MatchingUuid} n'existe pas.");
+        }
+
+        
+        matching.StatutMatching = updatedMatching.StatutMatching;
+        matching.Comment = updatedMatching.Comment;
+        matching.MatchingUuid = id;
+        matching.Score = updatedMatching.Score;
+        matching.ProfileUuid = updatedMatching.ProfileUuid;
+        matching.RfpUuid = updatedMatching.RfpUuid;
+
+
+        await _context.SaveChangesAsync();
+        return matching;
+    }
+
 
     
 

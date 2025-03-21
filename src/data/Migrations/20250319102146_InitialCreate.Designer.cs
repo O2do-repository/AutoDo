@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    [Migration("20250313094024_InitialCreate")]
+    [Migration("20250319102146_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -115,6 +115,10 @@ namespace data.Migrations
                     b.Property<int>("Score")
                         .HasColumnType("int")
                         .HasColumnName("Score");
+
+                    b.Property<string>("StatutMatching")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MatchingUuid");
 

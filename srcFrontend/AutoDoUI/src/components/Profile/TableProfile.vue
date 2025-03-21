@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import DeleteProfile from "./DeleteProfile.vue";
+
+
 
 interface Profile {
   profileUuid: string,
@@ -14,10 +17,25 @@ interface Profile {
   keywords: string[];
 }
 
+
 const router = useRouter();
 const profiles = ref<Profile[]>([]);
 const error = ref<string | null>(null);
 const search = ref('');
+
+const snackbar = ref(false);
+const snackbarMessage = ref('');
+const snackbarColor = ref('');
+
+
+const handleProfileDeleted = (payload: { message: string; color: string }) => {
+  snackbarMessage.value = payload.message;
+  snackbarColor.value = payload.color;
+  snackbar.value = true;
+  fetchProfiles(); // Rafraîchir la liste après suppression
+};
+
+
 
 const headers = ref([
   { key: 'jobTitle', title: 'Titre du poste', align: 'start' as const },
@@ -27,7 +45,8 @@ const headers = ref([
   { key: 'cvDate', title: 'Date CV', align: 'end' as const },
   { key: 'skills', title: 'Compétences', align: 'start' as const },
   { key: 'keywords', title: 'Mots-clés', align: 'start' as const },
-  { key: 'actions', title: 'Modifier', align: 'center' as const }
+  { key: 'actions', title: 'Modifier', align: 'center' as const },
+  { key: 'actionsSupp', title: 'Supprimer', align: 'center' as const }
 ]);
 
 const fetchProfiles = async () => {
@@ -83,12 +102,22 @@ onMounted(fetchProfiles);
       <template v-slot:item.actions="{ item }">
         <v-btn color="primary" @click="editProfile(item)" icon="mdi-pencil" density="comfortable"></v-btn>
       </template>
+      <template v-slot:item.actionsSupp="{ item }">
+        <DeleteProfile
+          :profileUuid="item.profileUuid"
+          @profileDeleted="handleProfileDeleted"
+        />
+      </template>
     </v-data-table>
 
     <v-alert v-if="!profiles.length && !error" type="info" class="mt-4">
       Aucun profil disponible.
     </v-alert>
   </v-container>
+  <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+    {{ snackbarMessage }}
+  </v-snackbar>
+
 </template>
 
 <style scoped>
