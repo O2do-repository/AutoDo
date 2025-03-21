@@ -1,10 +1,20 @@
 ﻿
 
+using Microsoft.EntityFrameworkCore;
+
 public class RfpService : IRfpService
 {
-    // Méthode pour filtrer les RFPs dont la date limite n'est pas atteinte
-    public List<RFP> FilterRfpDeadlineNotReachedYet(List<RFP> rfps)
+    private readonly AutoDoDbContext _context;
+
+    public RfpService(AutoDoDbContext context)
     {
-        return rfps.Where(data => data.DeadlineDate.CompareTo(DateTime.Today) >= 0).ToList();
+        _context = context;
+    }
+
+    public async Task<List<RFP>> FilterRfpDeadlineNotReachedYet()
+    {
+        return await _context.Rfps
+            .Where(rfp => rfp.DeadlineDate >= DateTime.Today)
+            .ToListAsync();
     }
 }
