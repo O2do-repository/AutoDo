@@ -20,6 +20,7 @@ builder.Services.AddScoped<IRfpService, RfpService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
 builder.Services.AddScoped<IMatchingService, MatchingService>();
+builder.Services.AddScoped<IConsultantService, ConsultantService>();
 
 builder.Services.AddScoped<AutoDoDbContext>();
 
@@ -34,9 +35,9 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
-app.MapGet("/log", () => new AzureMonitorLoggerConnection().CreateLogger("test"
+// app.MapGet("/log", () => new AzureMonitorLoggerConnection().CreateLogger("test"
 
-).LogCritical("cool"));
+// ).LogCritical("cool"));
 
 
 app.MapControllers();
