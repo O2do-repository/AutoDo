@@ -104,16 +104,14 @@ public IActionResult GetAllProfils()
             };
             
             var updatedProfile = _profileService.UpdateProfile(profile);
-
+            
             var matchings = await _matchingService.MatchingsForProfileAsync(updatedProfile);
 
             return Ok(updatedProfile);
         }
         catch (Exception ex)
         {
-            return ex.Message.Contains("n'existe pas") 
-                ? NotFound(ex.Message) 
-                : BadRequest(ex.Message);
+             return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
         }
     }
 

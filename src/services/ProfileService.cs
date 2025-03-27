@@ -19,8 +19,9 @@ public class ProfileService : IProfileService
     // Add a new profile 
     public Profile AddProfile(Profile profile)
     {
+        // se renseinger sur singleordefault 
         var consultant = _context.Consultants
-            .FirstOrDefault(c => c.ConsultantUuid.ToString() == profile.ConsultantUuid.ToString());
+            .SingleOrDefault(c => c.ConsultantUuid.ToString() == profile.ConsultantUuid.ToString());
 
 
         if (consultant == null)

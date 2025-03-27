@@ -106,7 +106,7 @@ public class MatchingServiceTest
         Assert.All(result, m => Assert.True(m.Score >= 0));
     }
 
-            [Fact]
+    [Fact]
     public async Task Test_MatchingsForProfileAsync_Should_Erase_Existent_Matchings()
     {
         // Arrange

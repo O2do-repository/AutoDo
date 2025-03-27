@@ -27,4 +27,17 @@ public class RfpController : ControllerBase
             return StatusCode(500, new { message = "Une erreur est survenue.", error = ex.Message });
         }
     }
+    [HttpPost("import")]
+    public IActionResult ImportRfpFromJson()
+    {
+        try
+        {
+            _rfpService.LoadRfpFromJson();
+            return Ok("Importation des RFPs réussie !");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Erreur : {ex.Message}");
+        }
+    }
 }
