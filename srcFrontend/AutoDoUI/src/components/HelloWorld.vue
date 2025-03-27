@@ -66,7 +66,6 @@ const headers = ref([
   { key: 'rfpPriority', title: 'Priorité', align: 'center' as const },
   { key: 'workplace', title: 'Lieu', align: 'start' as const },
   { key: 'rfpUrl', title: 'Lien', align: 'center' as const, sortable: false },
-  { key: 'actions', title: 'Actions', align: 'center' as const, sortable: false },
 ]);
 
 const fetchRFPList = async () => {

@@ -10,6 +10,7 @@ declare module 'vue' {
     AddProfile: typeof import('./components/Profile/AddProfile.vue')['default']
     DeleteProfile: typeof import('./components/Profile/DeleteProfile.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    ListConsultant: typeof import('./components/Consultant/ListConsultant.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SideMenu: typeof import('./components/utils/SideMenu.vue')['default']

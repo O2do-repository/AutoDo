@@ -14,13 +14,6 @@ public class AutoDoDbContext : DbContext
     
 
     private readonly bool _useInMemory;
-    private readonly IConnectionStringProvider _connectionStringProvider;
-
-    public AutoDoDbContext(IConnectionStringProvider connectionStringProvider)
-    {
-        _connectionStringProvider = connectionStringProvider;
-        _useInMemory = false;
-    }
 
     public AutoDoDbContext(DbContextOptions<AutoDoDbContext> options) : base(options)
     {
