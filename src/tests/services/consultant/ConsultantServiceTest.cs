@@ -28,7 +28,7 @@ public class ConsultantServiceTest
                 AvailabilityDate = new DateTime(2024, 5, 1),
                 ExpirationDateCI = new DateTime(2025, 5, 1),
                 Intern = false,
-                enterprise = Enterprise.O2do, // ✅ Utilisation correcte de l'Enum
+                enterprise = Enterprise.O2do,
                 Profiles = new List<Profile>()
             },
             new Consultant
@@ -41,7 +41,7 @@ public class ConsultantServiceTest
                 AvailabilityDate = new DateTime(2024, 6, 1),
                 ExpirationDateCI = new DateTime(2025, 6, 1),
                 Intern = true,
-                enterprise = Enterprise.MI6, // ✅ Utilisation correcte de l'Enum
+                enterprise = Enterprise.MI6,
                 Profiles = new List<Profile>()
             }
         });
