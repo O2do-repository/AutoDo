@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddConsultant: typeof import('./components/Consultant/AddConsultant.vue')['default']
     AddProfile: typeof import('./components/Profile/AddProfile.vue')['default']
     DeleteProfile: typeof import('./components/Profile/DeleteProfile.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']

@@ -64,6 +64,8 @@ public class AutoDoDbContext : DbContext
             entity.Property(c => c.Phone).HasColumnName("Phone").HasMaxLength(50).IsRequired();
             entity.Property(c => c.AvailabilityDate).HasColumnName("AvailabilityDate").IsRequired();
             entity.Property(c => c.ExpirationDateCI).HasColumnName("ExpirationDateCI").IsRequired();
+            entity.Property(c => c.Picture).HasColumnName("Picture").IsRequired();
+            entity.Property(c => c.CopyCI).HasColumnName("CopyCI").IsRequired();
 
             entity.HasMany(c => c.Profiles)
                 .WithOne(p => p.Consultant)

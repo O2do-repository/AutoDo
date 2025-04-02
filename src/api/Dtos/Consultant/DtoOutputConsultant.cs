@@ -8,4 +8,6 @@ public class DtoOutputConsultant{
     public string Surname { get; set; }
     public Enterprise enterprise {get; set;}
     public string Phone { get; set; }
+    public string Picture{get;set;}
+    public string CopyCI {get;set;}
 }

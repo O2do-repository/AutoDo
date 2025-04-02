@@ -44,7 +44,6 @@ public IActionResult GetAllProfils()
             return BadRequest("Le profil est invalide ou le consultant est manquant.");
         }
 
-        Console.WriteLine($"Consultant UUID reçu : {profileDto.ConsultantUuid}");
         try
         {
             if (profileDto.ConsultantUuid == Guid.Empty)

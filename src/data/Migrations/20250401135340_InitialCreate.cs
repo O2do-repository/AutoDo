@@ -23,7 +23,9 @@ namespace data.Migrations
                     Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     enterprise = table.Column<int>(type: "int", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Picture = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CopyCI = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,16 +49,16 @@ namespace data.Migrations
                 columns: table => new
                 {
                     RFPUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Reference = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     DeadlineDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DescriptionBrut = table.Column<string>(type: "nvarchar(max)", maxLength: 5000, nullable: false),
                     ExperienceLevel = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RfpPriority = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PublicationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Skills = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     JobTitle = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     RfpUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Workplace = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Reference = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                    PublicationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RfpPriority = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

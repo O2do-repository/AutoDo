@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    [Migration("20250319102146_InitialCreate")]
+    [Migration("20250401135340_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,6 +34,11 @@ namespace data.Migrations
                     b.Property<DateTime>("AvailabilityDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("AvailabilityDate");
+
+                    b.Property<string>("CopyCI")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CopyCI");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -60,6 +65,11 @@ namespace data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Phone");
+
+                    b.Property<string>("Picture")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Picture");
 
                     b.Property<string>("Surname")
                         .IsRequired()
