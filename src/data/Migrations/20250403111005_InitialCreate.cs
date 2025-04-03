@@ -22,7 +22,7 @@ namespace data.Migrations
                     Intern = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    enterprise = table.Column<int>(type: "int", nullable: false),
+                    enterprise = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Picture = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CopyCI = table.Column<string>(type: "nvarchar(max)", nullable: false)

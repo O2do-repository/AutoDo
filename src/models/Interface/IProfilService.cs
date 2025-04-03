@@ -3,4 +3,5 @@ public interface IProfileService{
     Profile AddProfile(Profile profile);
     Profile UpdateProfile(Profile updatedProfile);
     void DeleteProfile(Guid profileUuid);
+    List<Profile> GetProfilesByConsultant(Guid consultantUuid);
 }

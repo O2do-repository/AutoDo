@@ -28,6 +28,8 @@ public class ConsultantServiceTest
                 AvailabilityDate = new DateTime(2024, 5, 1),
                 ExpirationDateCI = new DateTime(2025, 5, 1),
                 Intern = false,
+                Picture = "http://localhost:8888/",
+                CopyCI = "http://localhost:8888/",
                 enterprise = Enterprise.O2do,
                 Profiles = new List<Profile>()
             },
@@ -42,6 +44,8 @@ public class ConsultantServiceTest
                 ExpirationDateCI = new DateTime(2025, 6, 1),
                 Intern = true,
                 enterprise = Enterprise.MI6,
+                Picture = "http://localhost:8888/",
+                CopyCI = "http://localhost:8888/",
                 Profiles = new List<Profile>()
             }
         });
@@ -92,5 +96,76 @@ public class ConsultantServiceTest
         Assert.NotNull(result);
         Assert.IsType<List<Consultant>>(result);
         Assert.Empty(result);
+    }
+    [Fact]
+    public void Test_AddConsultant_Should_Add_Consultant()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var consultantService = new ConsultantService(context);
+        var newConsultant = new Consultant
+        {
+            ConsultantUuid = Guid.NewGuid(),
+            Name = "John",
+            Surname = "Doe",
+            Email = "john.doe@example.com",
+            Phone = "123456789",
+            AvailabilityDate = new DateTime(2024, 7, 1),
+            ExpirationDateCI = new DateTime(2025, 7, 1),
+            Intern = false,
+            Picture = "http://localhost:8888/",
+            CopyCI = "http://localhost:8888/",
+            enterprise = Enterprise.O2do,
+            Profiles = new List<Profile>()
+        };
+
+        // Act
+        var result = consultantService.AddConsultant(newConsultant);
+        
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEqual(Guid.Empty, result.ConsultantUuid);
+        Assert.Equal("John", result.Name);
+        Assert.Equal("Doe", result.Surname);
+        Assert.Equal("john.doe@example.com", result.Email);
+        Assert.Equal("123456789", result.Phone);
+        Assert.Equal("http://localhost:8888/", result.CopyCI);
+        Assert.Equal("http://localhost:8888/", result.Picture);
+        Assert.NotEqual(default(DateTime), result.ExpirationDateCI);
+        
+        var dbConsultant = context.Consultants.Find(result.ConsultantUuid);
+        Assert.NotNull(dbConsultant);
+    }
+
+    [Fact]
+    public void Test_GetConsultantById_Should_Return_Consultant()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var consultantService = new ConsultantService(context);
+        var existingConsultant = context.Consultants.First();
+
+        // Act
+        var result = consultantService.GetConsultantById(existingConsultant.ConsultantUuid);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(existingConsultant.ConsultantUuid, result.ConsultantUuid);
+        Assert.Equal(existingConsultant.Name, result.Name);
+        Assert.Equal(existingConsultant.Email, result.Email);
+    }
+
+    [Fact]
+    public void Test_GetConsultantById_Should_Throw_Exception_When_Not_Found()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var consultantService = new ConsultantService(context);
+        var nonExistentUuid = Guid.NewGuid();
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() => consultantService.GetConsultantById(nonExistentUuid));
+        Assert.Contains($"Aucun consultant trouvé avec l'UUID {nonExistentUuid}", exception.Message);
     }
 }

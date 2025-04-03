@@ -9,7 +9,9 @@ declare module 'vue' {
   export interface GlobalComponents {
     AddConsultant: typeof import('./components/Consultant/AddConsultant.vue')['default']
     AddProfile: typeof import('./components/Profile/AddProfile.vue')['default']
+    ConsultantInfo: typeof import('./components/Consultant/ConsultantInfo.vue')['default']
     DeleteProfile: typeof import('./components/Profile/DeleteProfile.vue')['default']
+    GoBackBtn: typeof import('./components/utils/GoBackBtn.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     ListConsultant: typeof import('./components/Consultant/ListConsultant.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

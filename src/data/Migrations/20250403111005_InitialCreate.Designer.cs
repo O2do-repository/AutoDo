@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    [Migration("20250401135340_InitialCreate")]
+    [Migration("20250403111005_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -77,8 +77,9 @@ namespace data.Migrations
                         .HasColumnType("nvarchar(150)")
                         .HasColumnName("Surname");
 
-                    b.Property<int>("enterprise")
-                        .HasColumnType("int");
+                    b.Property<string>("enterprise")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ConsultantUuid");
 

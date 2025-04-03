@@ -152,7 +152,9 @@ public class ProfileTest
             Name = "John Doe",
             Email = "john.doe@example.com", 
             Phone = "1234567890",          
-            Surname = "Doe"                 
+            Surname = "Doe",
+            Picture =  "https://example.com/cv1.pdf",
+            CopyCI = "https://example.com/cv1.pdf  "      
         });
         context.SaveChanges();  
 
@@ -192,7 +194,9 @@ public class ProfileTest
             Name = "John Doe",
             Email = "john.doe@example.com", 
             Phone = "1234567890",          
-            Surname = "Doe"                 
+            Surname = "Doe"   ,
+            Picture =  "https://example.com/cv1.pdf",
+            CopyCI = "https://example.com/cv1.pdf  "                    
         });
         context.SaveChanges();  
 
@@ -320,6 +324,55 @@ public class ProfileTest
         // Act & Assert
         var exception = Assert.Throws<Exception>(() => profileService.DeleteProfile(nonExistingProfileUuid));
         Assert.Contains("n'existe pas", exception.Message);
+    }
+
+    [Fact]
+    public void Test_GetProfilesByConsultant_Should_Return_Profiles_When_Consultant_Has_Profiles()
+    {
+        
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context); // Seed some data
+        var consultantUuid = context.Profiles.First().ConsultantUuid;
+        var profileService = new ProfileService(context);
+
+        // Act
+        var result = profileService.GetProfilesByConsultant(consultantUuid);
+
+        // Assert
+        Assert.NotNull(result);  
+        Assert.NotEmpty(result);
+        Assert.All(result, p => Assert.Equal(consultantUuid, p.ConsultantUuid)); 
+    }
+    [Fact]
+    public void Test_GetProfilesByConsultant_Should_Return_Empty_List_When_Consultant_Has_No_Profiles()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var consultantUuid = Guid.NewGuid(); // UUID d'un consultant qui n'a pas de profils associés
+        var profileService = new ProfileService(context);
+
+        // Act
+        var result = profileService.GetProfilesByConsultant(consultantUuid);
+
+        // Assert
+        Assert.NotNull(result);  
+        Assert.Empty(result);      
+    }
+    [Fact]
+    public void Test_GetProfilesByConsultant_Should_Return_Empty_List_When_Consultant_Does_Not_Exist()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var nonExistentConsultantUuid = Guid.NewGuid();
+        var profileService = new ProfileService(context);
+
+        // Act
+        var result = profileService.GetProfilesByConsultant(nonExistentConsultantUuid);
+
+        // Assert
+        Assert.NotNull(result);    
+        Assert.Empty(result);     
     }
 
 

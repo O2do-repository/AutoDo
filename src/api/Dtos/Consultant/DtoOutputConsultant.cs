@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 public class DtoOutputConsultant{
     public Guid ConsultantUuid { get; set; }
     public string Email { get; set; }
@@ -6,6 +8,7 @@ public class DtoOutputConsultant{
     public bool Intern {get; set;} = true;
     public string Name { get; set; }
     public string Surname { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]   
     public Enterprise enterprise {get; set;}
     public string Phone { get; set; }
     public string Picture{get;set;}

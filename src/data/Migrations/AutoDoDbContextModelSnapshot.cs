@@ -74,8 +74,9 @@ namespace data.Migrations
                         .HasColumnType("nvarchar(150)")
                         .HasColumnName("Surname");
 
-                    b.Property<int>("enterprise")
-                        .HasColumnType("int");
+                    b.Property<string>("enterprise")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ConsultantUuid");
 

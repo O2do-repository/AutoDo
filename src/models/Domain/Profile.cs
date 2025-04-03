@@ -10,8 +10,11 @@ public class Profile
     [ForeignKey("ConsultantUuid")]
     public Guid ConsultantUuid{get;set;}
     public int Ratehour { get; set; }
+    [Required]
     public string CV { get; set; }
+    [Required]
     public DateTime CVDate { get; set; }
+    [Required]
     public string JobTitle { get; set; }
     public Experience ExperienceLevel { get; set; }
     public List<String> Skills { get; set; }

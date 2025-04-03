@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import GoBackBtn from '@/components/utils/GoBackBtn.vue'; 
 
 interface Profile {
     profileUuid: string;
@@ -58,7 +59,7 @@ const submitProfile = async () => {
         }
 
         setTimeout(() => {
-            router.push('/table-profile');
+            router.go(-1);
         }, 1000);
 
     } catch (error) {
@@ -69,6 +70,7 @@ const submitProfile = async () => {
 
 <template>
     <v-container>
+        <GoBackBtn/>
 
 
         <v-alert closable v-if="errorMessage" type="error" variant="outlined">
