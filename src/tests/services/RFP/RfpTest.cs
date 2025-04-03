@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -131,4 +132,140 @@ public class RfpTest
         // Assert
         Assert.Empty(result);
     }
+
+    [Fact]
+    public void Test_LoadRfpFromJson_Should_Throw_FileNotFoundException_When_File_Not_Found()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var rfpService = new RfpService(context, Mock.Of<IMatchingService>());
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "nonExistentFile.json");
+
+        // Mocking le fichier introuvable
+        typeof(RfpService).GetField("_jsonFilePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(rfpService, jsonFilePath);
+
+        // Act & Assert
+        Assert.Throws<FileNotFoundException>(() => rfpService.LoadRfpFromJson());
+    }
+
+    [Fact]
+    public void Test_LoadRfpFromJson_Should_Add_New_Rfps()
+    {
+        var context = GetInMemoryDbContext();
+        var jsonContent =  @"
+        [
+            {
+                ""Id"": ""VRT345923"",
+                ""SubmissionDeadline"": ""2025-04-02T00:00:00"",
+                ""Skills"": [""Aantoonbare ervaring als Team Coach""],
+                ""RawContent"": ""Teamcoach Radio en Audio (freelance)"",
+                ""Name"": ""Teamcoach Radio en Audio team (freelance)"",
+                ""RfpPriority"": ""not provided"",
+                ""Description"": ""blabla"",
+                ""Url"": ""https://customer.connecting-expertise.com/index.php?event=seller.selectRfq&id=174308220566007346"",
+                ""PlaceToWork"": ""OMROEPCENTRUM VRT (AUGUSTE REYERSLAAN, 1043 VRT, BELGIQUE)""
+            }
+        ]"; 
+
+
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "testRfp.json");
+        File.WriteAllText(jsonFilePath, jsonContent);
+
+        var rfpService = new RfpService(context, Mock.Of<IMatchingService>());
+        typeof(RfpService).GetField("_jsonFilePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(rfpService, jsonFilePath);
+
+        rfpService.LoadRfpFromJson();
+
+        var rfp = context.Rfps.SingleOrDefault(r => r.Reference == "VRT345923");
+        Assert.NotNull(rfp);
+    }
+    [Fact]
+    public void Test_LoadRfpFromJson_Should_Update_Existing_Rfp()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var existingRfp = new RFP
+        {
+            RFPUuid = Guid.NewGuid(),
+            Reference = "VRT345923",
+            JobTitle = "Old Title",
+            DeadlineDate = DateTime.Today.AddDays(10),
+            RfpUrl = "https://old-url.com",
+            Workplace = "Old Location",
+            Skills = new List<string> { "Java","JavaScript" },
+            DescriptionBrut="aaa",
+            RfpPriority="High"
+        };
+        context.Rfps.Add(existingRfp);
+        context.SaveChanges();
+
+        var jsonContent = @"
+        [
+            {
+                ""Id"": ""VRT345923"",
+                ""SubmissionDeadline"": ""2025-04-10T00:00:00"",
+                ""RawContent"": ""Updated content"",
+                ""Name"": ""Updated Job Title"",
+                ""Url"": ""https://new-url.com"",
+                ""PlaceToWork"": ""New Location"",
+                ""Skills"": [] 
+            }
+        ]";
+        
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "testUpdateRfp.json");
+        File.WriteAllText(jsonFilePath, jsonContent);
+
+        var rfpService = new RfpService(context, Mock.Of<IMatchingService>());
+        typeof(RfpService).GetField("_jsonFilePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(rfpService, jsonFilePath);
+
+        // Act
+        rfpService.LoadRfpFromJson();
+
+        // Assert
+        var updatedRfp = context.Rfps.SingleOrDefault(r => r.Reference == "VRT345923");
+        Assert.NotNull(updatedRfp);
+        Assert.Equal("Updated Job Title", updatedRfp.JobTitle);
+        Assert.Equal("https://new-url.com", updatedRfp.RfpUrl);
+        Assert.Equal("New Location", updatedRfp.Workplace);
+    }
+
+
+
+    [Fact]
+    public async Task Test_ImportRfpAndGenerateMatchingsAsync_Should_Rollback_On_Error()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var mockMatchingService = new Mock<IMatchingService>();
+        mockMatchingService.Setup(m => m.MatchingsForRfpsAsync(It.IsAny<List<RFP>>()))
+            .ThrowsAsync(new Exception("Matching failed"));
+
+        var rfpService = new RfpService(context, mockMatchingService.Object);
+        var jsonContent = @"
+        [
+            {
+                ""Id"": ""RFP-ERROR"",
+                ""SubmissionDeadline"": ""2025-05-01T00:00:00"",
+                ""RawContent"": ""Error case"",
+                ""Name"": ""Error Job"",
+                ""Url"": ""https://error-test.com"",
+                ""PlaceToWork"": ""Nowhere""
+            }
+        ]";
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "testError.json");
+        File.WriteAllText(jsonFilePath, jsonContent);
+
+        typeof(RfpService).GetField("_jsonFilePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(rfpService, jsonFilePath);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await rfpService.ImportRfpAndGenerateMatchingsAsync());
+
+        // Vérifier que la base ne contient aucun RFP ajouté
+        var count = await context.Rfps.CountAsync();
+        Assert.Equal(0, count);
+    }
+
+
 }

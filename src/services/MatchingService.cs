@@ -102,7 +102,6 @@ public class MatchingService :IMatchingService
     }
     public async Task<List<Matching>> MatchingsForRfpsAsync(List<RFP> rfps)
     {
-        // Récupérer tous les profils en une seule requête
         var profiles = await _context.Profiles.ToListAsync();
         
         var newMatchings = new List<Matching>();
@@ -119,7 +118,6 @@ public class MatchingService :IMatchingService
                 StatutMatching = StatutMatching.New
             }).ToList();
 
-            // Supprimer les anciens matchings du profil liés aux nouvelles RFPs
             var rfpUuids = rfps.Select(rfp => rfp.RFPUuid).ToHashSet();
             _context.Matchings.RemoveRange(_context.Matchings.Where(m => m.ProfileUuid == profile.ProfileUuid && rfpUuids.Contains(m.RfpUuid)));
 
