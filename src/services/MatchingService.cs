@@ -81,7 +81,7 @@ public class MatchingService :IMatchingService
     }
     public async Task<Matching> UpdateMatchingAsync(Guid id,Matching updatedMatching)
     {
-        var matching = await _context.Matchings.FirstOrDefaultAsync(m => m.MatchingUuid == id);
+        var matching = await _context.Matchings.SingleOrDefaultAsync(m => m.MatchingUuid == id);
 
         if (matching == null)
         {
@@ -100,8 +100,40 @@ public class MatchingService :IMatchingService
         await _context.SaveChangesAsync();
         return matching;
     }
+    public async Task<List<Matching>> MatchingsForRfpsAsync(List<RFP> rfps)
+    {
+        // Récupérer tous les profils en une seule requête
+        var profiles = await _context.Profiles.ToListAsync();
+        
+        var newMatchings = new List<Matching>();
+        
+        foreach (var profile in profiles)
+        {
+            var matchingsForProfile = rfps.Select(rfp => new Matching
+            {
+                MatchingUuid = Guid.NewGuid(),
+                ProfileUuid = profile.ProfileUuid,
+                RfpUuid = rfp.RFPUuid,
+                Score = CalculateMatchingScore(profile, rfp),
+                Comment = "",
+                StatutMatching = StatutMatching.New
+            }).ToList();
 
+            // Supprimer les anciens matchings du profil liés aux nouvelles RFPs
+            var rfpUuids = rfps.Select(rfp => rfp.RFPUuid).ToHashSet();
+            _context.Matchings.RemoveRange(_context.Matchings.Where(m => m.ProfileUuid == profile.ProfileUuid && rfpUuids.Contains(m.RfpUuid)));
 
-    
+            newMatchings.AddRange(matchingsForProfile);
+        }
+
+        if (newMatchings.Count > 0)
+            _context.Matchings.AddRange(newMatchings);
+        
+        await _context.SaveChangesAsync();
+
+        return newMatchings;
+    }
+
+ 
 
 }

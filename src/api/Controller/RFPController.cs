@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 public class RfpController : ControllerBase
 {
     private readonly IRfpService _rfpService;
+    private readonly IMatchingService _matchingService;
 
-    public RfpController(IRfpService rfpService)
+    public RfpController(IRfpService rfpService, IMatchingService matchingService)
     {
         _rfpService = rfpService;
+        _matchingService = matchingService;
     }
 
     [HttpGet]
@@ -28,12 +30,13 @@ public class RfpController : ControllerBase
         }
     }
     [HttpPost("import")]
-    public IActionResult ImportRfpFromJson()
+    public async Task<IActionResult> ImportRfpFromJson()
     {
         try
         {
-            _rfpService.LoadRfpFromJson();
-            return Ok("Importation des RFPs réussie !");
+            await _rfpService.ImportRfpAndGenerateMatchingsAsync();
+
+            return Ok("Importation des RFPs et génération des matchings réussie !");
         }
         catch (Exception ex)
         {

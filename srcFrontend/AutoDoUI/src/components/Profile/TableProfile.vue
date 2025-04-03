@@ -3,39 +3,60 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DeleteProfile from "./DeleteProfile.vue";
 
-
-
 interface Profile {
-  profileUuid: string,
+  profileUuid: string;
   consultantUuid: string;
   RateHour: number;
-  CV: string;
+  cv: string;
   CVDate: string;
   JobTitle: string;
   ExperienceLevel: string;
   skills: string[];
   keywords: string[];
 }
+interface Consultant {
+    consultantUuid: string;
 
-
+}
 const router = useRouter();
 const profiles = ref<Profile[]>([]);
 const error = ref<string | null>(null);
 const search = ref('');
-
 const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('');
+const consultantUuid = ref<string | null>(null);
 
+const consultant = ref<Consultant | null>(null);
+
+// Récupère les données du consultant depuis sessionStorage
+onMounted(() => {
+  const storedData = sessionStorage.getItem("selectedConsultant");
+  if (storedData) {
+    consultant.value = JSON.parse(storedData);
+    fetchProfiles(); // Récupère les profils dès que le consultant est récupéré
+  } else {
+    error.value = "Aucun consultant sélectionné.";
+  }
+});
+const goToAddProfile = () => {
+  if (consultant.value) {
+    // Stocke l'UUID du consultant dans sessionStorage
+    sessionStorage.setItem('selectedConsultantUuid', consultant.value.consultantUuid);
+
+    // Redirige vers la page d'ajout de profil
+    router.push('/add-profile');
+  } else {
+    error.value = "Aucun consultant sélectionné.";
+  }
+};
 
 const handleProfileDeleted = (payload: { message: string; color: string }) => {
   snackbarMessage.value = payload.message;
   snackbarColor.value = payload.color;
   snackbar.value = true;
-  fetchProfiles(); // Rafraîchir la liste après suppression
+  fetchProfiles();
 };
-
-
 
 const headers = ref([
   { key: 'jobTitle', title: 'Titre du poste', align: 'start' as const },
@@ -49,64 +70,69 @@ const headers = ref([
   { key: 'actionsSupp', title: 'Supprimer', align: 'center' as const }
 ]);
 
+// get profils by consultantUuid
 const fetchProfiles = async () => {
+  if (!consultant.value) {
+    error.value = "Aucun consultant trouvé.";
+    return;
+  }
+
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`);
-    if (!response.ok) {
-      throw new Error("Erreur lors de la récupération des profils");
-    }
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/consultant/${consultant.value.consultantUuid}`);
+    if (!response.ok) throw new Error('Erreur lors de la récupération des profils');
     const data = await response.json();
-    console.log("Données reçues :", data); 
-    profiles.value = Array.isArray(data) ? data : [data];
+    profiles.value = data;
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Une erreur est survenue";
   }
 };
 
+// Handle button to edit profil
 const editProfile = (profile: Profile) => {
   localStorage.setItem('selectedProfile', JSON.stringify(profile));
   router.push({ path: `/edit-profile/${profile.profileUuid}` });
 };
 
-
-
-onMounted(fetchProfiles);
 </script>
 
 <template>
   <v-container>
     <h1 class="text-center mb-6">Liste des Profils</h1>
-    
-    <v-btn  @click="$router.push('/add-profile')" color="primary" class="mb-4" >Ajouter un profil</v-btn>
+
+    <v-btn @click="goToAddProfile" color="primary" class="mb-4">Ajouter un profil</v-btn>
 
     <v-alert v-if="error" type="error" variant="outlined" class="mb-4">
       {{ error }}
     </v-alert>
 
-    <v-text-field v-model="search" label="Rechercher un profil" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line class="mb-4"></v-text-field>
+    <v-text-field
+      v-model="search"
+      label="Rechercher un profil"
+      prepend-inner-icon="mdi-magnify"
+      variant="outlined"
+      hide-details
+      single-line
+      class="mb-4"
+    ></v-text-field>
 
     <v-data-table :headers="headers" :items="profiles" :search="search" item-value="consultantUuid" class="elevation-2">
-      <template v-slot:item.CV="{ item }">
-        <a v-if="item.CV" :href="item.CV" target="_blank">Voir le CV</a>
+      <template v-slot:item.cv="{ item }">
+        <a v-if="item.cv && item.cv.trim() !== ''" :href="item.cv" target="_blank">Voir le CV</a>
         <span v-else>Non disponible</span>
       </template>
-
       <template v-slot:item.skills="{ item }">
-        {{ item.skills && item.skills.length ? item.skills.join(', ') : 'Aucune compétence' }}
+        {{ item.skills?.length ? item.skills.join(', ') : 'Aucune compétence' }}
       </template>
 
       <template v-slot:item.keywords="{ item }">
-        {{ item.keywords && item.keywords.length ? item.keywords.join(', ') : 'Aucun mot-clé' }}
+        {{ item.keywords?.length ? item.keywords.join(', ') : 'Aucun mot-clé' }}
       </template>
 
       <template v-slot:item.actions="{ item }">
         <v-btn color="primary" @click="editProfile(item)" icon="mdi-pencil" density="comfortable"></v-btn>
       </template>
       <template v-slot:item.actionsSupp="{ item }">
-        <DeleteProfile
-          :profileUuid="item.profileUuid"
-          @profileDeleted="handleProfileDeleted"
-        />
+        <DeleteProfile :profileUuid="item.profileUuid" @profileDeleted="handleProfileDeleted" />
       </template>
     </v-data-table>
 
@@ -114,17 +140,16 @@ onMounted(fetchProfiles);
       Aucun profil disponible.
     </v-alert>
   </v-container>
+
   <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
     {{ snackbarMessage }}
   </v-snackbar>
-
 </template>
 
 <style scoped>
 .v-container {
   margin: auto;
 }
-
 
 a {
   text-decoration: none;

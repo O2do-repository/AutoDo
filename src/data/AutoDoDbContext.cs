@@ -63,7 +63,11 @@ public class AutoDoDbContext : DbContext
             entity.Property(c => c.Surname).HasColumnName("Surname").HasMaxLength(150).IsRequired();
             entity.Property(c => c.Phone).HasColumnName("Phone").HasMaxLength(50).IsRequired();
             entity.Property(c => c.AvailabilityDate).HasColumnName("AvailabilityDate").IsRequired();
-            entity.Property(c => c.ExpirationDateCI).HasColumnName("ExpirationDateCI").IsRequired();
+            entity.Property(c => c.ExpirationDateCI).HasColumnName("ExpirationDateCI");
+            entity.Property(c => c.Picture).HasColumnName("Picture");
+            entity.Property(c => c.CopyCI).HasColumnName("CopyCI").IsRequired();
+            entity.Property(c => c.enterprise)
+                .HasConversion(x => x.ToString(), x => (Enterprise)Enum.Parse(typeof(Enterprise), x));
 
             entity.HasMany(c => c.Profiles)
                 .WithOne(p => p.Consultant)
@@ -78,8 +82,8 @@ public class AutoDoDbContext : DbContext
             entity.ToTable("Profile");
             entity.HasKey(p => p.ProfileUuid);
             entity.Property(p => p.ProfileUuid).HasColumnName("ProfileUuid").IsRequired();
-            entity.Property(p => p.Ratehour).HasColumnName("Ratehour").IsRequired();
-            entity.Property(p => p.CV).HasColumnName("CV").HasMaxLength(500);
+            entity.Property(p => p.Ratehour).HasColumnName("Ratehour");
+            entity.Property(p => p.CV).HasColumnName("CV").HasMaxLength(500).IsRequired();
             entity.Property(p => p.CVDate).HasColumnName("CVDate").IsRequired();
             entity.Property(p => p.JobTitle).HasColumnName("JobTitle").HasMaxLength(150).IsRequired();
             entity.Property(p => p.ExperienceLevel)

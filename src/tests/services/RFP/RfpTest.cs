@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,7 +69,12 @@ public class RfpTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var rfpService = new RfpService(context);
+                
+        // Mocking IMatchingService
+        var mockMatchingService = new Mock<IMatchingService>();
+        
+        // Instancier le service avec le mock de IMatchingService
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
         // Act
         var result = await rfpService.FilterRfpDeadlineNotReachedYet();
@@ -83,7 +89,10 @@ public class RfpTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var rfpService = new RfpService(context);
+        var mockMatchingService = new Mock<IMatchingService>();
+
+        var rfpService = new RfpService(context, mockMatchingService.Object);
+
 
         // Act
         var result = await rfpService.FilterRfpDeadlineNotReachedYet();
@@ -111,7 +120,10 @@ public class RfpTest
             Workplace = "On-site"
         }); 
         context.SaveChanges();
-        var rfpService = new RfpService(context);
+        var mockMatchingService = new Mock<IMatchingService>();
+
+        // Instancier le service avec le mock de IMatchingService
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
         // Act
         var result = await rfpService.FilterRfpDeadlineNotReachedYet();

@@ -3,4 +3,5 @@ public interface IMatchingService{
     Task<List<Matching>> MatchingsForProfileAsync(Profile profile);
     Task<List<Matching>> GetAllMatchingsAsync();
     Task<Matching> UpdateMatchingAsync(Guid id,Matching updatedMatching);
+    Task<List<Matching>> MatchingsForRfpsAsync(List<RFP> rfps);
 }

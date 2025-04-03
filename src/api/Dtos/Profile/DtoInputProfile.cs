@@ -6,7 +6,6 @@ public class DtoInputProfile
     [Required]
     public Guid ConsultantUuid { get; set; }
 
-    [Required]
     [Range(0, int.MaxValue, ErrorMessage = "Le taux horaire ne peut pas être négatif.")]
     public int RateHour { get; set; }
 
@@ -20,7 +19,6 @@ public class DtoInputProfile
     [Required]
     public string JobTitle { get; set; }
 
-    [Required]
     [JsonConverter(typeof(JsonStringEnumConverter))] 
     public Experience ExperienceLevel { get; set; }
 

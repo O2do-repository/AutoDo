@@ -15,6 +15,21 @@ public class ProfileService : IProfileService
     {
         return _context.Profiles.ToList();
     }
+    public List<Profile> GetProfilesByConsultant(Guid consultantUuid)
+    {
+        var profiles = _context.Profiles
+            .Where(p => p.ConsultantUuid == consultantUuid)
+            .ToList();
+
+        if (!profiles.Any())
+        {
+
+            return new List<Profile>();
+        }
+
+        return profiles;
+    }
+
 
     // Add a new profile 
     public Profile AddProfile(Profile profile)

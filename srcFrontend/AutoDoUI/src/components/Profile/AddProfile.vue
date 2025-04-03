@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import GoBackBtn from '@/components/utils/GoBackBtn.vue'; 
 
 interface Profile {
   consultantUuid: string;
@@ -14,7 +15,7 @@ interface Profile {
 }
 
 const profile = ref<Profile>({
-  consultantUuid: '50bcf3a7-d5d9-4017-9df4-f0da847bfe88',
+  consultantUuid: '', // Initialement vide, sera rempli après récupération de l'UUID
   RateHour: null,
   CV: '',
   CVDate: '',
@@ -28,11 +29,19 @@ const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
 const availableSkills: string[] = ['C#', 'ASP.NET', 'Vue.js', 'SQL'];
 const availableKeywords: string[] = ['Backend', 'Frontend', 'API'];
 
-
 const router = useRouter();
 
+// Récupère l'UUID du consultant depuis sessionStorage
+onMounted(() => {
+  const storedUuid = sessionStorage.getItem('selectedConsultantUuid');
+  if (storedUuid) {
+    profile.value.consultantUuid = storedUuid; // Met à jour l'UUID du consultant dans le profil
+  } else {
+    console.error('Aucun consultant sélectionné');
+  }
+});
+
 const submitProfile = async () => {
-  
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
       method: 'POST',
@@ -45,7 +54,7 @@ const submitProfile = async () => {
     }
 
     setTimeout(() => {
-      router.push('/table-profile'); 
+      router.go(-1);
     }, 1000);
 
   } catch (error) {
@@ -56,7 +65,9 @@ const submitProfile = async () => {
 
 <template>
   <v-container>
+    
     <v-card class="pa-4">
+      <GoBackBtn/>
       <v-card-title>Nouveau Profil</v-card-title>
       <v-card-text>
         <v-text-field label="Job Title *" v-model="profile.JobTitle" required></v-text-field>
@@ -89,4 +100,3 @@ const submitProfile = async () => {
     </v-card>
   </v-container>
 </template>
-  

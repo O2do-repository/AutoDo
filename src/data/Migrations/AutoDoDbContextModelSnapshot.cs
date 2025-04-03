@@ -32,6 +32,11 @@ namespace data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("AvailabilityDate");
 
+                    b.Property<string>("CopyCI")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CopyCI");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -58,14 +63,20 @@ namespace data.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Phone");
 
+                    b.Property<string>("Picture")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Picture");
+
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)")
                         .HasColumnName("Surname");
 
-                    b.Property<int>("enterprise")
-                        .HasColumnType("int");
+                    b.Property<string>("enterprise")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ConsultantUuid");
 

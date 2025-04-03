@@ -33,6 +33,31 @@ public IActionResult GetAllProfils()
 
         return Ok(outputProfiles);
     }
+    [HttpGet("consultant/{consultantUuid}")]
+    public IActionResult GetProfilesByConsultant(Guid consultantUuid)
+    {
+        var profiles = _profileService.GetProfilesByConsultant(consultantUuid);
+
+        if (profiles == null || !profiles.Any())
+        {
+            return NotFound(new { message = "Aucun profil trouvé pour ce consultant." });
+        }
+
+        var outputProfiles = profiles.Select(profile => new DtoOutputProfile
+        {
+            ProfileUuid = profile.ProfileUuid,
+            ConsultantUuid = profile.ConsultantUuid,
+            RateHour = profile.Ratehour,
+            Cv = profile.CV,
+            CvDate = profile.CVDate,
+            JobTitle = profile.JobTitle,
+            ExperienceLevel = profile.ExperienceLevel,
+            Skills = profile.Skills ?? new List<string>(),
+            Keywords = profile.Keywords ?? new List<string>()
+        }).ToList();
+
+        return Ok(outputProfiles);
+    }
 
 
 
@@ -44,7 +69,6 @@ public IActionResult GetAllProfils()
             return BadRequest("Le profil est invalide ou le consultant est manquant.");
         }
 
-        Console.WriteLine($"Consultant UUID reçu : {profileDto.ConsultantUuid}");
         try
         {
             if (profileDto.ConsultantUuid == Guid.Empty)

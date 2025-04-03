@@ -19,10 +19,7 @@
               <v-list-item-title>Consultant</v-list-item-title>
             </v-list-item>
           </template>
-  
-          <v-list-item to="/table-profile" link >
-            <v-list-item-title class="text-primary">Liste des profils</v-list-item-title>
-          </v-list-item>
+
           <v-list-item to="/consultant/list-consultant" link >
             <v-list-item-title class="text-primary">Liste des consultants</v-list-item-title>
           </v-list-item>
