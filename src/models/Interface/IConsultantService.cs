@@ -3,4 +3,5 @@ public interface IConsultantService{
     Consultant AddConsultant(Consultant consultant);
     Consultant GetConsultantById(Guid consultantUuid);
     void DeleteConsultant(Guid consultantUuid);
+    Consultant UpdateConsultant(Consultant updatedConsultant);
 }

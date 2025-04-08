@@ -93,6 +93,40 @@ public class ConsultantController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+    [HttpPut]
+    public async Task<IActionResult> UpdateConsultant([FromBody] DtoUpdateConsultant ConsultantDto)
+    {
+        if (ConsultantDto == null)
+        {
+            return BadRequest("Données de consultants invalides.");
+        }
+        
+        try
+        {
+            var Consultant = new Consultant
+            {
+                ConsultantUuid = ConsultantDto.ConsultantUuid,
+                Email = ConsultantDto.Email,
+                AvailabilityDate = ConsultantDto.AvailabilityDate,
+                ExpirationDateCI = ConsultantDto.ExpirationDateCI,
+                Intern = ConsultantDto.Intern,
+                Name = ConsultantDto.Name,
+                Surname = ConsultantDto.Surname,
+                CopyCI = ConsultantDto.CopyCI,
+                Picture = ConsultantDto.Picture,
+                enterprise = ConsultantDto.enterprise,
+                Phone = ConsultantDto.Phone,
+            };
+            
+            var updatedConsultant = _consultantService.UpdateConsultant(Consultant);
+            
 
+            return Ok(updatedConsultant);
+        }
+        catch (Exception ex)
+        {
+             return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+        }
+    }
 
 }

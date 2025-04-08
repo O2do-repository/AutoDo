@@ -58,7 +58,7 @@ public Consultant AddConsultant(Consultant consultant)
         return consultant;
     }
 
-        // Delete Consultant
+    // Delete Consultant
     public void DeleteConsultant(Guid consultantUuid)
     {
         var existingConsultant = _context.Consultants.SingleOrDefault(c => c.ConsultantUuid == consultantUuid);
@@ -70,6 +70,35 @@ public Consultant AddConsultant(Consultant consultant)
 
         _context.Consultants.Remove(existingConsultant);
         _context.SaveChanges();
+    }
+
+    // Update Consultant 
+    public Consultant UpdateConsultant(Consultant updatedConsultant)
+    {
+        var existingConsultant = _context.Consultants
+            .FirstOrDefault(p => p.ConsultantUuid == updatedConsultant.ConsultantUuid);
+        
+        if (existingConsultant == null)
+        {
+            throw new Exception($"Le consultant avec UUID {updatedConsultant.ConsultantUuid} n'existe pas.");
+        }
+
+        existingConsultant.ConsultantUuid = updatedConsultant.ConsultantUuid;
+        existingConsultant.Email = updatedConsultant.Email;
+        existingConsultant.AvailabilityDate = updatedConsultant.AvailabilityDate;
+        existingConsultant.ExpirationDateCI = updatedConsultant.ExpirationDateCI;
+        existingConsultant.Intern = updatedConsultant.Intern;
+        existingConsultant.Name = updatedConsultant.Name;
+        existingConsultant.Surname = updatedConsultant.Surname;
+        existingConsultant.Phone = updatedConsultant.Phone;
+        existingConsultant.Picture = updatedConsultant.Picture;
+        existingConsultant.CopyCI = updatedConsultant.CopyCI;
+        existingConsultant.enterprise = updatedConsultant.enterprise;
+
+        _context.Consultants.Update(existingConsultant);
+        _context.SaveChanges();
+
+        return existingConsultant;
     }
 
 

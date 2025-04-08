@@ -22,6 +22,7 @@ declare module 'vue' {
     StatusMatching: typeof import('./components/Matching/StatusMatching.vue')['default']
     TableMatching: typeof import('./components/Matching/TableMatching.vue')['default']
     TableProfile: typeof import('./components/Profile/TableProfile.vue')['default']
+    UpdateConsultant: typeof import('./components/Consultant/UpdateConsultant.vue')['default']
     UpdateProfile: typeof import('./components/Profile/UpdateProfile.vue')['default']
   }
 }

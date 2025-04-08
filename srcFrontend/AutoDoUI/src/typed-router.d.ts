@@ -21,8 +21,9 @@ declare module 'vue-router/auto-routes' {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/add-profile': RouteRecordInfo<'/add-profile', '/add-profile', Record<never, never>, Record<never, never>>,
     '/consultant/add-consultant': RouteRecordInfo<'/consultant/add-consultant', '/consultant/add-consultant', Record<never, never>, Record<never, never>>,
+    '/consultant/consultant-info': RouteRecordInfo<'/consultant/consultant-info', '/consultant/consultant-info', Record<never, never>, Record<never, never>>,
+    '/consultant/edit-consultant': RouteRecordInfo<'/consultant/edit-consultant', '/consultant/edit-consultant', Record<never, never>, Record<never, never>>,
     '/consultant/list-consultant': RouteRecordInfo<'/consultant/list-consultant', '/consultant/list-consultant', Record<never, never>, Record<never, never>>,
-    '/consultant/table-profile': RouteRecordInfo<'/consultant/table-profile', '/consultant/table-profile', Record<never, never>, Record<never, never>>,
     '/edit-profile/[profileUuid]': RouteRecordInfo<'/edit-profile/[profileUuid]', '/edit-profile/:profileUuid', { profileUuid: ParamValue<true> }, { profileUuid: ParamValue<false> }>,
     '/table-matching': RouteRecordInfo<'/table-matching', '/table-matching', Record<never, never>, Record<never, never>>,
   }

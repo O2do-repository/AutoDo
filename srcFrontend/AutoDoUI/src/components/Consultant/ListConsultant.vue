@@ -133,7 +133,7 @@ export default defineComponent({
 
     const goToConsultantProfiles = (consultant: Consultant) => {
       sessionStorage.setItem("selectedConsultant", JSON.stringify(consultant));
-      router.push("/consultant/table-profile");
+      router.push("/consultant/consultant-info");
     };
 
       
