@@ -266,6 +266,21 @@ public class RfpTest
         var count = await context.Rfps.CountAsync();
         Assert.Equal(0, count);
     }
+    [Fact]
+    public void Test_LoadRfpFromJson_Should_Throw_When_Invalid_Json()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        var invalidJsonContent = "{ invalid json content ";
+        var jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "invalid.json");
+        File.WriteAllText(jsonFilePath, invalidJsonContent);
 
+        var rfpService = new RfpService(context, Mock.Of<IMatchingService>());
+        typeof(RfpService).GetField("_jsonFilePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            .SetValue(rfpService, jsonFilePath);
 
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() => rfpService.LoadRfpFromJson());
+        Assert.Contains("Erreur lors de la lecture du fichier JSON", ex.Message);
+    }
 }

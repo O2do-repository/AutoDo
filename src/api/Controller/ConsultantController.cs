@@ -60,10 +60,8 @@ public class ConsultantController : ControllerBase
                 Picture = consultantDto.Picture
             };
 
-            // Ajouter le consultant à la base de données
             var newConsultant = _consultantService.AddConsultant(consultant);
 
-            // Retourner le profil créé
             return CreatedAtAction(nameof(GetConsultantById), new { id = newConsultant.ConsultantUuid }, newConsultant);
         }
         catch (Exception ex)
@@ -80,6 +78,20 @@ public class ConsultantController : ControllerBase
             return NotFound(new { message = "Consultant non trouvé." });
         }
         return Ok(consultant);
+    }
+
+    [HttpDelete("{consultantUuid}")]
+    public IActionResult DeleteConsultant(Guid consultantUuid)
+    {
+        try
+        {
+            _consultantService.DeleteConsultant(consultantUuid);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 
 

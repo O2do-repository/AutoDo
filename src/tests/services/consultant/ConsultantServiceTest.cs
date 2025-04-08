@@ -168,4 +168,42 @@ public class ConsultantServiceTest
         var exception = Assert.Throws<Exception>(() => consultantService.GetConsultantById(nonExistentUuid));
         Assert.Contains($"Aucun consultant trouvé avec l'UUID {nonExistentUuid}", exception.Message);
     }
+    [Fact]
+    public void Test_DeleteConsultant_Should_Remove_Consultant()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);  // Ajouter des consultants à la base de données en mémoire
+        var consultantService = new ConsultantService(context);
+
+        // On prend un consultant existant à partir de la base de données
+        var existingConsultant = context.Consultants.First();
+
+        // Act
+        consultantService.DeleteConsultant(existingConsultant.ConsultantUuid);
+
+        // Assert
+        var deletedConsultant = context.Consultants
+            .SingleOrDefault(c => c.ConsultantUuid == existingConsultant.ConsultantUuid);
+
+        Assert.Null(deletedConsultant);
+    }
+
+    [Fact]
+    public void Test_DeleteConsultant_Should_Throw_Exception_When_Consultant_Not_Found()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context); 
+        var consultantService = new ConsultantService(context);
+
+
+        var nonExistentUuid = Guid.NewGuid();
+
+        // Act & Assert
+        var exception = Assert.Throws<KeyNotFoundException>(() => consultantService.DeleteConsultant(nonExistentUuid));
+
+        // Vérifier que l'exception contient le bon message
+        Assert.Contains($"Aucun consultant trouvé avec l'UUID : {nonExistentUuid}", exception.Message);
+    }
 }

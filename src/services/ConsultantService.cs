@@ -15,14 +15,37 @@ public class ConsultantService : IConsultantService
     }
 
 
-    public Consultant AddConsultant(Consultant consultant)
+public Consultant AddConsultant(Consultant consultant)
+{
+    var existingConsultant = _context.Consultants
+        .SingleOrDefault(c => c.ConsultantUuid == consultant.ConsultantUuid);
+
+    if (existingConsultant == null)
+    {
+        // Insert
+        _context.Consultants.Add(consultant);
+    }
+    else
     {
 
-        _context.Consultants.Add(consultant);
-        _context.SaveChanges();
+        existingConsultant.Email = consultant.Email;
+        existingConsultant.AvailabilityDate = consultant.AvailabilityDate;
+        existingConsultant.ExpirationDateCI = consultant.ExpirationDateCI;
+        existingConsultant.Intern = consultant.Intern;
+        existingConsultant.Name = consultant.Name;
+        existingConsultant.Surname = consultant.Surname;
+        existingConsultant.Phone = consultant.Phone;
+        existingConsultant.Picture = consultant.Picture;
+        existingConsultant.CopyCI = consultant.CopyCI;
+        existingConsultant.enterprise = consultant.enterprise;
 
-        return consultant;
     }
+
+    _context.SaveChanges();
+
+    return consultant;
+}
+
     public Consultant GetConsultantById(Guid consultantUuid)
     {
         var consultant = _context.Consultants.SingleOrDefault(c => c.ConsultantUuid == consultantUuid);
@@ -34,4 +57,20 @@ public class ConsultantService : IConsultantService
 
         return consultant;
     }
+
+        // Delete Consultant
+    public void DeleteConsultant(Guid consultantUuid)
+    {
+        var existingConsultant = _context.Consultants.SingleOrDefault(c => c.ConsultantUuid == consultantUuid);
+
+        if (existingConsultant == null)
+        {
+            throw new KeyNotFoundException($"Aucun consultant trouvé avec l'UUID : {consultantUuid}");
+        }
+
+        _context.Consultants.Remove(existingConsultant);
+        _context.SaveChanges();
+    }
+
+
 }

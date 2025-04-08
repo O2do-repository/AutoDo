@@ -44,6 +44,7 @@ public class RfpService : IRfpService
 
                 foreach (var rfp in rfps)
                 {
+                    rfp.Skills ??= new List<string>();
                     var existingRfp = existingReferences.FirstOrDefault(r => r.Reference == rfp.Reference);
 
                     if (existingRfp != null)

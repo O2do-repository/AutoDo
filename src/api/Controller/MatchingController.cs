@@ -14,7 +14,7 @@ public class MatchingController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<DtoOutputMatching>>> GetAllMatchings()
     {
-        var matchings = await _matchingService.GetAllMatchingsAsync();
+        var matchings = await _matchingService.GetAllMatchingsFiltered();
         
         if (!matchings.Any())
         {
@@ -72,13 +72,6 @@ public class MatchingController : ControllerBase
         }
 
     }
-
-
-
-
-
-
-
 
 
 }

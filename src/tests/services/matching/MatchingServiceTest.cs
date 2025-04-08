@@ -214,66 +214,161 @@ public class MatchingServiceTest
     }
 
     [Fact]
-public async Task Test_UpdateMatchingAsync_Should_Update_Existing_Matching()
+    public async Task Test_UpdateMatchingAsync_Should_Update_Existing_Matching()
+    {
+        // Arrange
+        var dbContext = GetInMemoryDbContext();
+        var service = new MatchingService(dbContext);
+
+        var matchingId = Guid.NewGuid();
+        var existingMatching = new Matching
+        {
+            MatchingUuid = matchingId,
+            StatutMatching = StatutMatching.New,
+            Comment = "Old Comment",
+            Score = 50,
+            ProfileUuid = Guid.NewGuid(),
+            RfpUuid = Guid.NewGuid()
+        };
+
+        dbContext.Matchings.Add(existingMatching);
+        await dbContext.SaveChangesAsync();
+
+        var updatedMatching = new Matching
+        {
+            MatchingUuid = matchingId,
+            StatutMatching = StatutMatching.Apply,
+            Comment = "Updated Comment",
+            Score = 90,
+            ProfileUuid = existingMatching.ProfileUuid,
+            RfpUuid = existingMatching.RfpUuid
+        };
+
+        // Act
+        var result = await service.UpdateMatchingAsync(matchingId, updatedMatching);
+
+        // Assert
+        Assert.Equal(updatedMatching.StatutMatching, result.StatutMatching);
+        Assert.Equal(updatedMatching.Comment, result.Comment);
+        Assert.Equal(updatedMatching.Score, result.Score);
+    }
+
+    [Fact]
+    public async Task Test_UpdateMatchingAsync_Should_Throw_Exception_When_Matching_Not_Found()
+    {
+        // Arrange
+        var dbContext = GetInMemoryDbContext();
+        var service = new MatchingService(dbContext);
+        var nonExistentId = Guid.NewGuid();
+        var updatedMatching = new Matching
+        {
+            MatchingUuid = nonExistentId,
+            StatutMatching = StatutMatching.Apply,
+            Comment = "Updated Comment",
+            Score = 90,
+            ProfileUuid = Guid.NewGuid(),
+            RfpUuid = Guid.NewGuid()
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            await service.UpdateMatchingAsync(nonExistentId, updatedMatching));
+        
+        Assert.Contains("n'existe pas", exception.Message);
+    }
+
+
+    [Fact]
+    public async Task Test_GetAllMatchingsFiltered_Should_Exclude_Rejected_Matchings()
+    {
+        // Arrange
+        var dbContext = GetInMemoryDbContext();
+        SeedDatabase(dbContext);
+
+        var service = new MatchingService(dbContext);
+
+        var profile = new Profile
+        {
+            ProfileUuid = Guid.NewGuid(),
+            Ratehour = 50,
+            CV = "https://example.com/cv1.pdf",
+            CVDate = DateTime.Today,
+            JobTitle = "Software Engineer",
+            ExperienceLevel = Experience.Junior,
+            ConsultantUuid = Guid.NewGuid(),
+            Skills = new List<string> { "Java", "JavaScript" },
+            Keywords = new List<string> { "Architect", "DevOps" }
+        };
+
+        dbContext.Profiles.Add(profile);
+        await dbContext.SaveChangesAsync();
+
+        // Création d'un matching rejeté
+        var rejectedMatching = new Matching
+        {
+            MatchingUuid = Guid.NewGuid(),
+            ProfileUuid = profile.ProfileUuid,
+            RfpUuid = new Guid("123e4567-e89b-12d3-a456-426614174233"), // RFP existant
+            Score = 50,
+            Comment = "Rejected Matching",
+            StatutMatching = StatutMatching.Rejected // Le statut est "Rejected"
+        };
+
+        dbContext.Matchings.Add(rejectedMatching);
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await service.GetAllMatchingsFiltered();
+
+        // Assert
+        Assert.DoesNotContain(result, m => m.MatchingUuid == rejectedMatching.MatchingUuid); 
+    }
+    [Fact]
+public async Task Test_GetAllMatchingsFiltered_Should_Exclude_Low_Score_Matchings()
 {
     // Arrange
     var dbContext = GetInMemoryDbContext();
+    SeedDatabase(dbContext);
+
     var service = new MatchingService(dbContext);
 
-    var matchingId = Guid.NewGuid();
-    var existingMatching = new Matching
+    var profile = new Profile
     {
-        MatchingUuid = matchingId,
-        StatutMatching = StatutMatching.New,
-        Comment = "Old Comment",
-        Score = 50,
         ProfileUuid = Guid.NewGuid(),
-        RfpUuid = Guid.NewGuid()
+        Ratehour = 50,
+        CV = "https://example.com/cv1.pdf",
+        CVDate = DateTime.Today,
+        JobTitle = "Software Engineer",
+        ExperienceLevel = Experience.Junior,
+        ConsultantUuid = Guid.NewGuid(),
+        Skills = new List<string> { "Java", "JavaScript" },
+        Keywords = new List<string> { "Architect", "DevOps" }
     };
 
-    dbContext.Matchings.Add(existingMatching);
+    dbContext.Profiles.Add(profile);
     await dbContext.SaveChangesAsync();
 
-    var updatedMatching = new Matching
+    // Création d'un matching avec un score faible
+    var lowScoreMatching = new Matching
     {
-        MatchingUuid = matchingId,
-        StatutMatching = StatutMatching.Apply,
-        Comment = "Updated Comment",
-        Score = 90,
-        ProfileUuid = existingMatching.ProfileUuid,
-        RfpUuid = existingMatching.RfpUuid
+        MatchingUuid = Guid.NewGuid(),
+        ProfileUuid = profile.ProfileUuid,
+        RfpUuid = new Guid("123e4567-e89b-12d3-a456-426614174233"), // RFP existant
+        Score = 0, // Un score faible
+        Comment = "Low score Matching",
+        StatutMatching = StatutMatching.New
     };
+
+    dbContext.Matchings.Add(lowScoreMatching);
+    await dbContext.SaveChangesAsync();
 
     // Act
-    var result = await service.UpdateMatchingAsync(matchingId, updatedMatching);
+    var result = await service.GetAllMatchingsFiltered();
 
     // Assert
-    Assert.Equal(updatedMatching.StatutMatching, result.StatutMatching);
-    Assert.Equal(updatedMatching.Comment, result.Comment);
-    Assert.Equal(updatedMatching.Score, result.Score);
+    // Vérifie que le matching avec un score faible n'est pas dans les résultats
+    Assert.DoesNotContain(result, m => m.MatchingUuid == lowScoreMatching.MatchingUuid);
 }
 
-[Fact]
-public async Task Test_UpdateMatchingAsync_Should_Throw_Exception_When_Matching_Not_Found()
-{
-    // Arrange
-    var dbContext = GetInMemoryDbContext();
-    var service = new MatchingService(dbContext);
-    var nonExistentId = Guid.NewGuid();
-    var updatedMatching = new Matching
-    {
-        MatchingUuid = nonExistentId,
-        StatutMatching = StatutMatching.Apply,
-        Comment = "Updated Comment",
-        Score = 90,
-        ProfileUuid = Guid.NewGuid(),
-        RfpUuid = Guid.NewGuid()
-    };
 
-    // Act & Assert
-    var exception = await Assert.ThrowsAsync<Exception>(async () =>
-        await service.UpdateMatchingAsync(nonExistentId, updatedMatching));
-    
-    Assert.Contains("n'existe pas", exception.Message);
-}
 }
