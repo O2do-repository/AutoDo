@@ -17,19 +17,26 @@ jobs:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ✅ Important pour SonarCloud (blame, coverage, etc.)
 
-      - name: Set up .NET Core
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '9.x'
           include-prerelease: true
 
-      - name: Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
+      - name: Install tools (SonarScanner & ReportGenerator)
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+        shell: pwsh
 
-      - name: Add SonarScanner to PATH
-        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Add tools to PATH
+        run: echo "$HOME/.dotnet/tools" | Out-File -Append -FilePath $env:GITHUB_PATH
+        shell: pwsh
 
       - name: Begin SonarCloud Analysis
         run: >
@@ -38,31 +45,44 @@ jobs:
           /o:"o2do-repository"
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/**/*.cobertura.xml
+          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/**/coverage.cobertura.xml
+        shell: pwsh
 
-          
       - name: Restore dependencies
         run: dotnet restore src
 
-      - name: Build
+      - name: Build solution
         run: dotnet build src --configuration Release --no-restore
+
       - name: Run tests with coverage
-        run: dotnet test src/tests/tests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory src/tests/TestResults/
-  
+        run: >
+          dotnet test src/tests/tests.csproj
+          --no-build
+          --configuration Release
+          --collect:"XPlat Code Coverage"
+          --results-directory src/tests/TestResults/
+        shell: pwsh
+
+      - name: Convert coverage to Cobertura
+        run: >
+          reportgenerator
+          -reports:src/tests/TestResults/**/coverage.cobertura.xml
+          -targetdir:src/tests/TestResults/Cobertura
+          -reporttypes:Cobertura
+        shell: pwsh
 
       - name: List coverage files (for debugging)
         run: Get-ChildItem -Path src/tests/TestResults -Recurse -Filter *.cobertura.xml
         shell: pwsh
 
-
-
       - name: End SonarCloud Analysis
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        shell: pwsh
 
-      - name: dotnet publish
+      - name: Publish .NET app
         run: dotnet publish src -c Release -o ${{ env.DOTNET_ROOT }}/myapp
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
@@ -76,7 +96,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: .net-app
