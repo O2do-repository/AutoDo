@@ -38,7 +38,7 @@ jobs:
           /o:"o2do-repository"
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/**/*.cobertura.xml
+          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/51671de3-841f-44fb-940a-e74634468d6e/coverage.cobertura.xml
 
           
       - name: Restore dependencies
