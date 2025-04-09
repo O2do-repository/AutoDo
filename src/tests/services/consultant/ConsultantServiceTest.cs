@@ -206,4 +206,76 @@ public class ConsultantServiceTest
         // Vérifier que l'exception contient le bon message
         Assert.Contains($"Aucun consultant trouvé avec l'UUID : {nonExistentUuid}", exception.Message);
     }
+        [Fact]
+    public void Test_UpdateConsultant_Should_Throw_Exception_When_Consultant_Not_Found()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var consultantService = new ConsultantService(context);
+
+        var nonExistentUuid = Guid.NewGuid();
+        var updatedConsultant = new Consultant
+        {
+            ConsultantUuid = nonExistentUuid,
+            Name = "Nonexistent Consultant",
+            Surname = "Test",
+            Email = "nonexistent@example.com",
+            Phone = "1234567890",
+            AvailabilityDate = new DateTime(2024, 5, 10),
+            ExpirationDateCI = new DateTime(2025, 5, 10),
+            Intern = true,
+            Picture = "http://localhost/nonexistent.jpg",
+            CopyCI = "http://localhost/nonexistent_copy.jpg",
+            enterprise = Enterprise.O2do,
+            Profiles = new List<Profile>()
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() => consultantService.UpdateConsultant(updatedConsultant));
+        Assert.Contains($"Le consultant avec UUID {nonExistentUuid} n'existe pas.", exception.Message);
+    }
+
+    [Fact]
+    public void Test_UpdateConsultant_Should_Update_Consultant()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+        SeedDatabase(context);
+        var consultantService = new ConsultantService(context);
+
+        // Consultant à mettre à jour
+        var existingConsultant = context.Consultants.First();
+        var updatedConsultant = new Consultant
+        {
+            ConsultantUuid = existingConsultant.ConsultantUuid,
+            Name = "jean Updated",
+            Surname = "Johnson Updated",
+            Email = "jean.updated@example.com",
+            Phone = "1234567890",
+            AvailabilityDate = new DateTime(2024, 5, 10),
+            ExpirationDateCI = new DateTime(2025, 5, 10),
+            Intern = true,
+            Picture = "http://localhost/updated.jpg",
+            CopyCI = "http://localhost/updated_copy.jpg",
+            enterprise = Enterprise.O2do,
+            Profiles = new List<Profile>()
+        };
+
+        // Act
+        var result = consultantService.UpdateConsultant(updatedConsultant);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("jean Updated", result.Name);
+        Assert.Equal("Johnson Updated", result.Surname);
+        Assert.Equal("jean.updated@example.com", result.Email);
+        Assert.Equal("1234567890", result.Phone);
+        Assert.Equal(new DateTime(2024, 5, 10), result.AvailabilityDate);
+        Assert.Equal(new DateTime(2025, 5, 10), result.ExpirationDateCI);
+        Assert.Equal("http://localhost/updated.jpg", result.Picture);
+        Assert.Equal("http://localhost/updated_copy.jpg", result.CopyCI);
+        Assert.True(result.Intern);
+    }
+
 }
