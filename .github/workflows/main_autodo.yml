@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # ✅ Important pour SonarCloud (blame, coverage, etc.)
+          fetch-depth: 0  
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
@@ -45,7 +45,7 @@ jobs:
           /o:"o2do-repository"
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/**/coverage.cobertura.xml
+          /d:sonar.cs.opencover.reportsPaths=src/tests/TestResults/**/coverage.cobertura.xml  # Pointage vers le fichier Cobertura
         shell: pwsh
 
       - name: Restore dependencies
