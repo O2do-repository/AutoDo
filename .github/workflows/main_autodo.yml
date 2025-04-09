@@ -38,7 +38,7 @@ jobs:
           /o:"o2do-repository"
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/51671de3-841f-44fb-940a-e74634468d6e/coverage.cobertura.xml
+          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/**/*.cobertura.xml
 
           
       - name: Restore dependencies
@@ -48,7 +48,7 @@ jobs:
         run: dotnet build src --configuration Release --no-restore
 
       - name: Run tests with coverage
-        run: dotnet test src/tests --no-build --configuration Release --collect:"XPlat Code Coverage"
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory src/tests/TestResults/
 
       - name: List coverage files (for debugging)
         run: Get-ChildItem -Path src/tests/TestResults -Recurse -Filter *.cobertura.xml
