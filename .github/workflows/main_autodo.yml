@@ -38,7 +38,7 @@ jobs:
           /o:"o2do-repository"
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.opencover.reportsPaths="src/tests/TestResults/coverage.opencover.xml"
+          /d:sonar.cs.cobertura.reportPaths=src/tests/TestResults/**/coverage.cobertura.xml
           
       - name: Restore dependencies
         run: dotnet restore src
@@ -47,13 +47,8 @@ jobs:
         run: dotnet build src --configuration Release --no-restore
 
       - name: Run tests with coverage
-        run: >
-          dotnet test src/tests
-          --no-build
-          --configuration Release
-          /p:CollectCoverage=true
-          /p:CoverletOutputFormat=opencover
-          /p:CoverletOutput=src/tests/TestResults/coverage.opencover.xml
+        run: dotnet test src/tests --no-build --configuration Release --collect:"XPlat Code Coverage"
+
 
       - name: End SonarCloud Analysis
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
