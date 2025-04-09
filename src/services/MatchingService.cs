@@ -79,6 +79,16 @@ public class MatchingService :IMatchingService
                 .ThenInclude(p => p.Consultant) 
             .ToListAsync();
     }
+    public async Task<List<Matching>> GetAllMatchingsFiltered()
+    {
+        return await _context.Matchings
+            .Where(m => m.Score != 0 && m.StatutMatching != StatutMatching.Rejected)
+            .Include(m => m.Rfp)
+            .Include(m => m.Profile)
+                .ThenInclude(p => p.Consultant) 
+            .ToListAsync();
+    }
+
     public async Task<Matching> UpdateMatchingAsync(Guid id,Matching updatedMatching)
     {
         var matching = await _context.Matchings.SingleOrDefaultAsync(m => m.MatchingUuid == id);

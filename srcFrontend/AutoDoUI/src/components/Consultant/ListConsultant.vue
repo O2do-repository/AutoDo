@@ -18,16 +18,12 @@
           elevation="3"
           @click="goToConsultantProfiles(consultant)"
         >
-          <!-- Bouton de suppression -->
-          <v-btn
-            icon
-            size="x-small"
-            color="red"
-            class="delete-btn"
-            @click.stop="deleteConsultant(consultant.consultantUuid)"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+        <DeleteConsultant
+          :consultantUuid="consultant.consultantUuid"
+          @click.stop
+          @consultantDeleted="handleConsultantDeleted"
+        />
+
 
           <v-card-text class="d-flex flex-column align-center justify-center">
             <!-- Avatar avec image-->
@@ -74,6 +70,8 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import DeleteConsultant from '@/components/Consultant/DeleteConsultant.vue';
+
 
 interface Consultant {
   consultantUuid: string;
@@ -114,6 +112,11 @@ export default defineComponent({
       }
     };
 
+    const handleConsultantDeleted = (uuid: string) => {
+      consultants.value = consultants.value.filter(c => c.consultantUuid !== uuid);
+    };
+
+
     const deleteConsultant = async (uuid: string) => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant/${uuid}`, {
@@ -130,7 +133,7 @@ export default defineComponent({
 
     const goToConsultantProfiles = (consultant: Consultant) => {
       sessionStorage.setItem("selectedConsultant", JSON.stringify(consultant));
-      router.push("/consultant/table-profile");
+      router.push("/consultant/consultant-info");
     };
 
       
@@ -149,7 +152,8 @@ export default defineComponent({
       deleteConsultant,
       goToConsultantProfiles,
       defaultImage,
-      setPlaceholder
+      setPlaceholder,
+      handleConsultantDeleted
     };
   },
 });

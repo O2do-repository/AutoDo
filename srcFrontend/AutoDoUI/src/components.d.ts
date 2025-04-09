@@ -10,6 +10,7 @@ declare module 'vue' {
     AddConsultant: typeof import('./components/Consultant/AddConsultant.vue')['default']
     AddProfile: typeof import('./components/Profile/AddProfile.vue')['default']
     ConsultantInfo: typeof import('./components/Consultant/ConsultantInfo.vue')['default']
+    DeleteConsultant: typeof import('./components/Consultant/DeleteConsultant.vue')['default']
     DeleteProfile: typeof import('./components/Profile/DeleteProfile.vue')['default']
     GoBackBtn: typeof import('./components/utils/GoBackBtn.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
@@ -21,6 +22,7 @@ declare module 'vue' {
     StatusMatching: typeof import('./components/Matching/StatusMatching.vue')['default']
     TableMatching: typeof import('./components/Matching/TableMatching.vue')['default']
     TableProfile: typeof import('./components/Profile/TableProfile.vue')['default']
+    UpdateConsultant: typeof import('./components/Consultant/UpdateConsultant.vue')['default']
     UpdateProfile: typeof import('./components/Profile/UpdateProfile.vue')['default']
   }
 }
