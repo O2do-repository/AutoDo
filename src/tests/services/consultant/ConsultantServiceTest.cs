@@ -267,9 +267,9 @@ public class ConsultantServiceTest
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("Alice Updated", result.Name);
+        Assert.Equal("jean Updated", result.Name);
         Assert.Equal("Johnson Updated", result.Surname);
-        Assert.Equal("alice.updated@example.com", result.Email);
+        Assert.Equal("jean.updated@example.com", result.Email);
         Assert.Equal("1234567890", result.Phone);
         Assert.Equal(new DateTime(2024, 5, 10), result.AvailabilityDate);
         Assert.Equal(new DateTime(2025, 5, 10), result.ExpirationDateCI);
