@@ -50,6 +50,11 @@ jobs:
       - name: Run tests with coverage
         run: dotnet test src/tests --no-build --configuration Release --collect:"XPlat Code Coverage"
 
+      - name: List coverage files (for debugging)
+        run: Get-ChildItem -Path src/tests/TestResults -Recurse -Filter *.cobertura.xml
+        shell: pwsh
+
+
 
       - name: End SonarCloud Analysis
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
