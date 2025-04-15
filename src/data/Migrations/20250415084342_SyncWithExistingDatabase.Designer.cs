@@ -11,15 +11,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    [Migration("20250403111005_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250415084342_SyncWithExistingDatabase")]
+    partial class SyncWithExistingDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
