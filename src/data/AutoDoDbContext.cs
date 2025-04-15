@@ -18,18 +18,18 @@ public class AutoDoDbContext : DbContext
     public AutoDoDbContext(DbContextOptions<AutoDoDbContext> options) : base(options)
     
     {
-        _useInMemory = true;
+        //_useInMemory = true;
     }
 
     public AutoDoDbContext() : base(new DbContextOptions<AutoDoDbContext>())
     {
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-            optionsBuilder.UseSqlServer("Server=O2DO_LAPTOP_2\\SQLEXPRESS;Database=AutoDo;Trusted_Connection=True;TrustServerCertificate=True;");
-    }
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     if (!optionsBuilder.IsConfigured)
+    //         optionsBuilder.UseSqlServer("Server=O2DO_LAPTOP_2\\SQLEXPRESS;Database=AutoDo;Trusted_Connection=True;TrustServerCertificate=True;");
+    // }
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -148,8 +148,6 @@ public class AutoDoDbContext : DbContext
 
             entity.HasIndex(m => new { m.RfpUuid, m.ProfileUuid }).IsUnique();
         });
-
-
 
     } 
 }
