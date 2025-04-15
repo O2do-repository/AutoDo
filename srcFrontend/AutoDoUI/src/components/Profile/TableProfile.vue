@@ -45,7 +45,7 @@ const goToAddProfile = () => {
     sessionStorage.setItem('selectedConsultantUuid', consultant.value.consultantUuid);
 
     // Redirige vers la page d'ajout de profil
-    router.push('/add-profile');
+    router.push('/profile/add-profile');
   } else {
     error.value = "Aucun consultant sélectionné.";
   }
@@ -90,7 +90,7 @@ const fetchProfiles = async () => {
 // Handle button to edit profil
 const editProfile = (profile: Profile) => {
   localStorage.setItem('selectedProfile', JSON.stringify(profile));
-  router.push({ path: `/edit-profile/${profile.profileUuid}` });
+  router.push({ path: `/profile/edit-profile` });
 };
 
 </script>

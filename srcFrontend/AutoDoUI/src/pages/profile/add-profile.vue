@@ -3,6 +3,6 @@
 </template>
   
 <script lang="ts" setup>
-import AddProfile from '../components/Profile/AddProfile.vue'; 
+import AddProfile from '@/components/Profile/AddProfile.vue'; 
 </script>
   
