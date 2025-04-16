@@ -10,7 +10,7 @@ interface Consultant {
   Intern: boolean | null;
   Name: string;
   Surname: string;
-  enterprise: number | null;
+  enterprise: string;
   Phone: string;
   CopyCI: string;
   Picture: string;
@@ -23,7 +23,7 @@ const consultant = ref<Consultant>({
   Intern: false,
   Name: '',
   Surname: '',
-  enterprise: null,
+  enterprise: '',
   Phone: '',
   CopyCI: '',
   Picture: ''
@@ -31,11 +31,8 @@ const consultant = ref<Consultant>({
 
 const router = useRouter();
 
-const enterprises = [
-  { id: 0, name: 'O2do' },
-  { id: 1, name: 'Winch' },
-  { id: 2, name: 'MI6' }
-];
+
+const enterprises: string[] = ['O2do', 'MI6', 'Winch'];
 
 // Validation rules
 const required = (value: string) => {
@@ -142,7 +139,6 @@ const submitConsultant = async () => {
             </v-avatar>
           </v-col>
 
-          <!-- Champ de texte pour modifier l'image -->
           <v-col cols="12">
             <v-text-field 
               variant="outlined"
@@ -156,11 +152,12 @@ const submitConsultant = async () => {
             ></v-text-field>
           </v-col>
           <v-col cols="6">
-            <v-text-field  variant="outlined" color="primary" label="Nom *" v-model="consultant.Name" :rules="[required]" required></v-text-field>
-          </v-col>
-          <v-col cols="6">
             <v-text-field variant="outlined" color="primary"  label="Prénom *" v-model="consultant.Surname" :rules="[required]" required></v-text-field>
           </v-col>
+          <v-col cols="6">
+            <v-text-field  variant="outlined" color="primary" label="Nom *" v-model="consultant.Name" :rules="[required]" required></v-text-field>
+          </v-col>
+
 
           <v-col cols="6">
             <v-text-field variant="outlined" color="primary"  label="Lien Copie CI *" v-model="consultant.CopyCI" :rules="[required]" required></v-text-field>
@@ -178,7 +175,7 @@ const submitConsultant = async () => {
               v-model="consultant.enterprise"
               :items="enterprises"
               item-title="name"
-              item-value="id"
+              item-value="name"
               :rules="[required]"
               variant="outlined" color="primary" 
             ></v-select>

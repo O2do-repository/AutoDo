@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class SyncWithExistingDatabase : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,7 @@ namespace data.Migrations
                     Intern = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    enterprise = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Enterprise = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Picture = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CopyCI = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -30,6 +30,18 @@ namespace data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Consultant", x => x.ConsultantUuid);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Enterprise",
+                columns: table => new
+                {
+                    EnterpriseUuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Enterprise", x => x.EnterpriseUuid);
                 });
 
             migrationBuilder.CreateTable(
@@ -150,6 +162,9 @@ namespace data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Enterprise");
+
             migrationBuilder.DropTable(
                 name: "Keyword");
 

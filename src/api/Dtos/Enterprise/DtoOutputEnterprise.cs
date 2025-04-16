@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 
-public class Enterprise
+public class DtoOutputEnterprise
 {
     [Key]
     public Guid EnterpriseUuid { get; set; }
+    [Required]
     public string Name { get; set; }
-
 }

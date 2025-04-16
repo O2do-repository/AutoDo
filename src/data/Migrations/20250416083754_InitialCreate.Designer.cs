@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    [Migration("20250415084342_SyncWithExistingDatabase")]
-    partial class SyncWithExistingDatabase
+    [Migration("20250416083754_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,11 +79,31 @@ namespace data.Migrations
 
                     b.Property<string>("enterprise")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Enterprise");
 
                     b.HasKey("ConsultantUuid");
 
                     b.ToTable("Consultant", (string)null);
+                });
+
+            modelBuilder.Entity("Enterprise", b =>
+                {
+                    b.Property<Guid>("EnterpriseUuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("EnterpriseUuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("EnterpriseUuid");
+
+                    b.ToTable("Enterprise", (string)null);
                 });
 
             modelBuilder.Entity("Keyword", b =>

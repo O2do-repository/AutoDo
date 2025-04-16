@@ -8,22 +8,14 @@
         <v-divider></v-divider>
   
         <!-- Admin -->
-        <v-list-item to="/" link>
-          <v-list-item-title class="font-weight-bold">RFP</v-list-item-title>
+        <v-list-item to="/admin" link>
+          <v-list-item-title class="font-weight-bold">Admin</v-list-item-title>
         </v-list-item>
   
         <!-- Consultant avec sous-menu -->
-        <v-list-group>
-          <template #activator="{ props }">
-            <v-list-item v-bind="props">
-              <v-list-item-title>Consultant</v-list-item-title>
-            </v-list-item>
-          </template>
-
-          <v-list-item to="/consultant/list-consultant" link >
-            <v-list-item-title class="text-primary">Liste des consultants</v-list-item-title>
-          </v-list-item>
-        </v-list-group>
+        <v-list-item to="/consultant/list-consultant" link >
+          <v-list-item-title class="font-weight-bold">Consultants</v-list-item-title>
+        </v-list-item>
   
         <!-- Dashboard -->
         <v-list-item to="/table-matching" link>

@@ -30,7 +30,7 @@ public class ConsultantServiceTest
                 Intern = false,
                 Picture = "http://localhost:8888/",
                 CopyCI = "http://localhost:8888/",
-                enterprise = Enterprise.O2do,
+                enterprise = "O2do",
                 Profiles = new List<Profile>()
             },
             new Consultant
@@ -43,7 +43,7 @@ public class ConsultantServiceTest
                 AvailabilityDate = new DateTime(2024, 6, 1),
                 ExpirationDateCI = new DateTime(2025, 6, 1),
                 Intern = true,
-                enterprise = Enterprise.MI6,
+                enterprise = "MI6",
                 Picture = "http://localhost:8888/",
                 CopyCI = "http://localhost:8888/",
                 Profiles = new List<Profile>()
@@ -115,7 +115,7 @@ public class ConsultantServiceTest
             Intern = false,
             Picture = "http://localhost:8888/",
             CopyCI = "http://localhost:8888/",
-            enterprise = Enterprise.O2do,
+            enterprise = "O2do",
             Profiles = new List<Profile>()
         };
 
@@ -227,7 +227,7 @@ public class ConsultantServiceTest
             Intern = true,
             Picture = "http://localhost/nonexistent.jpg",
             CopyCI = "http://localhost/nonexistent_copy.jpg",
-            enterprise = Enterprise.O2do,
+            enterprise = "O2do",
             Profiles = new List<Profile>()
         };
 
@@ -258,7 +258,7 @@ public class ConsultantServiceTest
             Intern = true,
             Picture = "http://localhost/updated.jpg",
             CopyCI = "http://localhost/updated_copy.jpg",
-            enterprise = Enterprise.O2do,
+            enterprise = "O2do",
             Profiles = new List<Profile>()
         };
 

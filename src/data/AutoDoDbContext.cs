@@ -11,6 +11,7 @@ public class AutoDoDbContext : DbContext
     public DbSet<RFP> Rfps { get; set; }
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Keyword> Keywords { get; set; }
+    public DbSet<Enterprise> Enterprises {get;set;}
     
 
     private readonly bool _useInMemory;
@@ -68,7 +69,10 @@ public class AutoDoDbContext : DbContext
             entity.Property(c => c.Picture).HasColumnName("Picture");
             entity.Property(c => c.CopyCI).HasColumnName("CopyCI").IsRequired();
             entity.Property(c => c.enterprise)
-                .HasConversion(x => x.ToString(), x => (Enterprise)Enum.Parse(typeof(Enterprise), x));
+                .HasColumnName("Enterprise")
+                .HasMaxLength(255)
+                .IsRequired();
+
 
             entity.HasMany(c => c.Profiles)
                 .WithOne(p => p.Consultant)
@@ -100,12 +104,12 @@ public class AutoDoDbContext : DbContext
             v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
         );
 
-    modelBuilder.Entity<Profile>()
-        .Property(p => p.Keywords)
-        .HasConversion(
-            v => JsonConvert.SerializeObject(v),
-            v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
-        );
+        modelBuilder.Entity<Profile>()
+            .Property(p => p.Keywords)
+            .HasConversion(
+                v => JsonConvert.SerializeObject(v),
+                v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
+            );
 
         modelBuilder.Entity<Keyword>(entity =>
         {
@@ -122,6 +126,15 @@ public class AutoDoDbContext : DbContext
             entity.Property(s => s.SkillUuid).HasColumnName("SkillUuid").IsRequired();
             entity.Property(s => s.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
         });
+
+        modelBuilder.Entity<Enterprise>(entity =>
+        {
+            entity.ToTable("Enterprise");
+            entity.HasKey(e => e.EnterpriseUuid);
+            entity.Property(e => e.EnterpriseUuid).HasColumnName("EnterpriseUuid").IsRequired();
+            entity.Property(e => e.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+        });
+
 
 
         // Configuration du matching
