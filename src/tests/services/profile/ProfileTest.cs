@@ -154,7 +154,8 @@ public class ProfileTest
             Phone = "1234567890",          
             Surname = "Doe",
             Picture =  "https://example.com/cv1.pdf",
-            CopyCI = "https://example.com/cv1.pdf  "      
+            CopyCI = "https://example.com/cv1.pdf  ",
+            enterprise = "O2do"   
         });
         context.SaveChanges();  
 
@@ -196,7 +197,8 @@ public class ProfileTest
             Phone = "1234567890",          
             Surname = "Doe"   ,
             Picture =  "https://example.com/cv1.pdf",
-            CopyCI = "https://example.com/cv1.pdf  "                    
+            CopyCI = "https://example.com/cv1.pdf  ",
+            enterprise = "O2do"                     
         });
         context.SaveChanges();  
 
