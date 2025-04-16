@@ -19,9 +19,7 @@ public class DtoInputConsultant{
     public string CopyCI {get;set;}
     [Url(ErrorMessage = "Le champ CV doit être une URL valide.")]   
     public string Picture{get;set;}
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]    
-    public Enterprise enterprise {get; set;}
+    public string enterprise {get; set;}
     [Required]
     public string Phone { get; set; }
 }

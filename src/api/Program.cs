@@ -24,12 +24,11 @@ builder.Services.AddScoped<IRfpService, RfpService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IMatchingService, MatchingService>();
 builder.Services.AddScoped<IConsultantService, ConsultantService>();
+builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<IEnterpriseService, EnterpriseService>();
+builder.Services.AddScoped<IKeywordService, KeywordService>();
 
-//builder.Services.AddScoped<AutoDoDbContext>();
 
-
-
-// Charger la configuration
 var configuration = builder.Configuration;
 
 builder.Configuration
@@ -45,8 +44,6 @@ var app = builder.Build();
 
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
-
-
 
 app.MapControllers();
 

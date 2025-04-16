@@ -76,11 +76,31 @@ namespace data.Migrations
 
                     b.Property<string>("enterprise")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Enterprise");
 
                     b.HasKey("ConsultantUuid");
 
                     b.ToTable("Consultant", (string)null);
+                });
+
+            modelBuilder.Entity("Enterprise", b =>
+                {
+                    b.Property<Guid>("EnterpriseUuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("EnterpriseUuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("EnterpriseUuid");
+
+                    b.ToTable("Enterprise", (string)null);
                 });
 
             modelBuilder.Entity("Keyword", b =>

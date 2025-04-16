@@ -16,7 +16,7 @@ public class Consultant
     public string Name { get; set; }
     [Required]
     public string Surname { get; set; }
-    public Enterprise enterprise {get; set;}
+    public String enterprise {get; set;}
     [Required]
     public string Phone { get; set; }
     public string Picture{get;set;}
