@@ -111,7 +111,7 @@ const setPlaceholder = () => {
 watch(() => consultant.value.Picture, checkImage);
 
 // Post Consultant dans la database
-const submitConsultant = async () => {
+const submitConsultant = async (): Promise<void> => {
   try {
     if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
       consultant.value.Picture = placeholderImage;
