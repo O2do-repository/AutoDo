@@ -1,9 +1,9 @@
-<script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+<script lang="ts">
+import { defineComponent, ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import GoBackBtn from '@/components/utils/GoBackBtn.vue';
 
-// set interface
+// Interface pour Consultant
 interface Consultant {
   Email: string;
   AvailabilityDate: string;
@@ -17,137 +17,159 @@ interface Consultant {
   Picture: string;
 }
 
-const consultant = ref<Consultant>({
-  Email: '',
-  AvailabilityDate: '',
-  ExpirationDateCI: '',
-  Intern: false,
-  Name: '',
-  Surname: '',
-  enterprise: '',
-  Phone: '',
-  CopyCI: '',
-  Picture: ''
-});
-
+// Interface pour Enterprise
 interface Enterprise {
   enterpriseUuid: string;
   name: string;
 }
 
-const router = useRouter();
-
-// recupération des entreprises pour le v-select
-const enterprises = ref<Enterprise[]>([]);
-
-const fetchEnterprises = async () => {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
-    if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
-
-    const data = await response.json();
-    enterprises.value = data;
-  } catch (error) {
-    console.error("Erreur fetch entreprises :", error);
-  }
-};
-
-// 🧪 Validation Rules
-const required = (value: string) => value?.trim() !== '' || 'Champ obligatoire';
-const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
-const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Format invalide (ex: +32444332211)";
-const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
-const imageUrlRule = (value: string) => /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i.test(value) || "Lien image invalide (ex: https://site.com/photo.jpg)";
-const dateRule = (value: string) => !!value || 'Veuillez choisir une date';
-
-// Si le consultant est interne alors il sera d'O2do
-watch(() => consultant.value.Intern, (newVal) => {
-  if (newVal) {
-    consultant.value.enterprise = 'O2do';
-  } else {
-    consultant.value.enterprise = '';
-  }
-});
-
-const formRef = ref<any>(null);
-
-// Image de remplacement
-const placeholderImage = 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg';
-const validPicture = ref(placeholderImage);
-
-// Check si l'image est valide
-const checkImage = () => {
-  if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
-    validPicture.value = placeholderImage;
-    return;
-  }
-
-  const img = new Image();
-  img.src = consultant.value.Picture;
-  img.onload = () => {
-    validPicture.value = consultant.value.Picture;
-  };
-  img.onerror = () => {
-    validPicture.value = placeholderImage;
-  };
-};
-
-const clearPlaceholder = () => {
-  if (consultant.value.Picture === placeholderImage) {
-    consultant.value.Picture = '';
-  }
-};
-
-const restorePlaceholder = () => {
-  if (!consultant.value.Picture) {
-    consultant.value.Picture = placeholderImage;
-  }
-};
-
-const setPlaceholder = () => {
-  validPicture.value = placeholderImage;
-};
-
-watch(() => consultant.value.Picture, checkImage);
-
-// Post Consultant dans la database
-const submitConsultant = async () => {
-  try {
-    if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
-      consultant.value.Picture = placeholderImage;
-    }
-
-    if (!formRef.value) return;
-
-    const result: { valid: boolean } = await formRef.value.validate();
-    if (!result.valid) return;
-
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(consultant.value)
+export default defineComponent({
+  name: 'AddConsultant',
+  components: {
+    GoBackBtn
+  },
+  setup() {
+    // Variable consultant
+    const consultant = ref<Consultant>({
+      Email: '',
+      AvailabilityDate: '',
+      ExpirationDateCI: '',
+      Intern: false,
+      Name: '',
+      Surname: '',
+      enterprise: '',
+      Phone: '',
+      CopyCI: '',
+      Picture: ''
     });
 
-    if (!response.ok) {
-      throw new Error("Erreur lors de l'ajout du consultant");
-    }
+    const router = useRouter();
+    const enterprises = ref<Enterprise[]>([]);
+    const formRef = ref<any>(null);
 
-    setTimeout(() => {
-      router.push('/consultant/list-consultant');
-    }, 1000);
+    // Image de remplacement
+    const placeholderImage = 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg';
+    const validPicture = ref(placeholderImage);
 
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+    // 🧪 Validation Rules
+    const required = (value: string) => value?.trim() !== '' || 'Champ obligatoire';
+    const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
+    const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Format invalide (ex: +32444332211)";
+    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
+    const imageUrlRule = (value: string) => /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i.test(value) || "Lien image invalide (ex: https://site.com/photo.jpg)";
+    const dateRule = (value: string) => !!value || 'Veuillez choisir une date';
+
+    // Récupérer les entreprises
+    const fetchEnterprises = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
+        if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
+        const data = await response.json();
+        enterprises.value = data;
+      } catch (error) {
+        console.error("Erreur fetch entreprises :", error);
+      }
+    };
+
+    // Si le consultant est interne alors il sera d'O2do
+    watch(() => consultant.value.Intern, (newVal) => {
+      if (newVal) {
+        consultant.value.enterprise = 'O2do';
+      } else {
+        consultant.value.enterprise = '';
+      }
+    });
+
+    // Check si l'image est valide
+    const checkImage = () => {
+      if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
+        validPicture.value = placeholderImage;
+        return;
+      }
+
+      const img = new Image();
+      img.src = consultant.value.Picture;
+      img.onload = () => {
+        validPicture.value = consultant.value.Picture;
+      };
+      img.onerror = () => {
+        validPicture.value = placeholderImage;
+      };
+    };
+
+    const clearPlaceholder = () => {
+      if (consultant.value.Picture === placeholderImage) {
+        consultant.value.Picture = '';
+      }
+    };
+
+    const restorePlaceholder = () => {
+      if (!consultant.value.Picture) {
+        consultant.value.Picture = placeholderImage;
+      }
+    };
+
+    const setPlaceholder = () => {
+      validPicture.value = placeholderImage;
+    };
+
+    watch(() => consultant.value.Picture, checkImage);
+
+    // Post Consultant dans la database
+    const submitConsultant = async () => {
+      try {
+        if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
+          consultant.value.Picture = placeholderImage;
+        }
+
+        if (!formRef.value) return;
+
+        const { valid } = await formRef.value.validate();
+        if (!valid) return;
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(consultant.value)
+        });
+
+        if (!response.ok) {
+          throw new Error("Erreur lors de l'ajout du consultant");
+        }
+
+        setTimeout(() => {
+          router.push('/consultant/list-consultant');
+        }, 1000);
+
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+      }
+    };
+
+    onMounted(() => {
+      fetchEnterprises();
+    });
+
+    return {
+      consultant,
+      enterprises,
+      formRef,
+      validPicture,
+      required,
+      emailRule,
+      phoneRule,
+      urlRule,
+      imageUrlRule,
+      dateRule,
+      clearPlaceholder,
+      restorePlaceholder,
+      setPlaceholder,
+      submitConsultant,
+      placeholderImage
+    };
   }
-};
-
-onMounted(() => {
-  fetchEnterprises();
 });
 </script>
-
-
 
 <template>
   <v-container>
@@ -156,7 +178,7 @@ onMounted(() => {
 
       <v-card-title class="text-h5 font-weight-bold">Nouveau Consultant</v-card-title>
       <v-card-text>
-        <v-form ref="formRef" >
+        <v-form ref="formRef">
 
           <v-row>
             <!-- Avatar + Image Preview -->
@@ -182,7 +204,6 @@ onMounted(() => {
                 :rules="[required, imageUrlRule]"
                 @focus="clearPlaceholder"
                 @blur="restorePlaceholder"
-                @input="checkImage"
               ></v-text-field>
             </v-col>
 
@@ -306,4 +327,3 @@ onMounted(() => {
     </v-card>
   </v-container>
 </template>
-
