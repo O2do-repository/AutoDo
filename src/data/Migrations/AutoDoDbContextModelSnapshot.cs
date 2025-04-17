@@ -82,6 +82,9 @@ namespace data.Migrations
 
                     b.HasKey("ConsultantUuid");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("Consultant", (string)null);
                 });
 
@@ -100,6 +103,9 @@ namespace data.Migrations
 
                     b.HasKey("EnterpriseUuid");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Enterprise", (string)null);
                 });
 
@@ -117,6 +123,9 @@ namespace data.Migrations
                         .HasColumnName("Name");
 
                     b.HasKey("KeywordUuid");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Keyword", (string)null);
                 });
@@ -284,6 +293,9 @@ namespace data.Migrations
                         .HasColumnName("Name");
 
                     b.HasKey("SkillUuid");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Skill", (string)null);
                 });

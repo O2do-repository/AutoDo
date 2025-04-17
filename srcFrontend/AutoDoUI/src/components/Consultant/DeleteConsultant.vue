@@ -1,7 +1,7 @@
 <template>
     <div>
       <!-- Bouton de suppression -->
-      <v-btn color="red" icon="mdi-delete" density="comfortable" @click="dialog = true" />
+      <v-btn color="error" variant="text" icon="mdi-delete" density="comfortable" @click="dialog = true" />
   
       <!-- Dialog de confirmation -->
       <v-dialog v-model="dialog" max-width="500">

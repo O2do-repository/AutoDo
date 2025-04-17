@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreateV3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -143,6 +143,24 @@ namespace data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Consultant_Email",
+                table: "Consultant",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enterprise_Name",
+                table: "Enterprise",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Keyword_Name",
+                table: "Keyword",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Matching_ProfileUuid",
                 table: "Matching",
                 column: "ProfileUuid");
@@ -157,6 +175,12 @@ namespace data.Migrations
                 name: "IX_Profile_ConsultantUuid",
                 table: "Profile",
                 column: "ConsultantUuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Skill_Name",
+                table: "Skill",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />

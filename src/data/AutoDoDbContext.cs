@@ -73,6 +73,8 @@ public class AutoDoDbContext : DbContext
                 .HasMaxLength(255)
                 .IsRequired();
 
+             entity.HasIndex(c => c.Email).IsUnique();
+
 
             entity.HasMany(c => c.Profiles)
                 .WithOne(p => p.Consultant)
@@ -117,6 +119,8 @@ public class AutoDoDbContext : DbContext
             entity.HasKey(k => k.KeywordUuid);
             entity.Property(k => k.KeywordUuid).HasColumnName("KeywordUuid").IsRequired();
             entity.Property(k => k.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+
+            entity.HasIndex(k => k.Name).IsUnique();
         });
 
         modelBuilder.Entity<Skill>(entity =>
@@ -125,6 +129,8 @@ public class AutoDoDbContext : DbContext
             entity.HasKey(s => s.SkillUuid);
             entity.Property(s => s.SkillUuid).HasColumnName("SkillUuid").IsRequired();
             entity.Property(s => s.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+
+            entity.HasIndex(s => s.Name).IsUnique();
         });
 
         modelBuilder.Entity<Enterprise>(entity =>
@@ -133,6 +139,9 @@ public class AutoDoDbContext : DbContext
             entity.HasKey(e => e.EnterpriseUuid);
             entity.Property(e => e.EnterpriseUuid).HasColumnName("EnterpriseUuid").IsRequired();
             entity.Property(e => e.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+
+            entity.HasIndex(e => e.Name).IsUnique();
+            
         });
 
 

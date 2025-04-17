@@ -38,11 +38,6 @@ public IActionResult GetAllProfils()
     {
         var profiles = _profileService.GetProfilesByConsultant(consultantUuid);
 
-        if (profiles == null || !profiles.Any())
-        {
-            return NotFound(new { message = "Aucun profil trouvé pour ce consultant." });
-        }
-
         var outputProfiles = profiles.Select(profile => new DtoOutputProfile
         {
             ProfileUuid = profile.ProfileUuid,

@@ -16,10 +16,7 @@ public class MatchingController : ControllerBase
     {
         var matchings = await _matchingService.GetAllMatchingsFiltered();
         
-        if (!matchings.Any())
-        {
-            return NotFound("Aucun matching trouvé.");
-        }
+    
 
         var dtos = matchings
             .Where(m => m.Profile?.Consultant != null)

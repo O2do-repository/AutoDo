@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import GoBackBtn from '@/components/utils/GoBackBtn.vue'; 
+import GoBackBtn from '@/components/utils/GoBackBtn.vue';
 
 interface Consultant {
   email: string;
@@ -10,12 +10,18 @@ interface Consultant {
   intern: boolean | null;
   name: string;
   surname: string;
-  enterprise: string | null;
+  enterprise: string;
   phone: string;
   copyCI: string;
   picture: string;
 }
 
+interface Enterprise {
+  enterpriseUuid: string;
+  name: string;
+}
+
+const router = useRouter();
 const consultant = ref<Consultant>({
   email: '',
   availabilityDate: '',
@@ -23,32 +29,22 @@ const consultant = ref<Consultant>({
   intern: false,
   name: '',
   surname: '',
-  enterprise: null,
+  enterprise: '',
   phone: '',
   copyCI: '',
   picture: ''
 });
 
-const router = useRouter();
-
-const enterprises = [
-  { id: '0', name: 'O2do' },
-  { id: '1', name: 'Winch' },
-  { id: '2', name: 'MI6' }
-];
+const enterprises = ref<Enterprise[]>([]);
 
 // Validation rules
-const required = (value: string) => {
-  return value !== null && value !== undefined && value !== '' || 'Champ obligatoire';
-};
-const emailRule = (value: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'E-mail invalide';
-const phoneRule = (value: string) =>
-  /^[0-9]{10}$/.test(value) || 'Numéro de téléphone invalide (10 chiffres)';
-const dateRule = (value: string) =>
-  !!value || 'Veuillez choisir une date';
+const required = (value: string) => value?.trim() !== '' || 'Champ obligatoire';
+const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
+const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Format invalide (ex: +32444332211)";
+const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
+const imageUrlRule = (value: string) => /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i.test(value) || "Lien image invalide (ex: https://site.com/photo.jpg)";
+const dateRule = (value: string) => !!value || 'Veuillez choisir une date';
 
-// Gestion de l'upload d'image
 const placeholderImage = 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg';
 const validPicture = ref(placeholderImage);
 
@@ -86,11 +82,40 @@ const setPlaceholder = () => {
 
 watch(() => consultant.value.picture, checkImage);
 
+// Si le consultant est interne alors il sera d'O2do
+watch(() => consultant.value.intern, (newVal) => {
+  if (newVal) {
+    consultant.value.enterprise = 'O2do';
+  } else {
+    consultant.value.enterprise = '';
+  }
+});
+
+const formRef = ref<any>(null);
+
+// Fetch des entreprises
+const fetchEnterprises = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
+    if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
+
+    const data = await response.json();
+    enterprises.value = data;
+  } catch (error) {
+    console.error("Erreur fetch entreprises :", error);
+  }
+};
+
 const submitConsultant = async () => {
   try {
     if (!consultant.value.picture || consultant.value.picture.trim() === '') {
       consultant.value.picture = placeholderImage;
     }
+
+    if (!formRef.value) return;
+
+    const { valid } = await formRef.value.validate();
+    if (!valid) return;
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
       method: 'PUT',
@@ -103,108 +128,100 @@ const submitConsultant = async () => {
     }
 
     setTimeout(() => {
-      router.push('/consultant/list-consultant');
+      router.push('/consultant/consultant-info');
     }, 1000);
-
   } catch (error) {
     console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
   }
 };
 
 onMounted(() => {
+  fetchEnterprises();
+
   const storedConsultant = sessionStorage.getItem("editConsultant");
   if (storedConsultant) {
-    const parsedConsultant = JSON.parse(storedConsultant);
-
-    // Corriger le format des dates pour les inputs type="date"
-    if (parsedConsultant.expirationDateCI) {
-      parsedConsultant.expirationDateCI = parsedConsultant.expirationDateCI.split('T')[0];
-    }
-    if (parsedConsultant.availabilityDate) {
-      parsedConsultant.availabilityDate = parsedConsultant.availabilityDate.split('T')[0];
-    }
-
-    Object.assign(consultant.value, parsedConsultant);
+    const parsed = JSON.parse(storedConsultant);
+    parsed.expirationDateCI = parsed.expirationDateCI?.split('T')[0] || '';
+    parsed.availabilityDate = parsed.availabilityDate?.split('T')[0] || '';
+    Object.assign(consultant.value, parsed);
     checkImage();
   }
 });
-
 </script>
 
 <template>
   <v-container>
     <v-card class="pa-4">
-      <GoBackBtn class="mb-4"/>
+      <GoBackBtn class="mb-4" />
 
       <v-card-title class="text-h5 font-weight-bold">Modifier Consultant</v-card-title>
       <v-card-text>
-        <v-row>
-          <!-- Avatar + Image Preview -->
-          <v-col cols="12" class="d-flex flex-column align-center">
-            <v-avatar size="150">
-              <v-img 
-                :src="validPicture" 
-                alt="Photo Consultant"
-                contain
-                @error="setPlaceholder"
-              ></v-img>
-            </v-avatar>
-          </v-col>
+        <v-form ref="formRef">
+          <v-row>
+            <!-- Image Preview -->
+            <v-col cols="12" class="d-flex flex-column align-center">
+              <v-avatar size="150">
+                <v-img :src="validPicture" alt="Photo Consultant" contain @error="setPlaceholder"></v-img>
+              </v-avatar>
+            </v-col>
 
-          <!-- Champ de texte pour modifier l'image -->
-          <v-col cols="12">
-            <v-text-field 
-              variant="outlined"
-              color="primary"
-              label="Lien Photo *" 
-              v-model="consultant.picture" 
-              :placeholder="placeholderImage"
-              @focus="clearPlaceholder"
-              @blur="restorePlaceholder"
-              @input="checkImage"
-            ></v-text-field>
-          </v-col>
+            <!-- Lien de l'image -->
+            <v-col cols="12">
+              <v-text-field 
+                variant="outlined" color="primary"
+                label="Lien Photo *"
+                v-model="consultant.picture"
+                :placeholder="placeholderImage"
+                :rules="[required, imageUrlRule]"
+                @focus="clearPlaceholder"
+                @blur="restorePlaceholder"
+                @input="checkImage"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field label="Prénom *" v-model="consultant.surname" :rules="[required]" required variant="outlined" color="primary" />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field label="Nom *" v-model="consultant.name" :rules="[required]" required variant="outlined" color="primary" />
+            </v-col>
 
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Nom *" v-model="consultant.name" :rules="[required]" required></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Prénom *" v-model="consultant.surname" :rules="[required]" required></v-text-field>
-          </v-col>
 
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Lien Copie CI *" v-model="consultant.copyCI" :rules="[required]" required></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Expiration CI *" v-model="consultant.expirationDateCI" type="date"></v-text-field>
-          </v-col>
+            <v-col cols="6">
+              <v-text-field label="Lien Copie CI *" v-model="consultant.copyCI" :rules="[required, urlRule]" required variant="outlined" color="primary" />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field label="Expiration CI *" v-model="consultant.expirationDateCI" type="date" :rules="[required, dateRule]" variant="outlined" color="primary" />
+            </v-col>
 
-          <v-col cols="6">
-            <v-switch variant="outlined" color="primary" label="Stagiaire *" v-model="consultant.intern"></v-switch>
-          </v-col>
-          <v-col cols="6">
-            <v-select
-              label="Entreprise *"
-              v-model="consultant.enterprise"
-              :items="enterprises"
-              item-title="name"
-              item-value="id"
-              :rules="[required]"
-              variant="outlined" color="primary"
-            ></v-select>
-          </v-col>
+            <v-col cols="6">
+              <v-switch label="Interne" v-model="consultant.intern" color="primary" />
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                label="Entreprise *"
+                v-model="consultant.enterprise"
+                :items="enterprises"
+                item-title="name"
+                item-value="name"
+                :rules="[required]"
+                variant="outlined"
+                color="primary"
+                :disabled="!!consultant.intern"
+              />
+            </v-col>
 
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Email *" v-model="consultant.email" :rules="[required, emailRule]" required></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Téléphone *" v-model="consultant.phone" :rules="[required, phoneRule]" required></v-text-field>
-          </v-col>
+            <v-col cols="6">
+              <v-text-field label="Email *" v-model="consultant.email" :rules="[required, emailRule]" required variant="outlined" color="primary" />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field label="Téléphone *" v-model="consultant.phone" :rules="[required, phoneRule]" required variant="outlined" color="primary" />
+            </v-col>
 
-          <v-col cols="6">
-            <v-text-field variant="outlined" color="primary" label="Date de disponibilité *" v-model="consultant.availabilityDate" type="date" :rules="[dateRule]" required></v-text-field>
-          </v-col>
-        </v-row>
+            <v-col cols="6">
+              <v-text-field label="Date de disponibilité *" v-model="consultant.availabilityDate" type="date" :rules="[required, dateRule]" required variant="outlined" color="primary" />
+            </v-col>
+          </v-row>
+        </v-form>
       </v-card-text>
 
       <v-card-actions class="d-flex justify-end">

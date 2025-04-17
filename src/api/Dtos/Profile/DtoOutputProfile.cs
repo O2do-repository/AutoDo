@@ -9,7 +9,8 @@ public class DtoOutputProfile
     public int RateHour { get; set; }
 
     public string Cv { get; set; }
-
+    
+    [JsonConverter(typeof(DateOnlyJsonConverter))]
     public DateTime CvDate { get; set; }
     public string JobTitle { get; set; }
 

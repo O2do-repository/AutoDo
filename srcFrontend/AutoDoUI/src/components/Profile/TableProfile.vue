@@ -99,7 +99,7 @@ const editProfile = (profile: Profile) => {
   <v-container>
     <h1 class="text-center mb-6">Liste des Profils</h1>
 
-    <v-btn @click="goToAddProfile" color="primary" class="mb-4">Ajouter un profil</v-btn>
+    <v-btn @click="goToAddProfile" icon="mdi-plus" color="primary"  class="mb-4"></v-btn>
 
     <v-alert v-if="error" type="error" variant="outlined" class="mb-4">
       {{ error }}

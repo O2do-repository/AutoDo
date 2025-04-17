@@ -1,32 +1,37 @@
 <template>
-  <v-container>
-    <v-tabs v-model="tab" grow bg-color="transparent">
-      <v-tab v-for="(item, index) in tabs" :key="index">{{ item.label }}</v-tab>
-    </v-tabs>
-    
-    <v-window v-model="tab">
-      <v-window-item :value="0">
-        <div class="d-flex justify-center">
-          <div class="content-wrapper">
+  <v-container fluid>
+    <!-- Onglets avec un peu de marge pour les descendre -->
+    <v-row justify="center" class="mt-8 mb-4">
+      <v-col cols="12" md="8">
+        <v-tabs
+          v-model="tab"
+          grow
+          bg-color="transparent"
+          class="elevation-1 rounded"
+        >
+          <v-tab v-for="(item, index) in tabs" :key="index">
+            {{ item.label }}
+          </v-tab>
+        </v-tabs>
+      </v-col>
+    </v-row>
+
+    <!-- Contenu des onglets -->
+    <v-row justify="center">
+      <v-col cols="12" md="10" lg="8">
+        <v-window v-model="tab" class="mt-4">
+          <v-window-item :value="0">
             <EntrepriseTab />
-          </div>
-        </div>
-      </v-window-item>
-      <v-window-item :value="1">
-        <div class="d-flex justify-center">
-          <div class="content-wrapper">
+          </v-window-item>
+          <v-window-item :value="1">
             <SkillsTab />
-          </div>
-        </div>
-      </v-window-item>
-      <v-window-item :value="2">
-        <div class="d-flex justify-center">
-          <div class="content-wrapper">
+          </v-window-item>
+          <v-window-item :value="2">
             <KeywordsTab />
-          </div>
-        </div>
-      </v-window-item>
-    </v-window>
+          </v-window-item>
+        </v-window>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -49,8 +54,5 @@ const tabs: TabItem[] = [
 </script>
 
 <style scoped>
-.content-wrapper {
-  width: 80%;
-  max-width: 1000px;
-}
+/* Plus besoin de .content-wrapper car on utilise v-col */
 </style>
