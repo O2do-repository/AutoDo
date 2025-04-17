@@ -1,8 +1,9 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
+<script lang="ts">
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GoBackBtn from '@/components/utils/GoBackBtn.vue';
 
+// Définition de l'interface Profile
 interface Profile {
   consultantUuid: string;
   RateHour: number | null;
@@ -14,92 +15,152 @@ interface Profile {
   keywords: string[];
 }
 
-const profile = ref<Profile>({
-  consultantUuid: '',
-  RateHour: null,
-  CV: '',
-  CVDate: '',
-  JobTitle: '',
-  ExperienceLevel: '',
-  Skills: [],
-  keywords: []
-});
-
-const router = useRouter();
-
-const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
-const availableSkills = ref<string[]>([]);
-const availableKeywords = ref<string[]>([]);
-const formRef = ref(); 
-
-
-// Règles de validation
-const required = (v: any) => !!v || 'Champ obligatoire';
-const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
-const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
-
-const dateRule = (v: string) => !!v || 'Date requise';
-
-const fetchSkills = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`);
-    if (!res.ok) throw new Error('Erreur récupération des skills');
-    const data = await res.json();
-    availableSkills.value = data.map((item: any) => item.name);
-  } catch (error) {
-    console.error('Erreur skills :', error);
-  }
-};
-
-const fetchKeywords = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
-    if (!res.ok) throw new Error('Erreur récupération des keywords');
-    const data = await res.json();
-    availableKeywords.value = data.map((item: any) => item.name);
-  } catch (error) {
-    console.error('Erreur keywords :', error);
-  }
-};
-
-onMounted(() => {
-  const storedUuid = sessionStorage.getItem('selectedConsultantUuid');
-  if (storedUuid) {
-    profile.value.consultantUuid = storedUuid;
-  } else {
-    console.error('Aucun consultant sélectionné');
-  }
-
-  fetchSkills();
-  fetchKeywords();
-});
-
-
-// ajouter un profile
-const submitProfile = async () => {
-  if (!formRef.value) return;
-
-  const result: { valid: boolean } = await formRef.value.validate();
-  if (!result.valid) return;
-
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile.value)
+export default defineComponent({
+  name: 'AddProfile',
+  components: {
+    GoBackBtn
+  },
+  setup() {
+    // Déclaration des variables
+    const profile = ref<Profile>({
+      consultantUuid: '',
+      RateHour: null,
+      CV: '',
+      CVDate: '',
+      JobTitle: '',
+      ExperienceLevel: '',
+      Skills: [],
+      keywords: []
     });
 
-    if (!response.ok) throw new Error('Erreur lors de l\'ajout du profil');
+    const router = useRouter();
+    const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
+    const availableSkills = ref<string[]>([]);
+    const availableKeywords = ref<string[]>([]);
+    const formRef = ref<any>(null);
 
-    setTimeout(() => {
-      router.go(-1);
-    }, 1000);
+    // CV placeholder
+    const placeholderCV = 'https://example.com/default-cv.pdf';
+    const validCV = ref('');
 
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+    // Règles de validation
+    const required = (v: any) => !!v || 'Champ obligatoire';
+    const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
+    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
+    const dateRule = (v: string) => !!v || 'Date requise';
+
+    // Fonction pour récupérer les compétences
+    const fetchSkills = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`);
+        if (!res.ok) throw new Error('Erreur récupération des skills');
+        const data = await res.json();
+        availableSkills.value = data.map((item: any) => item.name);
+      } catch (error) {
+        console.error('Erreur skills :', error);
+      }
+    };
+
+    // Fonction pour récupérer les mots-clés
+    const fetchKeywords = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
+        if (!res.ok) throw new Error('Erreur récupération des keywords');
+        const data = await res.json();
+        availableKeywords.value = data.map((item: any) => item.name);
+      } catch (error) {
+        console.error('Erreur keywords :', error);
+      }
+    };
+
+    // Vérifier si le lien CV est valide
+    const checkCV = () => {
+      if (!profile.value.CV || profile.value.CV.trim() === '') {
+        validCV.value = '';
+        return;
+      }
+
+
+      validCV.value = profile.value.CV;
+    };
+
+    // Gérer le placeholder pour le CV
+    const clearPlaceholder = () => {
+      if (profile.value.CV === placeholderCV) {
+        profile.value.CV = '';
+      }
+    };
+
+    const restorePlaceholder = () => {
+      if (!profile.value.CV) {
+        profile.value.CV = placeholderCV;
+      }
+    };
+
+    // Surveiller les changements du CV
+    watch(() => profile.value.CV, checkCV);
+
+    // Récupérer le consultant UUID
+    onMounted(() => {
+      const storedUuid = sessionStorage.getItem('selectedConsultantUuid');
+      if (storedUuid) {
+        profile.value.consultantUuid = storedUuid;
+      } else {
+        console.error('Aucun consultant sélectionné');
+      }
+
+      fetchSkills();
+      fetchKeywords();
+    });
+
+    // Soumettre le profil
+    const submitProfile = async () => {
+      try {
+        if (!profile.value.CV || profile.value.CV.trim() === '') {
+          profile.value.CV = placeholderCV;
+        }
+
+        if (!formRef.value) return;
+
+        const { valid } = await formRef.value.validate();
+        if (!valid) return;
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profile.value)
+        });
+
+        if (!response.ok) {
+          throw new Error("Erreur lors de l'ajout du profil");
+        }
+
+        setTimeout(() => {
+          router.go(-1);
+        }, 1000);
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+      }
+    };
+
+    return {
+      profile,
+      experienceLevels,
+      availableSkills,
+      availableKeywords,
+      formRef,
+      required,
+      numberRule,
+      urlRule,
+      dateRule,
+      placeholderCV,
+      validCV,
+      clearPlaceholder,
+      restorePlaceholder,
+      submitProfile
+    };
   }
-};
-
+});
 </script>
 
 <template>
@@ -111,6 +172,22 @@ const submitProfile = async () => {
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
+            <!-- Lien du CV -->
+            <v-col cols="12">
+              <v-text-field 
+                label="Lien du CV *" 
+                v-model="profile.CV" 
+                variant="outlined" 
+                color="primary"
+                :placeholder="placeholderCV"
+                :rules="[required, urlRule]" 
+                @focus="clearPlaceholder"
+                @blur="restorePlaceholder"
+                required 
+              />
+            </v-col>
+
+            <!-- Job Title -->
             <v-col cols="6">
               <v-text-field 
                 label="Job Title *" 
@@ -122,6 +199,7 @@ const submitProfile = async () => {
               />
             </v-col>
 
+            <!-- Niveau d'expérience -->
             <v-col cols="6">
               <v-select 
                 label="Niveau d'expérience *" 
@@ -134,6 +212,7 @@ const submitProfile = async () => {
               />
             </v-col>
 
+            <!-- Tarif / heure -->
             <v-col cols="6">
               <v-text-field 
                 label="Tarif / heure *" 
@@ -146,17 +225,7 @@ const submitProfile = async () => {
               />
             </v-col>
 
-            <v-col cols="6">
-              <v-text-field 
-                label="Lien du CV *" 
-                v-model="profile.CV" 
-                :rules="[required, urlRule]" 
-                variant="outlined" 
-                color="primary"
-                required 
-              />
-            </v-col>
-
+            <!-- Date du CV -->
             <v-col cols="6">
               <v-text-field 
                 label="Date du CV *" 
@@ -169,9 +238,10 @@ const submitProfile = async () => {
               />
             </v-col>
 
-            <v-col cols="6">
+            <!-- Compétences -->
+            <v-col cols="12">
               <v-select 
-                label="Compétences" 
+                label="Compétences *" 
                 v-model="profile.Skills" 
                 :items="availableSkills" 
                 multiple 
@@ -183,9 +253,10 @@ const submitProfile = async () => {
               />
             </v-col>
 
+            <!-- Mots-clés -->
             <v-col cols="12">
               <v-select 
-                label="Mots-clés" 
+                label="Mots-clés *" 
                 v-model="profile.keywords" 
                 :items="availableKeywords" 
                 multiple 
@@ -200,6 +271,7 @@ const submitProfile = async () => {
         </v-form>
       </v-card-text>
 
+      <!-- Bouton Publier -->
       <v-card-actions class="d-flex justify-end">
         <v-btn color="primary" @click="submitProfile">Publier</v-btn>
       </v-card-actions>

@@ -1,6 +1,6 @@
 <template>
     <div>
-    <v-btn color="red"  density="comfortable" @click="dialog = true">
+    <v-btn color="error" icon="mdi-delete" density="comfortable" @click="dialog = true">
     </v-btn>
   
     <v-dialog v-model="dialog" max-width="500">

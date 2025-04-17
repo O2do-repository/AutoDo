@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
+<script lang="ts">
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GoBackBtn from '@/components/utils/GoBackBtn.vue';
 
@@ -14,203 +14,271 @@ interface Profile {
   keywords: string[];
 }
 
-const storedProfile = localStorage.getItem('selectedProfile');
-
-const profile = ref<Profile>(storedProfile ? JSON.parse(storedProfile) : {
-  profileUuid: '',
-  rateHour: null,
-  cv: '',
-  cvDate: '',
-  jobTitle: '',
-  experienceLevel: '',
-  skills: [],
-  keywords: []
-});
-
-const router = useRouter();
-
-const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
-const availableSkills = ref<string[]>([]);
-const availableKeywords = ref<string[]>([]);
-
-const formRef = ref(); // Référence du formulaire
-const errorMessage = ref<string | null>(null);
-
-// Règles de validation
-const required = (v: any) => !!v || 'Champ obligatoire';
-const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
-const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
-const dateRule = (v: string) => !!v || 'Date requise';
-
-// Récupération des données dynamiques
-const fetchSkills = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`);
-    if (!res.ok) throw new Error('Erreur récupération des skills');
-    const data = await res.json();
-    availableSkills.value = data.map((item: any) => item.name);
-  } catch (error) {
-    console.error('Erreur skills :', error);
-  }
-};
-
-const fetchKeywords = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
-    if (!res.ok) throw new Error('Erreur récupération des keywords');
-    const data = await res.json();
-    availableKeywords.value = data.map((item: any) => item.name);
-  } catch (error) {
-    console.error('Erreur keywords :', error);
-  }
-};
-
-onMounted(() => {
-  fetchSkills();
-  fetchKeywords();
-});
-
-const submitProfile = async () => {
-  errorMessage.value = null;
-
-  if (!formRef.value) return;
-  const result: { valid: boolean } = await formRef.value.validate();
-  if (!result.valid) return;
-
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile.value)
+export default defineComponent({
+  name: 'EditProfile',
+  components: {
+    GoBackBtn
+  },
+  setup() {
+    // Récupération du profil stocké dans le localStorage
+    const storedProfile = localStorage.getItem('selectedProfile');
+    
+    const profile = ref<Profile>(storedProfile ? JSON.parse(storedProfile) : {
+      profileUuid: '',
+      rateHour: null,
+      cv: '',
+      cvDate: '',
+      jobTitle: '',
+      experienceLevel: '',
+      skills: [],
+      keywords: []
     });
 
-    if (!response.ok) throw new Error('Erreur lors de la mise à jour du profil');
+    const router = useRouter();
+    const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
+    const availableSkills = ref<string[]>([]);
+    const availableKeywords = ref<string[]>([]);
+    const formRef = ref<any>(null);
+    const errorMessage = ref<string | null>(null);
 
-    setTimeout(() => {
-      router.go(-1);
-    }, 1000);
+    // 🧪 CV placeholder et validation
+    const placeholderCV = 'https://example.com/default-cv.pdf';
+    const validCV = ref('');
 
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
-    errorMessage.value = 'Erreur lors de la mise à jour';
+    // 🧪 Règles de validation
+    const required = (v: any) => !!v || 'Champ obligatoire';
+    const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
+    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
+    const dateRule = (v: string) => !!v || 'Date requise';
+
+    // Vérifier si le lien CV est valide
+    const checkCV = () => {
+      if (!profile.value.cv || profile.value.cv.trim() === '') {
+        validCV.value = '';
+        return;
+      }
+
+      // Pour un PDF on ne peut pas vraiment vérifier avec l'API Image
+      // mais on pourrait implémenter une vérification d'URL
+      validCV.value = profile.value.cv;
+    };
+
+    // Gérer le placeholder pour le CV
+    const clearPlaceholder = () => {
+      if (profile.value.cv === placeholderCV) {
+        profile.value.cv = '';
+      }
+    };
+
+    const restorePlaceholder = () => {
+      if (!profile.value.cv) {
+        profile.value.cv = placeholderCV;
+      }
+    };
+
+    // Surveiller les changements du CV
+    watch(() => profile.value.cv, checkCV);
+
+    // Récupération des compétences
+    const fetchSkills = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`);
+        if (!res.ok) throw new Error('Erreur récupération des skills');
+        const data = await res.json();
+        availableSkills.value = data.map((item: any) => item.name);
+      } catch (error) {
+        console.error('Erreur skills :', error);
+      }
+    };
+
+    // Récupération des mots-clés
+    const fetchKeywords = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
+        if (!res.ok) throw new Error('Erreur récupération des keywords');
+        const data = await res.json();
+        availableKeywords.value = data.map((item: any) => item.name);
+      } catch (error) {
+        console.error('Erreur keywords :', error);
+      }
+    };
+
+    // Appel des fonctions au montage du composant
+    onMounted(() => {
+      fetchSkills();
+      fetchKeywords();
+      checkCV();
+    });
+
+    // Fonction pour soumettre le profil
+    const submitProfile = async () => {
+      try {
+        if (!profile.value.cv || profile.value.cv.trim() === '') {
+          profile.value.cv = placeholderCV;
+        }
+
+        errorMessage.value = null;
+
+        if (!formRef.value) return;
+
+        const { valid } = await formRef.value.validate();
+        if (!valid) return;
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profile.value)
+        });
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de la mise à jour du profil');
+        }
+
+        setTimeout(() => {
+          router.go(-1);
+        }, 1000);
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+        errorMessage.value = 'Erreur lors de la mise à jour';
+      }
+    };
+
+    return {
+      profile,
+      experienceLevels,
+      availableSkills,
+      availableKeywords,
+      formRef,
+      required,
+      numberRule,
+      urlRule,
+      dateRule,
+      placeholderCV,
+      validCV,
+      clearPlaceholder,
+      restorePlaceholder,
+      submitProfile,
+      errorMessage
+    };
   }
-};
+});
 </script>
 
-
 <template>
-    <v-container>
+  <v-container>
+    <v-alert v-if="errorMessage" closable type="error" variant="outlined" class="mb-4">
+      {{ errorMessage }}
+    </v-alert>
+
+    <v-card class="pa-4">
+      <GoBackBtn class="mb-4" />
       
-  
-      <v-alert
-        v-if="errorMessage"
-        closable
-        type="error"
-        variant="outlined"
-        class="mb-4"
-      >
-        {{ errorMessage }}
-      </v-alert>
-  
-      <v-card class="pa-4">
-        <GoBackBtn />
-        <v-card-title class="text-h5 font-weight-bold">Modifier le Profil</v-card-title>
-        <v-card-text>
-          <v-form ref="formRef">
-            <v-row>
-              <v-col cols="6">
-                <v-text-field 
-                  label="Job Title *" 
-                  v-model="profile.jobTitle" 
-                  :rules="[required]" 
-                  variant="outlined" 
-                  color="primary" 
-                  required 
-                />
-              </v-col>
-  
-              <v-col cols="6">
-                <v-select 
-                  label="Niveau d'expérience *" 
-                  v-model="profile.experienceLevel" 
-                  :items="experienceLevels" 
-                  :rules="[required]" 
-                  variant="outlined" 
-                  color="primary" 
-                  required 
-                />
-              </v-col>
-  
-              <v-col cols="6">
-                <v-text-field 
-                  label="Tarif / heure *" 
-                  v-model.number="profile.rateHour" 
-                  type="number" 
-                  :rules="[required, numberRule]" 
-                  variant="outlined" 
-                  color="primary" 
-                  required 
-                />
-              </v-col>
-  
-              <v-col cols="6">
-                <v-text-field 
-                  label="CV URL *" 
-                  v-model="profile.cv" 
-                  :rules="[required, urlRule]" 
-                  variant="outlined" 
-                  color="primary" 
-                  required 
-                />
-              </v-col>
-  
-              <v-col cols="6">
-                <v-text-field 
-                  label="Date du CV *" 
-                  v-model="profile.cvDate" 
-                  type="date" 
-                  :rules="[required, dateRule]" 
-                  variant="outlined" 
-                  color="primary" 
-                  required 
-                />
-              </v-col>
-  
-              <v-col cols="6">
-                <v-select 
-                  label="Compétences" 
-                  v-model="profile.skills" 
-                  :items="availableSkills" 
-                  multiple 
-                  chips 
-                  closable-chips 
-                  :rules="[required]" 
-                  variant="outlined" 
-                  color="primary" 
-                />
-              </v-col>
-  
-              <v-col cols="12">
-                <v-select 
-                  label="Mots-clés" 
-                  v-model="profile.keywords" 
-                  :items="availableKeywords" 
-                  multiple 
-                  chips 
-                  closable-chips 
-                  :rules="[required]" 
-                  variant="outlined" 
-                  color="primary" 
-                />
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-  
-        <v-card-actions class="d-flex justify-end">
-          <v-btn color="primary" @click="submitProfile">Publier</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-container>
-  </template>
-  
+      <v-card-title class="text-h5 font-weight-bold">Modifier le Profil</v-card-title>
+      <v-card-text>
+        <v-form ref="formRef">
+          <v-row>
+            <!-- Lien du CV -->
+            <v-col cols="12">
+              <v-text-field 
+                label="CV URL *" 
+                v-model="profile.cv" 
+                variant="outlined" 
+                color="primary"
+                :placeholder="placeholderCV"
+                :rules="[required, urlRule]" 
+                @focus="clearPlaceholder"
+                @blur="restorePlaceholder"
+                required 
+              />
+            </v-col>
+
+            <!-- Job Title -->
+            <v-col cols="6">
+              <v-text-field
+                label="Job Title *"
+                v-model="profile.jobTitle"
+                :rules="[required]"
+                variant="outlined"
+                color="primary"
+                required
+              />
+            </v-col>
+
+            <!-- Niveau d'expérience -->
+            <v-col cols="6">
+              <v-select
+                label="Niveau d'expérience *"
+                v-model="profile.experienceLevel"
+                :items="experienceLevels"
+                :rules="[required]"
+                variant="outlined"
+                color="primary"
+                required
+              />
+            </v-col>
+
+            <!-- Tarif / heure -->
+            <v-col cols="6">
+              <v-text-field
+                label="Tarif / heure *"
+                v-model.number="profile.rateHour"
+                type="number"
+                :rules="[required, numberRule]"
+                variant="outlined"
+                color="primary"
+                required
+              />
+            </v-col>
+
+            <!-- Date du CV -->
+            <v-col cols="6">
+              <v-text-field
+                label="Date du CV *"
+                v-model="profile.cvDate"
+                type="date"
+                :rules="[required, dateRule]"
+                variant="outlined"
+                color="primary"
+                required
+              />
+            </v-col>
+
+            <!-- Compétences -->
+            <v-col cols="12">
+              <v-select
+                label="Compétences *"
+                v-model="profile.skills"
+                :items="availableSkills"
+                multiple
+                chips
+                closable-chips
+                :rules="[required]"
+                variant="outlined"
+                color="primary"
+              />
+            </v-col>
+
+            <!-- Mots-clés -->
+            <v-col cols="12">
+              <v-select
+                label="Mots-clés *"
+                v-model="profile.keywords"
+                :items="availableKeywords"
+                multiple
+                chips
+                closable-chips
+                :rules="[required]"
+                variant="outlined"
+                color="primary"
+              />
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+
+      <v-card-actions class="d-flex justify-end">
+        <v-btn color="primary" @click="submitProfile">Publier</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>
+</template>
