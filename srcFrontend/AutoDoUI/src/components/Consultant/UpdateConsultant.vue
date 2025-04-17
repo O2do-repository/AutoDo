@@ -106,8 +106,7 @@ const fetchEnterprises = async () => {
   }
 };
 
-const submitConsultant = async (event: SubmitEvent): Promise<void> => {
-  event.preventDefault();
+const submitConsultant = async () => {
   try {
     if (!consultant.value.picture || consultant.value.picture.trim() === '') {
       consultant.value.picture = placeholderImage;
@@ -115,8 +114,8 @@ const submitConsultant = async (event: SubmitEvent): Promise<void> => {
 
     if (!formRef.value) return;
 
-    const { valid } = await formRef.value.validate();
-    if (!valid) return;
+    const result: { valid: boolean } = await formRef.value.validate();
+    if (!result.valid) return;
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
       method: 'PUT',
