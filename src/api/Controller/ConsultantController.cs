@@ -36,7 +36,7 @@ public class ConsultantController : ControllerBase
         return Ok(outputConsultants);
         }
     [HttpPost]
-    public async Task<IActionResult> CreateConsultant([FromBody] DtoInputConsultant consultantDto)
+    public IActionResult CreateConsultant([FromBody] DtoInputConsultant consultantDto)
     {
         if (consultantDto == null)
         {
@@ -69,6 +69,8 @@ public class ConsultantController : ControllerBase
             return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
         }
     }
+
+
     [HttpGet("{id}")]
     public IActionResult GetConsultantById(Guid id)
     {

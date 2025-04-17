@@ -46,7 +46,7 @@
       <!-- Ajouter un Consultant -->
       <v-col cols="12" sm="4" md="2" class="text-center">
         <v-card outlined class="consultant-card d-flex flex-column align-center justify-center">
-          <v-btn @click="$router.push('/consultant/add-consultant')" icon color="primary">
+          <v-btn @click="$router.push('/consultant/add-consultant')"  icon color="primary">
             <v-icon large>mdi-plus-circle</v-icon>
           </v-btn>
         </v-card>

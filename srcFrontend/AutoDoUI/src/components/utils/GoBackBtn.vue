@@ -16,12 +16,5 @@
   };
   </script>
   
-  <style scoped>
-  /* Personnalisation du style du bouton si nécessaire */
-  .v-btn {
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-  }
-  </style>
+
   

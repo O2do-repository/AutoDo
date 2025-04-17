@@ -38,7 +38,9 @@ onMounted(() => {
 
 <template>
   <v-card v-if="consultant" class="pa-4 mb-4">
-    <GoBackBtn />
+    <v-btn to="/consultant/list-consultant" class="back-btn" outlined color="primary" size="small" icon>
+      <v-icon>mdi-arrow-left</v-icon>
+    </v-btn>
     
     <v-card-title>
       Informations du Consultant
@@ -57,7 +59,7 @@ onMounted(() => {
         </v-col>
 
         <v-col cols="12" sm="6">
-          <strong>Nom :</strong> {{ consultant.name }} {{ consultant.surname }}
+          <strong>Prénom et nom :</strong>  {{ consultant.surname }} {{ consultant.name }}
         </v-col>
         <v-col cols="12" sm="6">
           <strong>Email :</strong> {{ consultant.email }}
@@ -95,9 +97,15 @@ onMounted(() => {
     </v-card-text>
 
     <v-card-actions class="d-flex justify-end">
-      <v-btn color="primary" variant="tonal" @click="editConsultant">
-        Modifier
-      </v-btn>
+      <v-btn color="primary" variant="tonal" icon="mdi-pencil" @click="editConsultant"></v-btn>
     </v-card-actions>
   </v-card>
 </template>
+<style scoped>
+
+.back-btn {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+</style>

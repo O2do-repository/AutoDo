@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    [Migration("20250416083754_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250417090321_InitialCreateV3")]
+    partial class InitialCreateV3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -85,6 +85,9 @@ namespace data.Migrations
 
                     b.HasKey("ConsultantUuid");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("Consultant", (string)null);
                 });
 
@@ -103,6 +106,9 @@ namespace data.Migrations
 
                     b.HasKey("EnterpriseUuid");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Enterprise", (string)null);
                 });
 
@@ -120,6 +126,9 @@ namespace data.Migrations
                         .HasColumnName("Name");
 
                     b.HasKey("KeywordUuid");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Keyword", (string)null);
                 });
@@ -287,6 +296,9 @@ namespace data.Migrations
                         .HasColumnName("Name");
 
                     b.HasKey("SkillUuid");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Skill", (string)null);
                 });
