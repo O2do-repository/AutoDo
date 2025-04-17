@@ -112,6 +112,7 @@ watch(() => consultant.value.Picture, checkImage);
 
 // Post Consultant dans la database
 const submitConsultant = async (event: SubmitEvent): Promise<void> => {
+  event.preventDefault();
   try {
     if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
       consultant.value.Picture = placeholderImage;

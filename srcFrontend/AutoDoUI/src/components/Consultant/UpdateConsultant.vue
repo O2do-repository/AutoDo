@@ -107,6 +107,7 @@ const fetchEnterprises = async () => {
 };
 
 const submitConsultant = async (event: SubmitEvent): Promise<void> => {
+  event.preventDefault();
   try {
     if (!consultant.value.picture || consultant.value.picture.trim() === '') {
       consultant.value.picture = placeholderImage;
