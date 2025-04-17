@@ -111,8 +111,7 @@ const setPlaceholder = () => {
 watch(() => consultant.value.Picture, checkImage);
 
 // Post Consultant dans la database
-const submitConsultant = async (event: SubmitEvent): Promise<void> => {
-  event.preventDefault();
+const submitConsultant = async () => {
   try {
     if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
       consultant.value.Picture = placeholderImage;
@@ -120,8 +119,9 @@ const submitConsultant = async (event: SubmitEvent): Promise<void> => {
 
     if (!formRef.value) return;
 
-    const { valid } = await formRef.value.validate();
-    if (!valid) return;
+    const result: { valid: boolean } = await formRef.value.validate();
+    if (!result.valid) return;
+
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
       method: 'POST',
