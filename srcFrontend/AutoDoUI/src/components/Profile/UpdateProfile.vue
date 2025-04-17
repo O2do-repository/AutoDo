@@ -71,6 +71,7 @@ onMounted(() => {
 });
 
 const submitProfile = async (event: SubmitEvent): Promise<void> => {
+    event.preventDefault();
   errorMessage.value = null;
 
   if (!formRef.value) return;
