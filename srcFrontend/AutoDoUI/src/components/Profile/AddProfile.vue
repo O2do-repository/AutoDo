@@ -76,7 +76,7 @@ onMounted(() => {
 
 
 // ajouter un profile
-const submitProfile = async (): Promise<void> => {
+const submitProfile = async (event: SubmitEvent): Promise<void> => {
   if (!formRef.value) return;
 
   const { valid } = await formRef.value.validate();

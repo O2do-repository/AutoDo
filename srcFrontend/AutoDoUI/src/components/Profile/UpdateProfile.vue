@@ -70,7 +70,7 @@ onMounted(() => {
   fetchKeywords();
 });
 
-const submitProfile = async (): Promise<void> => {
+const submitProfile = async (event: SubmitEvent): Promise<void> => {
   errorMessage.value = null;
 
   if (!formRef.value) return;
