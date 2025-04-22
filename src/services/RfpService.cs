@@ -39,7 +39,7 @@ public class RfpService : IRfpService
             {
                 // Charger toutes les références déjà présentes en base
                 var existingReferences = _context.Rfps
-                    .Where(rfp => rfps.Select(x => x.Reference).Contains(rfp.Reference)) // Vérifie si la référence existe dans les données existantes
+                    .Where(rfp => rfps.Select(x => x.Reference).Contains(rfp.Reference)) 
                     .ToList();
 
                 foreach (var rfp in rfps)
@@ -81,7 +81,7 @@ public class RfpService : IRfpService
     }
 
 
-        public async Task ImportRfpAndGenerateMatchingsAsync()
+    public async Task ImportRfpAndGenerateMatchingsAsync()
     {
         // Début de la transaction
         using (var transaction = await _context.Database.BeginTransactionAsync())
