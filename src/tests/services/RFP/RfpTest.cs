@@ -260,7 +260,7 @@ public class RfpTest
             .SetValue(rfpService, jsonFilePath);
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await rfpService.ImportRfpAndGenerateMatchingsAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await rfpService.ImportRfpAndGenerateMatchings());
 
         // Vérifier que la base ne contient aucun RFP ajouté
         var count = await context.Rfps.CountAsync();
