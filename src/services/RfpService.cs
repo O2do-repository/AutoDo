@@ -106,6 +106,8 @@ public class RfpService : IRfpService
             }
             else
             {
+                // Générer un RFPUuid si non défini
+                rfp.RFPUuid = Guid.NewGuid();
                 _context.Rfps.Add(rfp);
             }
         }

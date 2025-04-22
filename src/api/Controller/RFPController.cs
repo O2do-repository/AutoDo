@@ -44,14 +44,29 @@ public class RfpController : ControllerBase
         }
     }
     [HttpPost("import/json")]
-    public async Task<IActionResult> ImportFromRawJson([FromBody] List<RFP> rfps)
+    public async Task<IActionResult> ImportFromRawJson([FromBody] List<DtoInputRFP> rfps)
     {
         if (rfps == null || rfps.Count == 0)
             return BadRequest("Le JSON reçu est vide ou invalide.");
 
         try
         {
-            await _rfpService.ImportFromJsonData(rfps);
+            var mappedRfps = rfps.Select(dto => new RFP
+            {
+                Reference = dto.Reference,
+                DeadlineDate = dto.DeadlineDate,
+                DescriptionBrut = dto.DescriptionBrut,
+                ExperienceLevel = dto.ExperienceLevel,
+                Skills = dto.Skills,
+                JobTitle = dto.JobTitle,
+                RfpUrl = dto.RfpUrl,
+                Workplace = dto.Workplace,
+                PublicationDate = dto.PublicationDate,
+                RfpPriority = dto.RfpPriority
+            }).ToList();
+
+            await _rfpService.ImportFromJsonData(mappedRfps);
+
             return Ok("Importation depuis JSON brut réussie !");
         }
         catch (Exception ex)
@@ -59,5 +74,6 @@ public class RfpController : ControllerBase
             return StatusCode(500, $"Erreur d'importation : {ex.Message}");
         }
     }
+
 
 }
