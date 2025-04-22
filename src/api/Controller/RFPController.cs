@@ -34,7 +34,7 @@ public class RfpController : ControllerBase
     {
         try
         {
-            await _rfpService.ImportRfpAndGenerateMatchingsAsync();
+            await _rfpService.ImportRfpAndGenerateMatchings();
 
             return Ok("Importation des RFPs et génération des matchings réussie !");
         }
@@ -43,4 +43,21 @@ public class RfpController : ControllerBase
             return BadRequest($"Erreur : {ex.Message}");
         }
     }
+    [HttpPost("import/json")]
+    public async Task<IActionResult> ImportFromRawJson([FromBody] List<RFP> rfps)
+    {
+        if (rfps == null || rfps.Count == 0)
+            return BadRequest("Le JSON reçu est vide ou invalide.");
+
+        try
+        {
+            await _rfpService.ImportFromJsonData(rfps);
+            return Ok("Importation depuis JSON brut réussie !");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erreur d'importation : {ex.Message}");
+        }
+    }
+
 }
