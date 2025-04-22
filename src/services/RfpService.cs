@@ -79,9 +79,46 @@ public class RfpService : IRfpService
             throw new InvalidOperationException("Erreur lors de la lecture du fichier JSON et de l'enregistrement en base de données.", ex);
         }
     }
+    public async Task ImportFromJsonData(List<RFP> rfps)
+    {
+        if (rfps == null || rfps.Count == 0)
+            throw new ArgumentException("Liste vide.");
+
+        var existingReferences = _context.Rfps
+            .Where(rfp => rfps.Select(x => x.Reference).Contains(rfp.Reference))
+            .ToList();
+
+        foreach (var rfp in rfps)
+        {
+            rfp.Skills ??= new List<string>();
+            var existing = existingReferences.FirstOrDefault(x => x.Reference == rfp.Reference);
+
+            if (existing != null)
+            {
+                existing.JobTitle = rfp.JobTitle;
+                existing.DescriptionBrut = rfp.DescriptionBrut;
+                existing.PublicationDate = rfp.PublicationDate;
+                existing.DeadlineDate = rfp.DeadlineDate;
+                existing.RfpUrl = rfp.RfpUrl;
+                existing.Workplace = rfp.Workplace;
+                existing.RfpPriority = rfp.RfpPriority;
+                existing.ExperienceLevel = rfp.ExperienceLevel;
+            }
+            else
+            {
+                _context.Rfps.Add(rfp);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        var allRfps = await _context.Rfps.ToListAsync();
+        await _matchingService.MatchingsForRfpsAsync(allRfps);
+    }
 
 
-    public async Task ImportRfpAndGenerateMatchingsAsync()
+
+    public async Task ImportRfpAndGenerateMatchings()
     {
         // Début de la transaction
         using (var transaction = await _context.Database.BeginTransactionAsync())
