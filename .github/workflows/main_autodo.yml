@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Important pour SonarCloud pour voir l'historique complet
+          fetch-depth: 0  
       
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
@@ -46,8 +46,11 @@ jobs:
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          /d:sonar.inclusions="src/data/**/*.cs,src/domain/**/*.cs,src/services/**/*.cs,src/tests/**/*.cs"
+          /d:sonar.exclusions="**/bin/**,**/obj/**"
           /d:sonar.verbose=true
         shell: pwsh
+
       
       - name: Restore dependencies
         run: dotnet restore src
@@ -65,9 +68,6 @@ jobs:
           /p:CoverletOutput="./coverage.opencover.xml"
         shell: pwsh
       
-      - name: List coverage files (for debugging)
-        run: Get-ChildItem -Path src -Recurse -Filter *.opencover.xml
-        shell: pwsh
       
       - name: End SonarCloud Analysis
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
@@ -82,24 +82,7 @@ jobs:
           name: .net-app
           path: ${{ env.DOTNET_ROOT }}/myapp
       
-      # Ajout d'un rapport HTML de couverture comme alternative
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
-        shell: pwsh
-      
-      - name: Generate HTML coverage report
-        run: >
-          reportgenerator
-          -reports:**/coverage.opencover.xml
-          -targetdir:coverage-report
-          -reporttypes:Html
-        shell: pwsh
-      
-      - name: Upload coverage HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage-report
+    
   
   deploy:
     runs-on: windows-latest
