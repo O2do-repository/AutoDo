@@ -64,6 +64,10 @@
         {{ error }}
       </v-col>
     </v-row>
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+      {{ snackbarMessage }}
+    </v-snackbar>
+
   </v-container>
 </template>
 
@@ -94,27 +98,38 @@ export default defineComponent({
     const loading = ref(false);
     const error = ref<string | null>(null);
     const router = useRouter();
+    const snackbar = ref(false);
+    const snackbarMessage = ref('');
+    const snackbarColor = ref('green');
+
 
     // Image par défaut
     const defaultImage = 'https://via.placeholder.com/150?text=No+Image';
 
-    const fetchProfiles = async () => {
-      loading.value = true;
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`);
-        if (!response.ok) throw new Error('Failed to fetch consultants');
-        const data = await response.json();
-        consultants.value = data;
-      } catch (err: any) {
-        error.value = err.message || 'Unknown error';
-      } finally {
-        loading.value = false;
+    const fetchConsultants = async () => {
+    loading.value = true;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`);
+      if (!response.ok) throw new Error('Failed to fetch consultants');
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        consultants.value = data.data; 
+      } else {
+        throw new Error('Invalid data format');
       }
-    };
-
-    const handleConsultantDeleted = (uuid: string) => {
-      consultants.value = consultants.value.filter(c => c.consultantUuid !== uuid);
-    };
+    } catch (err: any) {
+      error.value = err.message || 'Unknown error';
+    } finally {
+      loading.value = false;
+    }
+  };
+  const handleConsultantDeleted = ({ uuid, message }: { uuid: string; message: string }) => {
+    consultants.value = consultants.value.filter(c => c.consultantUuid !== uuid);
+    snackbarMessage.value = message;
+    snackbarColor.value = 'green';
+    snackbar.value = true;
+  };
 
 
     const deleteConsultant = async (uuid: string) => {
@@ -142,13 +157,16 @@ export default defineComponent({
 };
 
     onMounted(() => {
-      fetchProfiles();
+      fetchConsultants();
     });
 
     return {
       consultants,
       loading,
       error,
+      snackbar,
+      snackbarMessage,
+      snackbarColor,
       deleteConsultant,
       goToConsultantProfiles,
       defaultImage,

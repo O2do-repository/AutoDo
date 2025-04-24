@@ -27,9 +27,7 @@
     import { ref } from 'vue';
     import { useRouter } from 'vue-router';
 
-    const snackbar = ref(false);
-    const snackbarMessage = ref('');
-    const snackbarColor = ref('');
+
 
   
     const props = defineProps<{
@@ -37,36 +35,57 @@
     }>();
   
     const emit = defineEmits<{
-        (e: 'profileDeleted', payload: { message: string; color: string }): void;
-    }>();
+    (e: 'profileDeleted', payload: { uuid: string; message: string }): void;
+  }>();
   
     const dialog = ref(false);
     const loading = ref(false);
+    const snackbar = ref(false);
+    const snackbarMessage = ref('');
+    const snackbarColor = ref('');
     const router = useRouter();
     
-    const deleteProfile = async () => {
-  loading.value = true;
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/${props.profileUuid}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erreur ${response.status}: Suppression échouée`);
+    const deleteProfile= async () => {
+    if (!props.profileUuid) {
+      snackbarMessage.value = 'UUID profil manquant';
+      snackbarColor.value = 'red';
+      snackbar.value = true;
+      return;
     }
 
-    dialog.value = false;
-    emit('profileDeleted', { message: 'Profil supprimé avec succès', color: 'green' });
+    loading.value = true;
 
-  } catch (error) {
-    console.error(error);
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inattendue';
-    emit('profileDeleted', { message: errorMessage, color: 'red' });
-  } finally {
-    loading.value = false;
-  }
-};
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/${props.profileUuid}`, {
+        method: 'DELETE',
+      });
+
+      const rawText = await response.text();
+
+      let result: any;
+      try {
+        result = JSON.parse(rawText);
+      } catch (e) {
+        throw new Error('Erreur serveur : réponse invalide');
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Erreur lors de la suppression');
+      }
+
+      emit('profileDeleted', {
+        uuid: props.profileUuid, 
+        message: result.message || 'Profile supprimé avec succès',
+      });
+
+    } catch (error: any) {
+      snackbarMessage.value = error.message || 'Erreur inconnue';
+      snackbarColor.value = 'red';
+    } finally {
+      snackbar.value = true;
+      loading.value = false;
+    }
+  };
 
 
 

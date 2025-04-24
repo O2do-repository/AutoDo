@@ -324,51 +324,112 @@ public class MatchingServiceTest
         Assert.DoesNotContain(result, m => m.MatchingUuid == rejectedMatching.MatchingUuid); 
     }
     [Fact]
-public async Task Test_GetAllMatchingsFiltered_Should_Exclude_Low_Score_Matchings()
-{
-    // Arrange
-    var dbContext = GetInMemoryDbContext();
-    SeedDatabase(dbContext);
-
-    var service = new MatchingService(dbContext);
-
-    var profile = new Profile
+    public async Task Test_GetAllMatchingsFiltered_Should_Exclude_Low_Score_Matchings()
     {
-        ProfileUuid = Guid.NewGuid(),
-        Ratehour = 50,
-        CV = "https://example.com/cv1.pdf",
-        CVDate = DateTime.Today,
-        JobTitle = "Software Engineer",
-        ExperienceLevel = Experience.Junior,
-        ConsultantUuid = Guid.NewGuid(),
-        Skills = new List<string> { "Java", "JavaScript" },
-        Keywords = new List<string> { "Architect", "DevOps" }
-    };
+        // Arrange
+        var dbContext = GetInMemoryDbContext();
+        SeedDatabase(dbContext);
 
-    dbContext.Profiles.Add(profile);
-    await dbContext.SaveChangesAsync();
+        var service = new MatchingService(dbContext);
 
-    // Création d'un matching avec un score faible
-    var lowScoreMatching = new Matching
+        var profile = new Profile
+        {
+            ProfileUuid = Guid.NewGuid(),
+            Ratehour = 50,
+            CV = "https://example.com/cv1.pdf",
+            CVDate = DateTime.Today,
+            JobTitle = "Software Engineer",
+            ExperienceLevel = Experience.Junior,
+            ConsultantUuid = Guid.NewGuid(),
+            Skills = new List<string> { "Java", "JavaScript" },
+            Keywords = new List<string> { "Architect", "DevOps" }
+        };
+
+        dbContext.Profiles.Add(profile);
+        await dbContext.SaveChangesAsync();
+
+        // Création d'un matching avec un score faible
+        var lowScoreMatching = new Matching
+        {
+            MatchingUuid = Guid.NewGuid(),
+            ProfileUuid = profile.ProfileUuid,
+            RfpUuid = new Guid("123e4567-e89b-12d3-a456-426614174233"), // RFP existant
+            Score = 0, // Un score faible
+            Comment = "Low score Matching",
+            StatutMatching = StatutMatching.New
+        };
+
+        dbContext.Matchings.Add(lowScoreMatching);
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await service.GetAllMatchingsFiltered();
+
+        // Assert
+        // Vérifie que le matching avec un score faible n'est pas dans les résultats
+        Assert.DoesNotContain(result, m => m.MatchingUuid == lowScoreMatching.MatchingUuid);
+    }
+    [Fact]
+    public async Task MatchingsForRfpsAsync_Should_Create_Matchings_For_Each_Profile()
     {
-        MatchingUuid = Guid.NewGuid(),
-        ProfileUuid = profile.ProfileUuid,
-        RfpUuid = new Guid("123e4567-e89b-12d3-a456-426614174233"), // RFP existant
-        Score = 0, // Un score faible
-        Comment = "Low score Matching",
-        StatutMatching = StatutMatching.New
-    };
+        // Arrange
+        var dbContext = GetInMemoryDbContext();
 
-    dbContext.Matchings.Add(lowScoreMatching);
-    await dbContext.SaveChangesAsync();
+        var rfp = new RFP
+        {
+            RFPUuid = Guid.NewGuid(),
+            DeadlineDate = DateTime.Today.AddDays(10),
+            DescriptionBrut = "Test RFP",
+            PublicationDate = DateTime.Today,
+            JobTitle = "Engineer",
+            ExperienceLevel = Experience.Junior,
+            RfpUrl = "https://example.com/rfp",
+            Skills = new List<string> { "Java" },
+            Workplace = "Remote",
+            RfpPriority = "haute",
+            Reference = "RFP-Test"
+        };
 
-    // Act
-    var result = await service.GetAllMatchingsFiltered();
+        var profiles = new List<Profile>
+        {
+            new Profile
+            {
+                ProfileUuid = Guid.NewGuid(),
+                CV = "cv1.pdf",
+                CVDate = DateTime.Today,
+                JobTitle = "Engineer",
+                ExperienceLevel = Experience.Junior,
+                ConsultantUuid = Guid.NewGuid(),
+                Skills = new List<string> { "Java" },
+                Keywords = new List<string> { "DevOps" }
+            },
+            new Profile
+            {
+                ProfileUuid = Guid.NewGuid(),
+                CV = "cv2.pdf",
+                CVDate = DateTime.Today,
+                JobTitle = "Engineer",
+                ExperienceLevel = Experience.Junior,
+                ConsultantUuid = Guid.NewGuid(),
+                Skills = new List<string> { "Python" },
+                Keywords = new List<string> { "Data" }
+            }
+        };
 
-    // Assert
-    // Vérifie que le matching avec un score faible n'est pas dans les résultats
-    Assert.DoesNotContain(result, m => m.MatchingUuid == lowScoreMatching.MatchingUuid);
-}
+        dbContext.Rfps.Add(rfp);
+        dbContext.Profiles.AddRange(profiles);
+        await dbContext.SaveChangesAsync();
+
+        var service = new MatchingService(dbContext);
+
+        // Act
+        var result = await service.MatchingsForRfpsAsync(new List<RFP> { rfp });
+
+        // Assert
+        Assert.Equal(profiles.Count, result.Count);
+    }
+
+
 
 
 }

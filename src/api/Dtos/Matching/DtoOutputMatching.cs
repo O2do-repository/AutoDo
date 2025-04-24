@@ -7,6 +7,7 @@ public class DtoOutputMatching
     public string ConsultantName { get; set; }
     public string ConsultantSurname { get; set; }
     public string RfpReference { get; set; }
+    public string RfpUrl{get;set;}
     public int Score { get; set; }
     public DateTime OfferDate { get; set; }
     public string Comment { get; set; }

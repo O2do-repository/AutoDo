@@ -15,8 +15,6 @@ public class MatchingController : ControllerBase
     public async Task<ActionResult<List<DtoOutputMatching>>> GetAllMatchings()
     {
         var matchings = await _matchingService.GetAllMatchingsFiltered();
-        
-    
 
         var dtos = matchings
             .Where(m => m.Profile?.Consultant != null)
@@ -25,6 +23,7 @@ public class MatchingController : ControllerBase
                 JobTitle = m.Profile.JobTitle,
                 ConsultantName = m.Profile.Consultant.Name,
                 ConsultantSurname = m.Profile.Consultant.Surname,
+                RfpUrl = m.Rfp.RfpUrl,
                 MatchingUuid = m.MatchingUuid,
                 RfpReference = m.Rfp?.Reference,
                 Score = m.Score,
@@ -36,7 +35,12 @@ public class MatchingController : ControllerBase
             })
             .ToList();
 
-        return Ok(dtos);
+        return Ok(new
+        {
+            success = true,
+            message = "Liste des matching récupérée avec succès.",
+            data = dtos
+        });
     }
 
     [HttpPut("{id}")]
@@ -44,7 +48,11 @@ public class MatchingController : ControllerBase
     {
         if (dto == null)
         {
-            return BadRequest("Données de matching invalides.");
+            return BadRequest(new
+            {
+                success = false,
+                message = "Données de matching invalides."
+            });
         }
 
         try
@@ -61,14 +69,21 @@ public class MatchingController : ControllerBase
 
             var updatedMatching = await _matchingService.UpdateMatchingAsync(id, matching);
 
-            return Ok(updatedMatching);
+            return Ok(new
+            {
+                success = true,
+                message = "Matching mis à jour avec succès.",
+                data = updatedMatching
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            return BadRequest(new
+            {
+                success = false,
+                message = "Erreur lors de la mise à jour du matching.",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
         }
-
     }
-
-
 }

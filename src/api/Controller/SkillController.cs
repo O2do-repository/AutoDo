@@ -6,11 +6,9 @@ public class SkillController : ControllerBase
 {
     private readonly ISkillService _skillService;
 
-
     public SkillController(ISkillService skillService)
     {
         _skillService = skillService;
-
     }
 
     [HttpGet]
@@ -20,12 +18,16 @@ public class SkillController : ControllerBase
 
         var outputSkill = skills.Select(skill => new DtoOutputSkill
         {
-            SkillUuid = skill.SkillUuid,                     
-            Name = skill.Name,                            
-                  
+            SkillUuid = skill.SkillUuid,
+            Name = skill.Name,
         }).ToList();
 
-        return Ok(outputSkill);
+        return Ok(new
+        {
+            success = true,
+            message = "Liste des compétences récupérée avec succès.",
+            data = outputSkill
+        });
     }
 
     [HttpPost]
@@ -33,7 +35,11 @@ public class SkillController : ControllerBase
     {
         if (skillDto == null)
         {
-            throw new ArgumentException("SkillUuid is empty or invalid");
+            return BadRequest(new
+            {
+                success = false,
+                message = "Les données de la compétence sont invalides."
+            });
         }
 
         try
@@ -46,28 +52,47 @@ public class SkillController : ControllerBase
 
             var newSkill = _skillService.AddSkill(skill);
 
-            return Ok(newSkill);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Compétence créée avec succès.",
+                data = newSkill
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+            return BadRequest(new
+            {
+                success = false,
+                message = "Erreur lors de la création de la compétence.",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
         }
     }
-
 
     [HttpDelete("{skillUuid}")]
     public IActionResult DeleteSkill(Guid skillUuid)
     {
         try
         {
+
+
             _skillService.DeleteSkill(skillUuid);
-            return NoContent();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Compétence supprimée avec succès."
+            });
         }
         catch (Exception ex)
         {
-            return NotFound(new { message = ex.Message });
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Erreur lors de la suppression de la compétence.",
+                details = ex.Message
+            });
         }
     }
-  
-
 }

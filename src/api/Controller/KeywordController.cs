@@ -22,7 +22,12 @@ public class KeywordController : ControllerBase
             Name = keyword.Name,
         }).ToList();
 
-        return Ok(outputKeywords);
+        return Ok(new
+        {
+            success = true,
+            message = "Liste des mots-clés récupérée avec succès.",
+            data = outputKeywords
+        });
     }
 
     [HttpPost]
@@ -30,7 +35,11 @@ public class KeywordController : ControllerBase
     {
         if (keywordDto == null)
         {
-            throw new ArgumentException("Keyword data is invalid");
+            return BadRequest(new
+            {
+                success = false,
+                message = "Les données du mot-clé sont invalides."
+            });
         }
 
         try
@@ -43,26 +52,46 @@ public class KeywordController : ControllerBase
 
             var newKeyword = _keywordService.AddKeyword(keyword);
 
-            return Ok(newKeyword);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Mot-clé créé avec succès.",
+                data = newKeyword
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+            return BadRequest(new
+            {
+                success = false,
+                message = "Erreur lors de la création du mot-clé.",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
         }
     }
-
 
     [HttpDelete("{keywordUuid}")]
     public IActionResult DeleteKeyword(Guid keywordUuid)
     {
         try
         {
+
             _keywordService.DeleteKeyword(keywordUuid);
-            return NoContent();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Mot-clé supprimé avec succès."
+            });
         }
         catch (Exception ex)
         {
-            return NotFound(new { message = ex.Message });
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Erreur lors de la suppression du mot-clé.",
+                details = ex.Message
+            });
         }
     }
 }

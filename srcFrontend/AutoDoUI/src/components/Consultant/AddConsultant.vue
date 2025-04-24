@@ -51,7 +51,12 @@ export default defineComponent({
     const placeholderImage = 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg';
     const validPicture = ref(placeholderImage);
 
-    // 🧪 Validation Rules
+    // Indicateurs de statut
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    const success = ref(false);
+
+    // Validation Rules
     const required = (value: string) => value?.trim() !== '' || 'Champ obligatoire';
     const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
     const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Format invalide (ex: +32444332211)";
@@ -65,7 +70,7 @@ export default defineComponent({
         const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
         if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
         const data = await response.json();
-        enterprises.value = data;
+        enterprises.value = data.data;
       } catch (error) {
         console.error("Erreur fetch entreprises :", error);
       }
@@ -117,6 +122,10 @@ export default defineComponent({
 
     // Post Consultant dans la database
     const submitConsultant = async () => {
+      loading.value = true;
+      error.value = null;
+      success.value = false;
+
       try {
         if (!consultant.value.Picture || consultant.value.Picture.trim() === '') {
           consultant.value.Picture = placeholderImage;
@@ -133,16 +142,20 @@ export default defineComponent({
           body: JSON.stringify(consultant.value)
         });
 
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error("Erreur lors de l'ajout du consultant");
+          throw new Error(data.message || "Erreur lors de l'ajout du consultant");
         }
 
+        success.value = data.message || 'Consultant modifié avec succès !';
         setTimeout(() => {
-          router.push('/consultant/list-consultant');
+          router.push('/consultant/consultant-info');
         }, 1000);
 
-      } catch (error) {
-        console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -165,7 +178,10 @@ export default defineComponent({
       restorePlaceholder,
       setPlaceholder,
       submitConsultant,
-      placeholderImage
+      placeholderImage,
+      loading,
+      error,
+      success
     };
   }
 });
@@ -318,12 +334,20 @@ export default defineComponent({
             </v-col>
           </v-row>
         </v-form>
+
+
+
       </v-card-text>
+      <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
+      <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
+      <v-alert v-if="success" type="success" class="mt-4">Consultant ajouté avec succès !</v-alert>
 
       <!-- Bouton Publier -->
       <v-card-actions class="d-flex justify-end">
-        <v-btn color="primary" @click="submitConsultant">Publier</v-btn>
+        <v-btn color="primary" @click="submitConsultant" :loading="loading">Publier</v-btn>
       </v-card-actions>
+              <!-- Afficher des messages de statut -->
+
     </v-card>
   </v-container>
 </template>

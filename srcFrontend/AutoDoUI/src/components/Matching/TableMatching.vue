@@ -7,6 +7,7 @@ interface Matching {
   rfpUuid: string;
   profileUuid: string;
   jobTitle: string;
+  rfpUrl: string;
   consultantName: string;
   consultantSurname: string;
   rfpReference: string;
@@ -53,7 +54,7 @@ const fetchMatchings = async () => {
     if (!response.ok) throw new Error("Erreur, impossible de récupérer les matchings");
     
     const data = await response.json();
-    profiles.value = (Array.isArray(data) ? data : [data]).map(m => ({
+    profiles.value = (Array.isArray(data.data) ? data.data : [data.data]).map((m: any) => ({
       ...m,
       editable: false 
     }));
@@ -185,6 +186,22 @@ onMounted(fetchMatchings);
 <template>
   <v-container>
     <h1 class="text-center mb-6">Liste des Matchings</h1>
+    <v-alert type="info" variant="outlined" class="mb-4 d-flex align-center">
+      Vous devez être connecté pour accéder aux liens RFP sur le site Connecting-Expertise.
+
+      <v-btn
+        color="info"
+        variant="outlined"
+        href="https://customer.connecting-expertise.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        size="small"
+      >
+
+        Se connecter
+      </v-btn>
+    </v-alert>
+
 
     <div class="d-flex align-center mb-4">
       <v-text-field 
@@ -244,6 +261,21 @@ onMounted(fetchMatchings);
                 class="elevation-1 mb-4"
                 density="compact"
               >
+              <template v-slot:item.rfpReference="{ item }">
+                <div>
+                  <a
+                    :href="item.rfpUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="color: #1976d2; text-decoration: underline;"
+                  >
+                    {{ item.rfpReference }}
+
+                  </a>
+
+                </div>
+              </template>
+
                 <!-- Checkbox -->
                 <template v-slot:item.edit="{ item }">
                   <v-checkbox v-model="item.editable" hide-details />

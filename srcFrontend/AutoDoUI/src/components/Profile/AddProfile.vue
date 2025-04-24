@@ -55,7 +55,7 @@ export default defineComponent({
         const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`);
         if (!res.ok) throw new Error('Erreur récupération des skills');
         const data = await res.json();
-        availableSkills.value = data.map((item: any) => item.name);
+        availableSkills.value = data.data.map((item: any) => item.name);
       } catch (error) {
         console.error('Erreur skills :', error);
       }
@@ -67,7 +67,7 @@ export default defineComponent({
         const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
         if (!res.ok) throw new Error('Erreur récupération des keywords');
         const data = await res.json();
-        availableKeywords.value = data.map((item: any) => item.name);
+        availableKeywords.value = data.data.map((item: any) => item.name);
       } catch (error) {
         console.error('Erreur keywords :', error);
       }
@@ -113,8 +113,16 @@ export default defineComponent({
       fetchKeywords();
     });
 
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    const success = ref(false);
+
+
     // Soumettre le profil
     const submitProfile = async () => {
+      loading.value = true;
+      error.value = null;
+      success.value = false;
       try {
         if (!profile.value.CV || profile.value.CV.trim() === '') {
           profile.value.CV = placeholderCV;
@@ -131,15 +139,20 @@ export default defineComponent({
           body: JSON.stringify(profile.value)
         });
 
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error("Erreur lors de l'ajout du profil");
+          throw new Error(data.message || "Erreur lors de l'ajout du profil");
         }
 
+        success.value = data.message || 'Profil modifié avec succès !';
         setTimeout(() => {
-          router.go(-1);
+          router.push('/consultant/consultant-info');
         }, 1000);
-      } catch (error) {
-        console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -157,7 +170,10 @@ export default defineComponent({
       validCV,
       clearPlaceholder,
       restorePlaceholder,
-      submitProfile
+      submitProfile,
+      loading,
+      error,
+      success
     };
   }
 });
@@ -270,6 +286,9 @@ export default defineComponent({
           </v-row>
         </v-form>
       </v-card-text>
+      <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
+      <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
+      <v-alert v-if="success" type="success" class="mt-4">Consultant ajouté avec succès !</v-alert>
 
       <!-- Bouton Publier -->
       <v-card-actions class="d-flex justify-end">
