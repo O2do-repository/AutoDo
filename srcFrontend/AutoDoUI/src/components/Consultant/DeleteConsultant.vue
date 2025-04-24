@@ -32,9 +32,9 @@
 
   
   const emit = defineEmits<{
-    (e: 'consultantDeleted', uuid: string): void;
+    (e: 'consultantDeleted', payload: { uuid: string; message: string }): void;
   }>();
-  
+
   const dialog = ref(false);
   const loading = ref(false);
   const snackbar = ref(false);
@@ -42,26 +42,46 @@
   const snackbarColor = ref('');
   
   const deleteConsultant = async () => {
-    console.log('Consultant UUID à supprimer:', props.consultantUuid);  // Vérifie ici l'UUID
-    loading.value = true;
+  if (!props.consultantUuid) {
+    snackbarMessage.value = 'UUID consultant manquant';
+    snackbarColor.value = 'red';
+    snackbar.value = true;
+    return;
+  }
+
+  loading.value = true;
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant/${props.consultantUuid}`, {
+      method: 'DELETE',
+    });
+
+    const rawText = await response.text();
+
+    let result: any;
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant/${props.consultantUuid}`, {
-        method: 'DELETE',
-      });
-  
-      if (!response.ok) throw new Error('Erreur lors de la suppression');
-  
-      emit('consultantDeleted', props.consultantUuid);
-      snackbarMessage.value = 'Consultant supprimé avec succès';
-      snackbarColor.value = 'green';
-      dialog.value = false;
-    } catch (error: any) {
-      snackbarMessage.value = error.message || 'Erreur inconnue';
-      snackbarColor.value = 'red';
-    } finally {
-      snackbar.value = true;
-      loading.value = false;
+      result = JSON.parse(rawText);
+    } catch (e) {
+      throw new Error('Erreur serveur : réponse invalide');
     }
-  };
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Erreur lors de la suppression');
+    }
+
+    emit('consultantDeleted', {
+      uuid: props.consultantUuid, 
+      message: result.message || 'Consultant supprimé avec succès',
+    });
+
+  } catch (error: any) {
+    snackbarMessage.value = error.message || 'Erreur inconnue';
+    snackbarColor.value = 'red';
+  } finally {
+    snackbar.value = true;
+    loading.value = false;
+  }
+};
+
   </script>
   

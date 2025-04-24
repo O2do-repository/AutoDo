@@ -14,10 +14,11 @@ interface Profile {
   skills: string[];
   keywords: string[];
 }
-interface Consultant {
-    consultantUuid: string;
 
+interface Consultant {
+  consultantUuid: string;
 }
+
 const router = useRouter();
 const profiles = ref<Profile[]>([]);
 const error = ref<string | null>(null);
@@ -26,7 +27,6 @@ const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('');
 const consultantUuid = ref<string | null>(null);
-
 const consultant = ref<Consultant | null>(null);
 
 // Récupère les données du consultant depuis sessionStorage
@@ -39,6 +39,7 @@ onMounted(() => {
     error.value = "Aucun consultant sélectionné.";
   }
 });
+
 const goToAddProfile = () => {
   if (consultant.value) {
     // Stocke l'UUID du consultant dans sessionStorage
@@ -51,11 +52,23 @@ const goToAddProfile = () => {
   }
 };
 
-const handleProfileDeleted = (payload: { message: string; color: string }) => {
-  snackbarMessage.value = payload.message;
-  snackbarColor.value = payload.color;
+const handleProfileDeleted = ({ uuid, message }: { uuid: string; message: string }) => {
+  if (uuid) {
+    // Remove the deleted profile from the profiles list
+    profiles.value = profiles.value.filter(p => p.profileUuid !== uuid);
+    snackbarColor.value = 'success';
+  } else {
+    // This is an error message
+    snackbarColor.value = 'error';
+  }
+  
+  snackbarMessage.value = message;
   snackbar.value = true;
-  fetchProfiles();
+  
+  // Refresh profiles only on successful deletion
+  if (uuid) {
+    fetchProfiles();
+  }
 };
 
 const headers = ref([
@@ -80,8 +93,9 @@ const fetchProfiles = async () => {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/consultant/${consultant.value.consultantUuid}`);
     if (!response.ok) throw new Error('Erreur lors de la récupération des profils');
-    const data = await response.json();
-    profiles.value = data;
+    
+    const { data } = await response.json(); 
+    profiles.value = data; 
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Une erreur est survenue";
   }
@@ -92,9 +106,7 @@ const editProfile = (profile: Profile) => {
   localStorage.setItem('selectedProfile', JSON.stringify(profile));
   router.push({ path: `/profile/edit-profile` });
 };
-
 </script>
-
 <template>
   <v-container>
     <h1 class="text-center mb-6">Liste des Profils</h1>

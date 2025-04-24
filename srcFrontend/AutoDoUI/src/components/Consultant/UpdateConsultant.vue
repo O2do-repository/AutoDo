@@ -44,6 +44,10 @@ export default defineComponent({
     const enterprises = ref<Enterprise[]>([]);
     const formRef = ref<any>(null);
 
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    const success = ref(false);
+
     // Validation rules
     const required = (value: string) => value?.trim() !== '' || 'Champ obligatoire';
     const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
@@ -105,13 +109,17 @@ export default defineComponent({
         if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
 
         const data = await response.json();
-        enterprises.value = data;
+        enterprises.value = data.data;
       } catch (error) {
         console.error("Erreur fetch entreprises :", error);
       }
     };
 
     const submitConsultant = async () => {
+      loading.value = true;
+      error.value = null;
+      success.value = false;
+
       try {
         if (!consultant.value.picture || consultant.value.picture.trim() === '') {
           consultant.value.picture = placeholderImage;
@@ -119,27 +127,31 @@ export default defineComponent({
 
         if (!formRef.value) return;
 
-        const result = await formRef.value.validate() as any;
-        if (!result.valid) return;
-        
+        const { valid } = await formRef.value.validate();
+        if (!valid) return;
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(consultant.value)
         });
 
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error("Erreur lors de la modification du consultant");
+          throw new Error(data.message || "Erreur lors de l'ajout du consultant");
         }
-        sessionStorage.setItem("selectedConsultant", JSON.stringify(consultant.value));
+
+        success.value = data.message || 'Consultant modifié avec succès !';
         setTimeout(() => {
           router.push('/consultant/consultant-info');
         }, 1000);
-      } catch (error) {
-        console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+      } finally {
+        loading.value = false;
       }
     };
-
     onMounted(() => {
       fetchEnterprises();
 
@@ -168,7 +180,10 @@ export default defineComponent({
       restorePlaceholder,
       setPlaceholder,
       submitConsultant,
-      placeholderImage
+      placeholderImage,
+      loading,
+      error,
+      success
     };
   }
 });
@@ -247,10 +262,13 @@ export default defineComponent({
           </v-row>
         </v-form>
       </v-card-text>
-
+      <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
+      <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
+      <v-alert v-if="success" type="success" class="mt-4">Consultant ajouté avec succès !</v-alert>
       <v-card-actions class="d-flex justify-end">
         <v-btn color="primary" @click="submitConsultant">Modifier</v-btn>
       </v-card-actions>
     </v-card>
+
   </v-container>
 </template>

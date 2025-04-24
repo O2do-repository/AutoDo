@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-interface Enterprise {
+interface Entreprise {
   enterpriseUuid: string;
   name: string;
 }
 
-const newEnterprise = ref<string>('')
-const enterprises = ref<Enterprise[]>([])
-const selectedEnterpriseIndex = ref<number | null>(null)
+const newEntreprise = ref<string>('')
+const entreprises = ref<Entreprise[]>([])
+const selectedEntrepriseIndex = ref<number | null>(null)
+const error = ref<string | null>(null);
+const success = ref(false);
+
 
 const dialog = ref(false)
 const loading = ref(false)
@@ -16,71 +19,99 @@ const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('')
 
-const fetchEnterprises = async () => {
+const fetchEntreprises = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`)
-    if (!response.ok) throw new Error("Erreur lors de la récupération des entreprises")
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
+    const resData = await response.json();
 
-    enterprises.value = await response.json()
+    if (!response.ok || !resData.success) {
+      throw new Error(resData.message || "Erreur lors de la récupération des entreprises");
+    }
+
+    entreprises.value = resData.data;
   } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
   }
 }
 
-const submitEnterprise = async () => {
-  const name = newEnterprise.value.trim()
-  if (!name) return
+
+const submitEntreprise = async () => {
+  const name = newEntreprise.value.trim();
+  if (!name) return;
+
+  loading.value = true;
+  error.value = null;
+  success.value = false;
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
-    })
+    });
 
-    if (!response.ok) throw new Error("Erreur lors de l'ajout de l'entreprise")
+    const result = await response.json();
 
-    const createdEnterprise = await response.json()
-    enterprises.value.push(createdEnterprise)
-    newEnterprise.value = ''
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Erreur lors de l'ajout de l'entreprise");
+    }
+
+    entreprises.value.push(result.data); // bien récupérer le `data` retourné par le controller
+    newEntreprise.value = '';
+    success.value = true;
+    snackbarMessage.value = result.message || 'Entreprise ajoutée';
+    snackbarColor.value = 'green';
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    snackbarMessage.value = error.value;
+    snackbarColor.value = 'red';
+  } finally {
+    snackbar.value = true;
+    loading.value = false;
   }
-}
+};
 
-const confirmDeleteEnterprise = (index: number) => {
-  selectedEnterpriseIndex.value = index
+
+const confirmDeleteEntreprise = (index: number) => {
+  selectedEntrepriseIndex.value = index
   dialog.value = true
 }
 
-const removeEnterprise = async () => {
-  if (selectedEnterpriseIndex.value === null) return
-  const index = selectedEnterpriseIndex.value
-  const enterprise = enterprises.value[index]
-  loading.value = true
+const removeEntreprise = async (uuid: string) => {
+  loading.value = true;
+  error.value = null;
+  success.value = false;
+  console.log("UUID à supprimer:", uuid); // Ajoutez ceci pour déboguer
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise/${enterprise.enterpriseUuid}`, {
-      method: 'DELETE',
-    })
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise/${uuid}`, {
+      
+      method: 'DELETE'
+    });
 
-    if (!response.ok) throw new Error("Erreur lors de la suppression")
+    const result = await response.json();
 
-    enterprises.value.splice(index, 1)
-    snackbarMessage.value = 'Entreprise supprimée avec succès'
-    snackbarColor.value = 'green'
-    dialog.value = false
-  } catch (error: any) {
-    snackbarMessage.value = error.message || 'Erreur inconnue'
-    snackbarColor.value = 'red'
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Erreur lors de la suppression de l'entreprise");
+    }
+
+    entreprises.value = entreprises.value.filter(e => e.enterpriseUuid !== uuid);
+    success.value = true;
+    snackbarMessage.value = result.message || 'Entreprise supprimée';
+    snackbarColor.value = 'green';
+    dialog.value = false;
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    snackbarMessage.value = error.value;
+    snackbarColor.value = 'red';
   } finally {
-    snackbar.value = true
-    loading.value = false
-    selectedEnterpriseIndex.value = null
+    snackbar.value = true;
+    loading.value = false;
   }
-}
+};
 
-onMounted(fetchEnterprises)
+
+onMounted(fetchEntreprises)
 </script>
 
 <template>
@@ -88,21 +119,21 @@ onMounted(fetchEnterprises)
     <v-row class="mt-5">
       <v-col cols="4">
         <v-text-field 
-          v-model="newEnterprise" 
-          label="Ajouter une entreprise" 
-          variant="outlined"
-          @keyup.enter="submitEnterprise"
-          hide-details
-          density="comfortable"
+            v-model="newEntreprise" 
+            label="Ajouter une entreprise" 
+            variant="outlined"
+            @keyup.enter="submitEntreprise"
+            hide-details
+            density="comfortable"
         />
       </v-col>
       <v-col cols="2">
         <v-btn 
-          color="primary" 
-          @click="submitEnterprise"
-          icon
-          variant="text"
-          :disabled="!newEnterprise.trim()"
+            color="primary" 
+            @click="submitEntreprise"
+            icon
+            variant="text"
+            :disabled="!newEntreprise.trim()"
         >
           <v-icon large>mdi-plus-circle</v-icon>
         </v-btn>
@@ -115,18 +146,18 @@ onMounted(fetchEnterprises)
         >
           <v-card-title class="text-h6 py-3 px-4 bg-primary text-white d-flex align-center">
             Entreprises
-            <v-chip class="ms-2" size="small" color="white" text-color="primary">{{ enterprises.length }}</v-chip>
+            <v-chip class="ms-2" size="small" color="white" text-color="primary">{{ entreprises.length }}</v-chip>
           </v-card-title>
-
+          
           <div class="scroll-container">
             <v-list density="compact" bg-color="transparent">
               <v-list-item
-                v-for="(enterprise, index) in enterprises"
-                :key="enterprise.enterpriseUuid"
+                v-for="(entreprise, index) in entreprises"
+                :key="entreprise.enterpriseUuid"
                 class="skill-item"
                 :class="{ 'even-item': index % 2 === 0 }"
               >
-                <v-list-item-title>{{ enterprise.name }}</v-list-item-title>
+                <v-list-item-title>{{ entreprise.name }}</v-list-item-title>
                 
                 <template v-slot:append>
                   <v-btn
@@ -134,13 +165,13 @@ onMounted(fetchEnterprises)
                     variant="text"
                     color="error"
                     size="small"
-                    @click="confirmDeleteEnterprise(index)"
+                    @click="confirmDeleteEntreprise(index)"
                   ></v-btn>
                 </template>
               </v-list-item>
             </v-list>
 
-            <!-- Dialog -->
+            <!-- Dialog de confirmation -->
             <v-dialog v-model="dialog" max-width="500">
               <v-card>
                 <v-card-title class="headline">Confirmer la suppression</v-card-title>
@@ -150,7 +181,14 @@ onMounted(fetchEnterprises)
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="grey" @click="dialog = false">Annuler</v-btn>
-                  <v-btn color="red" :loading="loading" @click="removeEnterprise">Supprimer</v-btn>
+                  <v-btn
+                    color="red"
+                    :loading="loading"
+                    @click="() => selectedEntrepriseIndex !== null && removeEntreprise(entreprises[selectedEntrepriseIndex].enterpriseUuid)"
+                  >
+                    Supprimer
+                  </v-btn>
+
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -159,7 +197,6 @@ onMounted(fetchEnterprises)
             <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
               {{ snackbarMessage }}
             </v-snackbar>
-
           </div>
         </v-card>
       </v-col>

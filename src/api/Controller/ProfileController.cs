@@ -13,10 +13,10 @@ public class ProfileController : ControllerBase
         _matchingService = matchingService;
     }
 
-[HttpGet]
-public IActionResult GetAllProfils()
-{
-    var profiles = _profileService.GetAllProfiles();
+    [HttpGet]
+    public IActionResult GetAllProfils()
+    {
+        var profiles = _profileService.GetAllProfiles();
 
         var outputProfiles = profiles.Select(profile => new DtoOutputProfile
         {
@@ -26,13 +26,19 @@ public IActionResult GetAllProfils()
             Cv = profile.CV,
             CvDate = profile.CVDate,
             JobTitle = profile.JobTitle,
-            ExperienceLevel = profile.ExperienceLevel, 
+            ExperienceLevel = profile.ExperienceLevel,
             Skills = profile.Skills ?? new List<string>(),
             Keywords = profile.Keywords ?? new List<string>()
         }).ToList();
 
-        return Ok(outputProfiles);
+        return Ok(new
+        {
+            success = true,
+            message = "Liste des profils récupérée avec succès.",
+            data = outputProfiles
+        });
     }
+
     [HttpGet("consultant/{consultantUuid}")]
     public IActionResult GetProfilesByConsultant(Guid consultantUuid)
     {
@@ -51,26 +57,28 @@ public IActionResult GetAllProfils()
             Keywords = profile.Keywords ?? new List<string>()
         }).ToList();
 
-        return Ok(outputProfiles);
+        return Ok(new
+        {
+            success = true,
+            message = "Profils du consultant récupérés avec succès.",
+            data = outputProfiles
+        });
     }
-
-
 
     [HttpPost]
     public async Task<IActionResult> CreateProfile([FromBody] DtoInputProfile profileDto)
     {
         if (profileDto == null || profileDto.ConsultantUuid == Guid.Empty)
         {
-            return BadRequest("Le profil est invalide ou le consultant est manquant.");
+            return BadRequest(new
+            {
+                success = false,
+                message = "Le profil est invalide ou le consultant est manquant."
+            });
         }
 
         try
         {
-            if (profileDto.ConsultantUuid == Guid.Empty)
-            {
-                throw new ArgumentException("ConsultantUuid is empty or invalid");
-            }
-
             var profile = new Profile
             {
                 ProfileUuid = Guid.NewGuid(),
@@ -84,29 +92,40 @@ public IActionResult GetAllProfils()
                 Keywords = profileDto.Keywords.ToList()
             };
 
-
-            // Ajouter le profil à la base de données
             var newProfile = _profileService.AddProfile(profile);
 
-            //temporaire -> switch vers un bus
-            // Appeler la méthode de matching après la création du profil
             var matchings = await _matchingService.MatchingsForProfileAsync(newProfile);
 
-            return CreatedAtAction(nameof(GetAllProfils), new { id = newProfile.ProfileUuid }, newProfile);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Profil créé avec succès.",
+                data = newProfile
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+            return BadRequest(new
+            {
+                success = false,
+                message = "Erreur lors de la création du profil.",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
         }
     }
+
     [HttpPut]
     public async Task<IActionResult> UpdateProfile([FromBody] DtoUpdateProfile profileDto)
     {
         if (profileDto == null)
         {
-            return BadRequest("Données de profil invalides.");
+            return BadRequest(new
+            {
+                success = false,
+                message = "Données de profil invalides."
+            });
         }
-        
+
         try
         {
             var profile = new Profile
@@ -121,16 +140,25 @@ public IActionResult GetAllProfils()
                 Skills = profileDto.Skills?.ToList() ?? new List<string>(),
                 Keywords = profileDto.Keywords?.ToList() ?? new List<string>()
             };
-            
+
             var updatedProfile = _profileService.UpdateProfile(profile);
-            
             var matchings = await _matchingService.MatchingsForProfileAsync(updatedProfile);
 
-            return Ok(updatedProfile);
+            return Ok(new
+            {
+                success = true,
+                message = "Profil mis à jour avec succès.",
+                data = updatedProfile
+            });
         }
         catch (Exception ex)
         {
-             return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+            return BadRequest(new
+            {
+                success = false,
+                message = "Erreur lors de la mise à jour du profil.",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
         }
     }
 
@@ -140,14 +168,21 @@ public IActionResult GetAllProfils()
         try
         {
             _profileService.DeleteProfile(profileUuid);
-            return NoContent();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Profil supprimé avec succès."
+            });
         }
         catch (Exception ex)
         {
-            return NotFound(new { message = ex.Message });
+            return NotFound(new
+            {
+                success = false,
+                message = "Erreur lors de la suppression du profil.",
+                details = ex.Message
+            });
         }
     }
-
-
-
 }

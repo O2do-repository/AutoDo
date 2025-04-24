@@ -22,14 +22,24 @@ public class EnterpriseController : ControllerBase
             Name = e.Name,
         }).ToList();
 
-        return Ok(outputEnterprises);
+        return Ok(new
+        {
+            success = true,
+            message = "Liste des entreprises récupérée avec succès.",
+            data = outputEnterprises
+        });
     }
+
     [HttpPost]
     public IActionResult CreateEnterprise([FromBody] DtoInputEnterprise enterpriseDto)
     {
         if (enterpriseDto == null)
         {
-            throw new ArgumentException("Enterprise data is invalid");
+            return BadRequest(new
+            {
+                success = false,
+                message = "Les données de l'entreprise sont invalides."
+            });
         }
 
         try
@@ -42,26 +52,47 @@ public class EnterpriseController : ControllerBase
 
             var newEnterprise = _enterpriseService.AddEnterprise(enterprise);
 
-            return Ok(newEnterprise);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Entreprise créée avec succès.",
+                data = newEnterprise
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.InnerException?.Message ?? ex.Message });
+            return BadRequest(new
+            {
+                success = false,
+                message = "Erreur lors de la création de l'entreprise.",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
         }
     }
-
 
     [HttpDelete("{enterpriseUuid}")]
     public IActionResult DeleteEnterprise(Guid enterpriseUuid)
     {
         try
         {
+
+
             _enterpriseService.DeleteEnterprise(enterpriseUuid);
-            return NoContent();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Entreprise supprimée avec succès."
+            });
         }
         catch (Exception ex)
         {
-            return NotFound(new { message = ex.Message });
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Erreur lors de la suppression de l'entreprise.",
+                details = ex.Message
+            });
         }
     }
 }

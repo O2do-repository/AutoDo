@@ -88,10 +88,12 @@ public class RfpService : IRfpService
             .Where(rfp => rfps.Select(x => x.Reference).Contains(rfp.Reference))
             .ToList();
 
+        var newRfps = new List<RFP>();
+
         foreach (var rfp in rfps)
         {
             rfp.Skills ??= new List<string>();
-            var existing = existingReferences.FirstOrDefault(x => x.Reference == rfp.Reference);
+            var existing = existingReferences.SingleOrDefault(x => x.Reference == rfp.Reference);
 
             if (existing != null)
             {
@@ -106,23 +108,25 @@ public class RfpService : IRfpService
             }
             else
             {
-                // Générer un RFPUuid si non défini
                 rfp.RFPUuid = Guid.NewGuid();
                 _context.Rfps.Add(rfp);
+                newRfps.Add(rfp); 
             }
         }
 
         await _context.SaveChangesAsync();
 
-        var allRfps = await _context.Rfps.ToListAsync();
-        await _matchingService.MatchingsForRfpsAsync(allRfps);
+        if (newRfps.Count > 0)
+        {
+            await _matchingService.MatchingsForRfpsAsync(newRfps);
+        }
     }
+
 
 
 
     public async Task ImportRfpAndGenerateMatchings()
     {
-        // Début de la transaction
         using (var transaction = await _context.Database.BeginTransactionAsync())
         {
             try

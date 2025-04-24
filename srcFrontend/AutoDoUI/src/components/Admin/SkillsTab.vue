@@ -9,6 +9,8 @@ interface Skill {
 const newSkill = ref<string>('')
 const skills = ref<Skill[]>([])
 const selectedSkillIndex = ref<number | null>(null)
+const error = ref<string | null>(null)
+const success = ref(false)
 
 const dialog = ref(false)
 const loading = ref(false)
@@ -19,18 +21,25 @@ const snackbarColor = ref('')
 const fetchSkills = async () => {
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/skill`)
-    if (!response.ok) throw new Error("Erreur lors de la récupération des compétences")
+    const resData = await response.json()
 
-    skills.value = await response.json()
+    if (!response.ok || !resData.success) {
+      throw new Error(resData.message || "Erreur lors de la récupération des compétences")
+    }
+
+    skills.value = resData.data
   } catch (error) {
     console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
   }
 }
 
-// Ajouter un skill
 const submitSkill = async () => {
   const name = newSkill.value.trim()
   if (!name) return
+
+  loading.value = true
+  error.value = null
+  success.value = false
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/skill`, {
@@ -39,75 +48,86 @@ const submitSkill = async () => {
       body: JSON.stringify({ name })
     })
 
-    if (!response.ok) throw new Error("Erreur lors de l'ajout de la compétence")
+    const result = await response.json()
 
-    const createdSkill = await response.json()
-    skills.value.push(createdSkill)
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Erreur lors de l'ajout de la compétence")
+    }
+
+    skills.value.push(result.data)
     newSkill.value = ''
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    success.value = true
+    snackbarMessage.value = result.message || 'Compétence ajoutée'
+    snackbarColor.value = 'green'
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+    snackbarMessage.value = error.value
+    snackbarColor.value = 'red'
+  } finally {
+    snackbar.value = true
+    loading.value = false
   }
 }
 
-// Ouvrir le dialog
 const confirmDeleteSkill = (index: number) => {
   selectedSkillIndex.value = index
   dialog.value = true
 }
 
-// Supprimer un skill après confirmation
-const removeSkill = async () => {
-  if (selectedSkillIndex.value === null) return
-  const index = selectedSkillIndex.value
-  const skill = skills.value[index]
+const removeSkill = async (uuid: string) => {
   loading.value = true
+  error.value = null
+  success.value = false
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/skill/${skill.skillUuid}`, {
-      method: 'DELETE',
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/skill/${uuid}`, {
+      method: 'DELETE'
     })
 
-    if (!response.ok) throw new Error("Erreur lors de la suppression")
+    const result = await response.json()
 
-    skills.value.splice(index, 1)
-    snackbarMessage.value = 'Compétence supprimée avec succès'
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Erreur lors de la suppression de la compétence")
+    }
+
+    skills.value = skills.value.filter(s => s.skillUuid !== uuid)
+    success.value = true
+    snackbarMessage.value = result.message || 'Compétence supprimée'
     snackbarColor.value = 'green'
     dialog.value = false
-  } catch (error: any) {
-    snackbarMessage.value = error.message || 'Erreur inconnue'
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+    snackbarMessage.value = error.value
     snackbarColor.value = 'red'
   } finally {
     snackbar.value = true
     loading.value = false
-    selectedSkillIndex.value = null
   }
 }
 
 onMounted(fetchSkills)
 </script>
 
-
 <template>
   <v-container>
     <v-row class="mt-5">
       <v-col cols="4">
         <v-text-field 
-            v-model="newSkill" 
-            label="Ajouter une compétence" 
-            variant="outlined"
-            @keyup.enter="submitSkill"
-
-            hide-details
-            density="comfortable"
+          v-model="newSkill" 
+          label="Ajouter une compétence" 
+          variant="outlined"
+          @keyup.enter="submitSkill"
+          hide-details
+          density="comfortable"
         />
       </v-col>
       <v-col cols="2">
         <v-btn 
-            color="primary" 
-            @click="submitSkill"
-            icon
-            variant="text"
-            :disabled="!newSkill.trim()"
+          color="primary" 
+          @click="submitSkill"
+          icon
+          variant="text"
+          :disabled="!newSkill.trim()"
         >
           <v-icon large>mdi-plus-circle</v-icon>
         </v-btn>
@@ -132,7 +152,7 @@ onMounted(fetchSkills)
                 :class="{ 'even-item': index % 2 === 0 }"
               >
                 <v-list-item-title>{{ skill.name }}</v-list-item-title>
-                
+
                 <template v-slot:append>
                   <v-btn
                     icon="mdi-delete"
@@ -144,6 +164,7 @@ onMounted(fetchSkills)
                 </template>
               </v-list-item>
             </v-list>
+
             <!-- Dialog de confirmation -->
             <v-dialog v-model="dialog" max-width="500">
               <v-card>
@@ -154,7 +175,13 @@ onMounted(fetchSkills)
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="grey" @click="dialog = false">Annuler</v-btn>
-                  <v-btn color="red" :loading="loading" @click="removeSkill">Supprimer</v-btn>
+                  <v-btn
+                    color="red"
+                    :loading="loading"
+                    @click="() => selectedSkillIndex !== null && removeSkill(skills[selectedSkillIndex].skillUuid)"
+                  >
+                    Supprimer
+                  </v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -163,14 +190,12 @@ onMounted(fetchSkills)
             <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
               {{ snackbarMessage }}
             </v-snackbar>
-
           </div>
         </v-card>
       </v-col>
     </v-row>
   </v-container>
 </template>
-
 
 <style scoped>
 .scroll-container {

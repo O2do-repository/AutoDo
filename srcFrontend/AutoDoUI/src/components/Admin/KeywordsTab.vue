@@ -9,6 +9,9 @@ interface Keyword {
 const newKeyword = ref<string>('')
 const keywords = ref<Keyword[]>([])
 const selectedKeywordIndex = ref<number | null>(null)
+const error = ref<string | null>(null);
+const success = ref(false);
+
 
 const dialog = ref(false)
 const loading = ref(false)
@@ -18,67 +21,93 @@ const snackbarColor = ref('')
 
 const fetchKeywords = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword`)
-    if (!response.ok) throw new Error("Erreur lors de la récupération des mots-clés")
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
+    const resData = await response.json();
 
-    keywords.value = await response.json()
+    if (!response.ok || !resData.success) {
+      throw new Error(resData.message || "Erreur lors de la récupération des mots-clés");
+    }
+
+    keywords.value = resData.data;
   } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
   }
 }
 
+
 const submitKeyword = async () => {
-  const name = newKeyword.value.trim()
-  if (!name) return
+  const name = newKeyword.value.trim();
+  if (!name) return;
+
+  loading.value = true;
+  error.value = null;
+  success.value = false;
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
-    })
+    });
 
-    if (!response.ok) throw new Error("Erreur lors de l'ajout du mot-clé")
+    const result = await response.json();
 
-    const createdKeyword = await response.json()
-    keywords.value.push(createdKeyword)
-    newKeyword.value = ''
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Erreur lors de l'ajout du mot-clé");
+    }
+
+    keywords.value.push(result.data); 
+    newKeyword.value = '';
+    success.value = true;
+    snackbarMessage.value = result.message || 'Mot-clé ajouté';
+    snackbarColor.value = 'green';
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    snackbarMessage.value = error.value;
+    snackbarColor.value = 'red';
+  } finally {
+    snackbar.value = true;
+    loading.value = false;
   }
-}
+};
+
 
 const confirmDeleteKeyword = (index: number) => {
   selectedKeywordIndex.value = index
   dialog.value = true
 }
 
-const removeKeyword = async () => {
-  if (selectedKeywordIndex.value === null) return
-  const index = selectedKeywordIndex.value
-  const keyword = keywords.value[index]
-  loading.value = true
+const removeKeyword = async (uuid: string) => {
+  loading.value = true;
+  error.value = null;
+  success.value = false;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword/${keyword.keywordUuid}`, {
-      method: 'DELETE',
-    })
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword/${uuid}`, {
+      method: 'DELETE'
+    });
 
-    if (!response.ok) throw new Error("Erreur lors de la suppression")
+    const result = await response.json();
 
-    keywords.value.splice(index, 1)
-    snackbarMessage.value = 'Mot-clé supprimé avec succès'
-    snackbarColor.value = 'green'
-    dialog.value = false
-  } catch (error: any) {
-    snackbarMessage.value = error.message || 'Erreur inconnue'
-    snackbarColor.value = 'red'
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Erreur lors de la suppression du mot-clé");
+    }
+
+    keywords.value = keywords.value.filter(k => k.keywordUuid !== uuid);
+    success.value = true;
+    snackbarMessage.value = result.message || 'Mot-clé supprimé';
+    snackbarColor.value = 'green';
+    dialog.value = false;
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    snackbarMessage.value = error.value;
+    snackbarColor.value = 'red';
   } finally {
-    snackbar.value = true
-    loading.value = false
-    selectedKeywordIndex.value = null
+    snackbar.value = true;
+    loading.value = false;
   }
-}
+};
+
 
 onMounted(fetchKeywords)
 </script>
@@ -150,7 +179,14 @@ onMounted(fetchKeywords)
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="grey" @click="dialog = false">Annuler</v-btn>
-                  <v-btn color="red" :loading="loading" @click="removeKeyword">Supprimer</v-btn>
+                  <v-btn
+                    color="red"
+                    :loading="loading"
+                    @click="() => selectedKeywordIndex !== null && removeKeyword(keywords[selectedKeywordIndex].keywordUuid)"
+                  >
+                    Supprimer
+                  </v-btn>
+
                 </v-card-actions>
               </v-card>
             </v-dialog>
