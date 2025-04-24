@@ -140,6 +140,8 @@ export default defineComponent({
         if (!response.ok) {
           throw new Error(data.message || "Erreur lors de l'ajout du consultant");
         }
+        sessionStorage.setItem("editConsultant", JSON.stringify(consultant.value));
+        sessionStorage.setItem("selectedConsultant", JSON.stringify(consultant.value));
 
         success.value = data.message || 'Consultant modifié avec succès !';
         setTimeout(() => {

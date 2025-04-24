@@ -149,7 +149,7 @@ export default defineComponent({
 
         success.value = data.message || 'Consultant modifié avec succès !';
         setTimeout(() => {
-          router.push('/consultant/consultant-info');
+          router.push('/consultant/list-consultant');
         }, 1000);
 
       } catch (err) {
