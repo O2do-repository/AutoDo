@@ -66,12 +66,12 @@
     }
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || 'Erreur lors de la suppression');
+      throw new Error(result.message);
     }
 
     emit('consultantDeleted', {
       uuid: props.consultantUuid, 
-      message: result.message || 'Consultant supprimé avec succès',
+      message: result.message,
     });
 
   } catch (error: any) {

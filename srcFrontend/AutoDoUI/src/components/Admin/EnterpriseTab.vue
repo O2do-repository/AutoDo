@@ -53,13 +53,13 @@ const submitEntreprise = async () => {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Erreur lors de l'ajout de l'entreprise");
+      throw new Error(result.message);
     }
 
     entreprises.value.push(result.data); // bien récupérer le `data` retourné par le controller
     newEntreprise.value = '';
     success.value = true;
-    snackbarMessage.value = result.message || 'Entreprise ajoutée';
+    snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
@@ -92,12 +92,12 @@ const removeEntreprise = async (uuid: string) => {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Erreur lors de la suppression de l'entreprise");
+      throw new Error(result.message);
     }
 
     entreprises.value = entreprises.value.filter(e => e.enterpriseUuid !== uuid);
     success.value = true;
-    snackbarMessage.value = result.message || 'Entreprise supprimée';
+    snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
     dialog.value = false;
   } catch (err) {

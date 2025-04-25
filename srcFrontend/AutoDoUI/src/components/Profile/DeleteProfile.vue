@@ -70,16 +70,16 @@
       }
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Erreur lors de la suppression');
+        throw new Error(result.message);
       }
 
       emit('profileDeleted', {
         uuid: props.profileUuid, 
-        message: result.message || 'Profile supprimé avec succès',
+        message: result.message,
       });
 
     } catch (error: any) {
-      snackbarMessage.value = error.message || 'Erreur inconnue';
+      snackbarMessage.value = error.message;
       snackbarColor.value = 'red';
     } finally {
       snackbar.value = true;

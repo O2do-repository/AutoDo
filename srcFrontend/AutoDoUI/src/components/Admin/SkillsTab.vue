@@ -51,13 +51,13 @@ const submitSkill = async () => {
     const result = await response.json()
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Erreur lors de l'ajout de la compétence")
+      throw new Error(result.message)
     }
 
     skills.value.push(result.data)
     newSkill.value = ''
     success.value = true
-    snackbarMessage.value = result.message || 'Compétence ajoutée'
+    snackbarMessage.value = result.message 
     snackbarColor.value = 'green'
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
@@ -87,12 +87,12 @@ const removeSkill = async (uuid: string) => {
     const result = await response.json()
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Erreur lors de la suppression de la compétence")
+      throw new Error(result.message)
     }
 
     skills.value = skills.value.filter(s => s.skillUuid !== uuid)
     success.value = true
-    snackbarMessage.value = result.message || 'Compétence supprimée'
+    snackbarMessage.value = result.message
     snackbarColor.value = 'green'
     dialog.value = false
   } catch (err) {
@@ -187,7 +187,7 @@ onMounted(fetchSkills)
             </v-dialog>
 
             <!-- Snackbar -->
-            <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+            <v-snackbar icon="" v-model="snackbar" :color="snackbarColor" timeout="3000">
               {{ snackbarMessage }}
             </v-snackbar>
           </div>

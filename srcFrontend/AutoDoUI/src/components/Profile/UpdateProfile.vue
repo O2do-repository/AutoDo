@@ -42,7 +42,7 @@ export default defineComponent({
     const errorMessage = ref<string | null>(null);
 
     // 🧪 CV placeholder et validation
-    const placeholderCV = 'https://example.com/default-cv.pdf';
+    const placeholderCV = 'https://example.com/default-cv';
     const validCV = ref('');
 
     // 🧪 Règles de validation
@@ -138,10 +138,10 @@ export default defineComponent({
 
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.message || "Erreur lors de l'ajout du profil");
+          throw new Error(data.message);
         }
 
-        success.value = data.message || 'Profil modifié avec succès !';
+        success.value = data.message;
         setTimeout(() => {
           router.push('/consultant/consultant-info');
         }, 1000);
