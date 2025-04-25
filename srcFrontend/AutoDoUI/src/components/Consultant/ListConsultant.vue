@@ -25,7 +25,7 @@
         />
 
 
-          <v-card-text class="d-flex flex-column align-center justify-center">
+          <v-card-text  class="d-flex flex-column align-center justify-center text-truncate text-center">
             <!-- Avatar avec image-->
             <v-avatar size="150">
               <v-img 
@@ -37,8 +37,8 @@
             </v-avatar>
 
 
-            <div>{{ consultant.name }} {{ consultant.surname }}</div>
-            <div class="text-caption grey--text">{{ consultant.email }}</div>
+            <div class="consultant-name">{{ consultant.surname }} {{ consultant.name }}</div>
+            <div class="consultant-email text-caption grey--text">{{ consultant.email }}</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -212,4 +212,19 @@ export default defineComponent({
   top: 5px;
   right: 5px;
 }
+.consultant-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.consultant-email {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 </style>

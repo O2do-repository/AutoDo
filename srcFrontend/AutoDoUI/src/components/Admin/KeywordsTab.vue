@@ -53,13 +53,13 @@ const submitKeyword = async () => {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Erreur lors de l'ajout du mot-clé");
+      throw new Error(result.message);
     }
 
     keywords.value.push(result.data); 
     newKeyword.value = '';
     success.value = true;
-    snackbarMessage.value = result.message || 'Mot-clé ajouté';
+    snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
@@ -90,12 +90,12 @@ const removeKeyword = async (uuid: string) => {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Erreur lors de la suppression du mot-clé");
+      throw new Error(result.message );
     }
 
     keywords.value = keywords.value.filter(k => k.keywordUuid !== uuid);
     success.value = true;
-    snackbarMessage.value = result.message || 'Mot-clé supprimé';
+    snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
     dialog.value = false;
   } catch (err) {

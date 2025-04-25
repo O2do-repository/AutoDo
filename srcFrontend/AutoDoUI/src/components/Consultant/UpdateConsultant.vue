@@ -53,7 +53,7 @@ export default defineComponent({
     const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
     const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Format invalide (ex: +32444332211)";
     const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
-    const imageUrlRule = (value: string) => /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i.test(value) || "Lien image invalide (ex: https://site.com/photo.jpg)";
+    const imageUrlRule = (value: string) => /^(https?:\/\/.*)/i.test(value) || "Lien invalide (ex: https://site.com/image)";
     const dateRule = (value: string) => !!value || 'Veuillez choisir une date';
 
     const placeholderImage = 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg';
@@ -138,12 +138,12 @@ export default defineComponent({
 
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.message || "Erreur lors de l'ajout du consultant");
+          throw new Error(data.message );
         }
         sessionStorage.setItem("editConsultant", JSON.stringify(consultant.value));
         sessionStorage.setItem("selectedConsultant", JSON.stringify(consultant.value));
 
-        success.value = data.message || 'Consultant modifié avec succès !';
+        success.value = data.message;
         setTimeout(() => {
           router.push('/consultant/consultant-info');
         }, 1000);
