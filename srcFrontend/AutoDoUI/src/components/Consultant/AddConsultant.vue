@@ -340,7 +340,7 @@ export default defineComponent({
       </v-card-text>
       <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
       <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
-      <v-alert v-if="success" type="success" class="mt-4">Consultant ajouté avec succès !</v-alert>
+      <v-alert v-if="success" type="success" class="mt-4">{{ success }}</v-alert>
 
       <!-- Bouton Publier -->
       <v-card-actions class="d-flex justify-end">
