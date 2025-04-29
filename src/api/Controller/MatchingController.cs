@@ -27,7 +27,7 @@ public class MatchingController : ControllerBase
                 MatchingUuid = m.MatchingUuid,
                 RfpReference = m.Rfp?.Reference,
                 Score = m.Score,
-                OfferDate = m.Rfp?.PublicationDate ?? DateTime.MinValue,
+                PublicationDate = m.Rfp?.PublicationDate ?? DateTime.MinValue,
                 Comment = m.Comment,
                 StatutMatching = m.StatutMatching,
                 ProfileUuid = m.ProfileUuid,

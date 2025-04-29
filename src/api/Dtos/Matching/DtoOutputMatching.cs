@@ -9,7 +9,7 @@ public class DtoOutputMatching
     public string RfpReference { get; set; }
     public string RfpUrl{get;set;}
     public int Score { get; set; }
-    public DateTime OfferDate { get; set; }
+    public DateTime PublicationDate { get; set; }
     public string Comment { get; set; }
     public Guid ProfileUuid {get;set;}
     public Guid RfpUuid {get;set;}
