@@ -12,7 +12,7 @@ interface Matching {
   consultantSurname: string;
   rfpReference: string;
   score: number;
-  offerDate: string;
+  publicationDate: string;
   comment: string;
   statutMatching: string;
   editable: boolean;
@@ -43,7 +43,7 @@ const headers = ref([
   { key: 'edit', title: '', align: 'center' as const },
   { key: 'rfpReference', title: 'Référence RFP', align: 'start' as const },
   { key: 'score', title: 'Score', align: 'end' as const },
-  { key: 'offerDate', title: "Date de l'offre", align: 'start' as const },
+  { key: 'publicationDate', title: "Date de publication", align: 'start' as const },
   { key: 'statutMatching', title: 'Statut', align: 'start' as const },
   { key: 'comment', title: 'Commentaire', align: 'start' as const },
 ]);
@@ -282,8 +282,8 @@ onMounted(fetchMatchings);
                 </template>
 
                 <!-- Date -->
-                <template v-slot:item.offerDate="{ item }">
-                  {{ formatDate(item.offerDate) }}
+                <template v-slot:item.publicationDate="{ item }">
+                  {{ formatDate(item.publicationDate) }}
                 </template>
 
                 <!-- Score -->

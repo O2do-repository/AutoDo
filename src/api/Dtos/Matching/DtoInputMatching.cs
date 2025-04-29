@@ -7,7 +7,7 @@ public class DtoInputMatching
     public string ConsultantSurname { get; set; }
     public string RfpReference { get; set; }
     public int Score { get; set; }
-    public DateTime OfferDate { get; set; }
+    public DateTime PublicationDate { get; set; }
     public string Comment { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public StatutMatching StatutMatching{get; set;}
