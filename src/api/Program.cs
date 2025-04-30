@@ -58,7 +58,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-app.MapControllers().RequireAuthorization();
+app.MapControllers();
 
 
 app.UseCors("all");

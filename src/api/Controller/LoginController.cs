@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 [ApiController]
 [Route("login")]
-[Authorize] // ← Exige que l'utilisateur soit authentifié (via Easy Auth)
+//[Authorize]
 public class LoginController : ControllerBase
 {
     [HttpGet]
