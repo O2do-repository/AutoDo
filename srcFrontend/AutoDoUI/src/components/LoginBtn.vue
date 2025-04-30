@@ -1,6 +1,6 @@
 <script setup lang="ts">
-
-const backendBaseUrl = `${import.meta.env.VITE_API_URL}/.auth/login/github`;
+const FRONTEND_REDIRECT_URL = encodeURIComponent(`${window.location.origin}/connexion-ok`);
+const backendBaseUrl = `${import.meta.env.VITE_API_URL}/.auth/login/github?post_login_redirect_uri=${FRONTEND_REDIRECT_URL}`;
 const errorMessage = ref('');
 
 function redirectToLogin() {

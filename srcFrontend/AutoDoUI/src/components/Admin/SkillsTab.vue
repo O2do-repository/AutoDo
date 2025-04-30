@@ -81,6 +81,7 @@ const removeSkill = async (uuid: string) => {
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/skill/${uuid}`, {
+      credentials: 'include',
       method: 'DELETE'
     })
 

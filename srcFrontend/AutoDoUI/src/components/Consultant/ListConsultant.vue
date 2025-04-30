@@ -109,7 +109,9 @@ export default defineComponent({
     const fetchConsultants = async () => {
     loading.value = true;
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`,
+        {credentials: 'include',}
+      );
       if (!response.ok) throw new Error('Failed to fetch consultants');
       
       const data = await response.json();

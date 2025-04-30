@@ -52,7 +52,9 @@ export default defineComponent({
     // Fonction pour récupérer les compétences
     const fetchSkills = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`,
+          {credentials: 'include',}
+        );
         if (!res.ok) throw new Error('Erreur récupération des skills');
         const data = await res.json();
         availableSkills.value = data.data.map((item: any) => item.name);
@@ -64,7 +66,9 @@ export default defineComponent({
     // Fonction pour récupérer les mots-clés
     const fetchKeywords = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`,
+          {credentials: 'include',}
+        );
         if (!res.ok) throw new Error('Erreur récupération des keywords');
         const data = await res.json();
         availableKeywords.value = data.data.map((item: any) => item.name);
@@ -134,6 +138,7 @@ export default defineComponent({
         if (!valid) return;
 
         const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
+          credentials: 'include',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profile.value)

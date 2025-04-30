@@ -57,6 +57,7 @@
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/${props.profileUuid}`, {
+        credentials: 'include',
         method: 'DELETE',
       });
 
