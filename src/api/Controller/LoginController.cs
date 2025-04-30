@@ -1,42 +1,43 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 [ApiController]
 [Route("login")]
+[Authorize] // ← Exige que l'utilisateur soit authentifié (via Easy Auth)
 public class LoginController : ControllerBase
 {
-    private readonly IGitHubService _githubService;
-
-    public LoginController(IGitHubService githubService)
+    [HttpGet]
+    public IActionResult Get()
     {
-        _githubService = githubService;
-    }
+        // Récupérer les claims injectés par Azure Easy Auth
+        var user = HttpContext.User;
+        var name = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var email = user.FindFirst(ClaimTypes.Email)?.Value;
+        var login = user.Claims.FirstOrDefault(c => c.Type.Contains("name"))?.Value;
 
-    [HttpGet("complete")]
-    public async Task<IActionResult> CompleteLogin([FromQuery] string redirect = "https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant")
-    {
-        try
+        var allowedUsersEnv = Environment.GetEnvironmentVariable("ALLOWED_USERS");
+
+        if (!string.IsNullOrWhiteSpace(allowedUsersEnv))
         {
-            var username = User.FindFirst("preferred_username")?.Value;
+            var allowedUsers = allowedUsersEnv
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            if (string.IsNullOrEmpty(username))
+            if (!allowedUsers.Contains(login, StringComparer.OrdinalIgnoreCase))
             {
-                return Redirect("https://o2do-repository.github.io/AutoDo/#/login?error=no-user");
+                return Unauthorized("Utilisateur non autorisé");
             }
-
-            var isAuthorized = await _githubService.IsMemberOfOrg(username);
-            if (!isAuthorized)
-            {
-                return Redirect("https://o2do-repository.github.io/AutoDo/#/login?error=not-in-org");
-            }
-
-            return Redirect(redirect);
         }
-        catch (Exception ex)
+
+        // Pour debug : afficher tous les claims
+        var allClaims = user.Claims.Select(c => new { c.Type, c.Value });
+
+        return Ok(new
         {
-            Console.WriteLine("Erreur dans /login/complete : " + ex.Message);
-            return Redirect("https://o2do-repository.github.io/AutoDo/#/login?error=server");
-        }
+            Login = login,
+            Email = email,
+            NameIdentifier = name,
+            Claims = allClaims
+        });
     }
-
 }
