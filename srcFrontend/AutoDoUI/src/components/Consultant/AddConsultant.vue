@@ -67,7 +67,9 @@ export default defineComponent({
     // Récupérer les entreprises
     const fetchEnterprises = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`,{
+          credentials: 'include',
+        });
         if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
         const data = await response.json();
         enterprises.value = data.data;
@@ -137,6 +139,7 @@ export default defineComponent({
         if (!valid) return;
 
         const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
+          credentials: 'include',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(consultant.value)

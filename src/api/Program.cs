@@ -30,7 +30,6 @@ builder.Services.AddScoped<IConsultantService, ConsultantService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IEnterpriseService, EnterpriseService>();
 builder.Services.AddScoped<IKeywordService, KeywordService>();
-builder.Services.AddScoped<IGitHubService, GitHubService>();
 
 
 

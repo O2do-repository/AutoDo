@@ -10,7 +10,6 @@ public class LoginController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        // Récupérer les claims injectés par Azure Easy Auth
         var user = HttpContext.User;
         var name = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = user.FindFirst(ClaimTypes.Email)?.Value;

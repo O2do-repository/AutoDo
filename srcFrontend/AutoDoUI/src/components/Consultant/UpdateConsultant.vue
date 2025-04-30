@@ -105,7 +105,9 @@ export default defineComponent({
     // Fetch des entreprises
     const fetchEnterprises = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`,
+          {credentials: 'include',}
+        );
         if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
 
         const data = await response.json();
@@ -131,6 +133,7 @@ export default defineComponent({
         if (!valid) return;
 
         const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
+          credentials: 'include',
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(consultant.value)

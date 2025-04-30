@@ -50,7 +50,9 @@ const headers = ref([
 
 const fetchMatchings = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/matching`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/matching`,
+      {credentials: 'include',}
+    );
     if (!response.ok) throw new Error("Erreur, impossible de récupérer les matchings");
     
     const data = await response.json();

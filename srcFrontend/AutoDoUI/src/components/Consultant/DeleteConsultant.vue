@@ -53,6 +53,7 @@
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant/${props.consultantUuid}`, {
+      credentials: 'include',
       method: 'DELETE',
     });
 

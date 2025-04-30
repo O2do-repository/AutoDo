@@ -84,6 +84,7 @@ const removeKeyword = async (uuid: string) => {
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword/${uuid}`, {
+      credentials: 'include',
       method: 'DELETE'
     });
 
