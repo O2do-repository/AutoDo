@@ -39,4 +39,9 @@ public class LoginController : ControllerBase
             Claims = allClaims
         });
     }
+    [HttpGet("redirect")]
+    public IActionResult RedirectToFrontend()
+    {
+        return Redirect("https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant");
+    }
 }

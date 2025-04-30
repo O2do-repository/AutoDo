@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const FRONTEND_REDIRECT_URL = encodeURIComponent(`${window.location.origin}/connexion-ok`);
-const backendBaseUrl = `${import.meta.env.VITE_API_URL}/.auth/login/github?post_login_redirect_uri=${FRONTEND_REDIRECT_URL}`;
+const FRONTEND_REDIRECT_URL = "https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant";
+const backendBaseUrl = `${import.meta.env.VITE_API_URL}/.auth/login/github?post_login_redirect_uri=${import.meta.env.VITE_API_URL}/login/redirect`;
 const errorMessage = ref('');
 
 function redirectToLogin() {
