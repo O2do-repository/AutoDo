@@ -1,4 +1,6 @@
 
+using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +29,8 @@ builder.Services.AddScoped<IConsultantService, ConsultantService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IEnterpriseService, EnterpriseService>();
 builder.Services.AddScoped<IKeywordService, KeywordService>();
+builder.Services.AddScoped<IGitHubService, GitHubService>();
+
 
 
 var configuration = builder.Configuration;
@@ -45,7 +49,26 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
+app.Use(async (context, next) =>
+{
+    var encodedPrincipal = context.Request.Headers["X-MS-CLIENT-PRINCIPAL"].SingleOrDefault();
+
+    if (!string.IsNullOrEmpty(encodedPrincipal))
+    {
+        var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(encodedPrincipal));
+        var principalData = JsonSerializer.Deserialize<AzureUserPrincipal>(decoded);
+
+        var claims = principalData.Claims.Select(c => new Claim(c.Type, c.Value));
+        context.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "AzureAuth"));
+    }
+
+    await next();
+});
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
+
 
 app.UseCors("all");
 
