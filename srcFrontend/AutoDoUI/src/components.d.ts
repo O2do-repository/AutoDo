@@ -18,6 +18,7 @@ declare module 'vue' {
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     KeywordsTab: typeof import('./components/Admin/KeywordsTab.vue')['default']
     ListConsultant: typeof import('./components/Consultant/ListConsultant.vue')['default']
+    LoginBtn: typeof import('./components/LoginBtn.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SideMenu: typeof import('./components/utils/SideMenu.vue')['default']
