@@ -1,26 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
 
-const frontendRedirectUri = encodeURIComponent("https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant");
-const backendBaseUrl = import.meta.env.VITE_API_URL;
+const backendBaseUrl = `${import.meta.env.VITE_API_URL}/.auth/login/github`;
+const errorMessage = ref('');
 
-const errorMessage = ref("");
-
-const redirectToLogin = () => {
-  const completeLoginUri = `/login/complete?redirect=${encodeURIComponent(frontendRedirectUri)}`;
-  window.location.href = `${backendBaseUrl}/.auth/login/github?post_login_redirect_uri=${completeLoginUri}`;
-};
-
-onMounted(() => {
-  const params = new URLSearchParams(window.location.search);
-  const error = params.get("error");
-
-  if (error === "no-user") {
-    errorMessage.value = "Aucun utilisateur connecté via Azure.";
-  } else if (error === "not-in-org") {
-    errorMessage.value = "Vous n'êtes pas membre de l'organisation O2do sur GitHub.";
+function redirectToLogin() {
+  try {
+    window.location.href = backendBaseUrl;
+  } catch (e) {
+    errorMessage.value = "Erreur lors de la redirection.";
   }
-});
+}
+
+
 </script>
 
 <template>
