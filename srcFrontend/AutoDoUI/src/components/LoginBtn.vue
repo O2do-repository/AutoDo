@@ -7,7 +7,7 @@ const backendBaseUrl = import.meta.env.VITE_API_URL;
 const errorMessage = ref("");
 
 const redirectToLogin = () => {
-  const completeLoginUri = encodeURIComponent(`/login/complete?redirect=${frontendRedirectUri}`);
+  const completeLoginUri = `/login/complete?redirect=${encodeURIComponent(frontendRedirectUri)}`;
   window.location.href = `${backendBaseUrl}/.auth/login/github?post_login_redirect_uri=${completeLoginUri}`;
 };
 
