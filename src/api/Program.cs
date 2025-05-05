@@ -70,6 +70,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-app.UseCors("all");
+app.UseCors("FrontendPolicy");
 
 app.Run();
