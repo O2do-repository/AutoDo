@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 [ApiController]
 [Route("login")]
-//[Authorize]
+[Authorize]
 public class LoginController : ControllerBase
 {
     [HttpGet]
