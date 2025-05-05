@@ -117,7 +117,7 @@ export default defineComponent({
         {
           method: 'GET',
           headers: {
-            'Authorization': `${token}`, // Passer le token directement sans "Bearer"
+            'Authorization': `Bearer ${token}`, // Passer le token directement sans "Bearer"
           },
 
         }
