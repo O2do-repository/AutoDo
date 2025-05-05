@@ -109,8 +109,18 @@ export default defineComponent({
     const fetchConsultants = async () => {
     loading.value = true;
     try {
+      const token = localStorage.getItem('easyauth_token'); // Récupérer le token depuis localStorage
+      if (!token) {
+        throw new Error('Utilisateur non authentifié');
+      }
       const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`,
-        {credentials: 'include',}
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `${token}`, // Passer le token directement sans "Bearer"
+          },
+
+        }
       );
       if (!response.ok) throw new Error('Failed to fetch consultants');
       
