@@ -1,55 +1,104 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
-// Define base URLs
-const API_URL = import.meta.env.VITE_API_URL || 'https://autodo-fpe3azgvbvcxbgcx.westeurope-01.azurewebsites.net';
-const FRONTEND_REDIRECT_URL = "https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant";
-
-// Construct login URL
-const backendBaseUrl = `${API_URL}/.auth/login/github?post_login_redirect_uri=${encodeURIComponent(`${API_URL}/login`)}`;
-
+// URL de base pour le backend
+const backendBaseUrl = import.meta.env.VITE_API_URL || 'https://votre-api.azurewebsites.net';
+// URL d'authentification personnalisée que nous avons créée
+const authUrl = `${backendBaseUrl}/auth/login`;
 const errorMessage = ref('');
 const isLoading = ref(false);
+const route = useRoute();
 
-function redirectToLogin() {
+// Fonction pour gérer le processus de connexion
+function login() {
+  isLoading.value = true;
   try {
-    isLoading.value = true;
-    console.log("Redirecting to:", backendBaseUrl);
-    window.location.href = backendBaseUrl;
+    window.location.href = authUrl;
   } catch (e) {
-    console.error("Redirect error:", e);
-    errorMessage.value = "Erreur lors de la redirection: " + (e instanceof Error ? e.message : "Erreur inconnue");
     isLoading.value = false;
+    errorMessage.value = "Erreur lors de la redirection vers le service d'authentification.";
+    console.error(e);
   }
 }
 
-// Check URL parameters for error information
+// Vérifier si nous venons d'être redirigés avec une erreur
 onMounted(() => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const error = urlParams.get('error');
-  if (error) {
-    errorMessage.value = `Erreur d'authentification: ${error}`;
+  // Vérifier si le paramètre d'erreur est présent dans l'URL
+  const errorParam = route.query.error;
+  if (errorParam) {
+    errorMessage.value = typeof errorParam === 'string' 
+      ? errorParam 
+      : "Erreur d'authentification";
+  }
+  
+  // Vérifier si login/email sont présents (utilisateur déjà authentifié)
+  const login = route.query.login;
+  const email = route.query.email;
+  
+  if (login) {
+    // Si l'utilisateur est déjà authentifié, vous pouvez définir des variables d'état ici
+    // ou faire un commit dans votre store
+    console.log("Utilisateur connecté:", login);
   }
 });
 </script>
 
 <template>
   <v-container class="fill-height d-flex align-center justify-center">
-    <v-card class="pa-8" elevation="12" rounded="2xl" max-width="400">
-      <v-card-title class="text-h5 text-center mb-4">Connexion</v-card-title>
+    <v-card class="pa-8" elevation="12" rounded="xl" max-width="450">
+      <v-card-title class="text-h5 text-center mb-4">
+        <span class="font-weight-bold">AutoDo</span>
+      </v-card-title>
+      
       <v-card-text class="text-center">
         <v-icon icon="mdi-github" size="56" color="primary" class="mb-4" />
-        <p class="mb-6">
-          Connecte-toi avec ton compte GitHub (membre O2do requis).
+        
+        <p class="mb-6 text-body-1">
+          Connectez-vous avec votre compte GitHub pour accéder à l'application.
+          <br>
+          <span class="text-caption text-medium-emphasis">
+            (Réservé aux membres de l'organisation O2do)
+          </span>
         </p>
-        <v-alert v-if="errorMessage" type="error" class="mb-4" dense>
+        
+        <v-alert
+          v-if="errorMessage"
+          type="error"
+          class="mb-4"
+          variant="tonal"
+          border="start"
+          closable
+        >
           {{ errorMessage }}
         </v-alert>
-        <v-btn color="primary" size="large" rounded @click="redirectToLogin" :loading="isLoading" :disabled="isLoading">
-          <v-icon start icon="mdi-login" />
-          Se connecter
+        
+        <v-btn
+          color="primary"
+          size="large"
+          block
+          rounded="pill"
+          @click="login"
+          :loading="isLoading"
+          min-width="200"
+        >
+          <v-icon start icon="mdi-github" class="mr-2" />
+          Se connecter avec GitHub
         </v-btn>
+      </v-card-text>
+      
+      <v-card-text class="text-caption text-center pt-4">
+        En vous connectant, vous acceptez les conditions d'utilisation d'AutoDo.
       </v-card-text>
     </v-card>
   </v-container>
 </template>
+
+<style scoped>
+.v-card {
+  transition: transform 0.3s;
+}
+.v-card:hover {
+  transform: translateY(-5px);
+}
+</style>
