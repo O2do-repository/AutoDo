@@ -4,6 +4,11 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAuthentication("AzureAppService")
+    .AddCookie("AzureAppService", options =>
+    {
+        options.Cookie.Name = ".AspNetCore.AzureAppAuth"; // facultatif
+    });
 
 
 // Ajouter CORS
@@ -64,6 +69,7 @@ app.UseRouting();
 
 // Middleware d’authentification et d’autorisation
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 
