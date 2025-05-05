@@ -1,51 +1,11 @@
 
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-
-string githubClientId = builder.Configuration["GitHub:GITHUB_CLIENT_ID"] ?? Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID");
-string githubClientSecret = builder.Configuration["GitHub:GITHUB_PROVIDER_AUTHENTICATION_SECRET"] ?? Environment.GetEnvironmentVariable("GITHUB_PROVIDER_AUTHENTICATION_SECRET");
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = "GitHub";
-})
-.AddCookie()
-.AddOAuth("GitHub", options =>
-{
-    options.ClientId = githubClientId;
-    options.ClientSecret = githubClientSecret;
-    options.CallbackPath = new PathString("/signin-github");
-    options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-    options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-    options.UserInformationEndpoint = "https://api.github.com/user";
-    options.SaveTokens = true;
-    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
-    options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
-    options.Events = new OAuthEvents
-    {
-        OnCreatingTicket = async context =>
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-            var response = await context.Backchannel.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-            context.RunClaimActions(user.RootElement);
-        }
-    };
-});
 // Ajouter CORS
 // CORS: autoriser frontend prod et dev
 string[] allowedOrigins =
