@@ -40,8 +40,16 @@ public class LoginController : ControllerBase
         });
     }
     [HttpGet("redirect")]
-    public IActionResult RedirectToFrontend()
+    public async Task<IActionResult> RedirectToFrontend()
     {
-        return Redirect("https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant");
+        var user = HttpContext.User;
+        var login = user.Claims.FirstOrDefault(c => c.Type.Contains("name"))?.Value;
+        var email = user.FindFirst(ClaimTypes.Email)?.Value;
+
+        // (Optionnel) tu peux générer un token, ou passer les infos dans l’URL
+        var frontendUrl = $"https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant?login={login}&email={email}";
+
+        return Redirect(frontendUrl);
     }
+
 }
