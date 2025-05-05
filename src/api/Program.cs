@@ -7,16 +7,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Ajouter CORS
+// CORS: autoriser frontend prod et dev
+string[] allowedOrigins =
+{
+    "https://o2do-repository.github.io", // production (GitHub Pages)
+    "http://localhost:3000/AutoDo/",             // développement (Vite)            
+};
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("all", builder =>
+    options.AddPolicy("FrontendPolicy", policy =>
     {
-        builder.SetIsOriginAllowed(_ => true)  // Allow any origin
-               .AllowAnyMethod()              // Allow any HTTP method
-               .AllowAnyHeader()              // Allow any headers
-               .AllowCredentials();           // Allow credentials
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
+
 
  builder.Services.AddDbContext<AutoDoDbContext>(options =>
       options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
