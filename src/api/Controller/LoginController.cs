@@ -9,12 +9,12 @@ using Microsoft.Extensions.Logging;
 public class LoginController : ControllerBase
 {
     private readonly ILogger<LoginController> _logger;
-
+    
     public LoginController(ILogger<LoginController> logger)
     {
         _logger = logger;
     }
-
+    
     [HttpGet]
     public IActionResult Get()
     {
@@ -30,13 +30,13 @@ public class LoginController : ControllerBase
                 _logger.LogWarning("Unauthorized access attempt: User not authenticated");
                 return Unauthorized("Non authentifié");
             }
-
+            
             // Extract user information
             var login = user.Claims.FirstOrDefault(c => c.Type.Contains("name"))?.Value;
             var email = user.FindFirst(ClaimTypes.Email)?.Value;
             
             _logger.LogInformation($"User login attempt: {login}, Email: {email}");
-
+            
             // Check if user is in allowed list
             var allowedUsersEnv = Environment.GetEnvironmentVariable("ALLOWED_USERS");
             if (!string.IsNullOrWhiteSpace(allowedUsersEnv))
@@ -55,12 +55,32 @@ public class LoginController : ControllerBase
             {
                 _logger.LogInformation("No allowed users list configured");
             }
-
-            // Build frontend URL with user information
-            var frontendUrl = new Uri($"https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant?login={Uri.EscapeDataString(login ?? string.Empty)}&email={Uri.EscapeDataString(email ?? string.Empty)}");
+            
+            // Utilisez simplement une chaîne pour l'URL au lieu d'un objet Uri
+            string frontendUrl = "https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant";
+            
+            // Ajoutez les paramètres si login et email ne sont pas null
+            if (!string.IsNullOrEmpty(login) || !string.IsNullOrEmpty(email))
+            {
+                frontendUrl += "?";
+                
+                if (!string.IsNullOrEmpty(login))
+                {
+                    frontendUrl += $"login={Uri.EscapeDataString(login)}";
+                }
+                
+                if (!string.IsNullOrEmpty(email))
+                {
+                    if (!string.IsNullOrEmpty(login))
+                    {
+                        frontendUrl += "&";
+                    }
+                    frontendUrl += $"email={Uri.EscapeDataString(email)}";
+                }
+            }
             
             _logger.LogInformation($"Redirecting to: {frontendUrl}");
-            return Redirect(frontendUrl.ToString());
+            return Redirect(frontendUrl);
         }
         catch (Exception ex)
         {
