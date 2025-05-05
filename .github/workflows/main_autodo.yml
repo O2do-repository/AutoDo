@@ -50,12 +50,7 @@ jobs:
           /d:sonar.exclusions="**/bin/**,**/obj/**"
           /d:sonar.verbose=true
         shell: pwsh
-      - name: Clean previous builds
-        run: |
-          dotnet clean
-          Remove-Item -Recurse -Force src/tests/bin, src/tests/obj
-        shell: pwsh
-      
+     
       - name: Restore dependencies
         run: dotnet restore src
       
