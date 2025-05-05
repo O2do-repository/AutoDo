@@ -7,26 +7,40 @@ const authCheckUrl = `${backendBaseUrl}/user/me`;
 
 // Fonction de redirection manuelle vers Azure Auth
 function redirectToLogin() {
-  const redirectUrl = 'https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant';
-
+  const redirectUrl = `${backendBaseUrl}/user/token`; // c’est maintenant la route qui redirige vers GitHub Pages avec un "token"
   window.location.href = `${backendBaseUrl}/.auth/login/github?post_login_redirect_uri=${encodeURIComponent(redirectUrl)}`;
 }
 
 // Vérifie si l'utilisateur est déjà authentifié
 onMounted(async () => {
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+  const token = urlParams.get('token');
+
+  if (token) {
+    localStorage.setItem('easyauth_token', token);
+    // Nettoie l'URL
+    window.location.hash = '#/consultant/list-consultant';
+  }
+
+  const savedToken = localStorage.getItem('easyauth_token');
+  if (!savedToken) return;
+
   try {
-    const res = await fetch(authCheckUrl, { credentials: 'include' });
-    if (res.status === 401) {
-      // Laisse l'utilisateur cliquer sur "Se connecter"
-      return;
-    }
+    const res = await fetch(authCheckUrl, {
+      headers: {
+        Authorization: `Bearer ${savedToken}`
+      }
+    });
+
+    if (res.status === 401) return;
+
     const user = await res.json();
     console.log("Connecté :", user.login);
-    // Ici, tu peux router ou stocker l'utilisateur dans un store global
   } catch (err) {
     console.error("Erreur de récupération utilisateur", err);
   }
 });
+
 </script>
 <template>
   <v-container class="fill-height d-flex align-center justify-center">
