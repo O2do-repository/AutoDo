@@ -36,8 +36,8 @@ builder.Services.AddAuthorization();
 // CORS: autoriser frontend prod et dev
 string[] allowedOrigins =
 {
-    "https://o2do-repository.github.io",
-    "http://localhost:3000/AutoDo/",             // développement (Vite)            
+    "https://o2do-repository.github.io/AutoDo",
+    "http://localhost:3000/AutoDo",             // développement (Vite)            
 };
 
 builder.Services.AddCors(options =>
@@ -89,6 +89,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 // Middleware d’authentification et d’autorisation
+app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -97,6 +98,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-app.UseCors("FrontendPolicy");
+
 
 app.Run();
