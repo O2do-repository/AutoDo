@@ -116,9 +116,7 @@ export default defineComponent({
       const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`,
         {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`, // Passer le token directement sans "Bearer"
-          },
+          credentials: 'include'
 
         }
       );
