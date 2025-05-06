@@ -35,15 +35,16 @@ builder.Services.AddAuthorization();
 // Ajouter CORS
 
 
+// Configuration de CORS pour autoriser toutes les origines
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("FrontendPolicy", policy =>
+    options.AddPolicy("AllowAllOrigins", policy =>
     {
-    policy
-        .WithOrigins("https://o2do-repository.github.io")
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
+        policy
+            .AllowAnyOrigin()  // Permet toutes les origines
+            .AllowAnyMethod()  // Permet toutes les méthodes HTTP
+            .AllowAnyHeader()  // Permet tous les headers
+            .AllowCredentials();  // Permet l'envoi de cookies si nécessaire
     });
 });
 
