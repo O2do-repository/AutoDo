@@ -1,42 +1,18 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
 
 [ApiController]
 [Route("user")]
 public class UserController : ControllerBase
 {
-    [HttpGet("me")]
-    public IActionResult Me()
-    {
-        var authHeader = Request.Headers["Authorization"].ToString();
-        if (!authHeader.StartsWith("Bearer ")) return Unauthorized();
-
-        var token = authHeader.Substring("Bearer ".Length).Trim();
-        try
-        {
-            var json = Encoding.UTF8.GetString(Convert.FromBase64String(token));
-            var userInfo = JsonSerializer.Deserialize<EasyAuthUser>(json);
-
-            return Ok(new
-            {
-                login = userInfo?.UserDetails,
-                provider = userInfo?.IdentityProvider,
-                roles = userInfo?.UserRoles
-            });
-        }
-        catch
-        {
-            return Unauthorized();
-        }
-    }
+    private static string JwtSecretKey => Environment.GetEnvironmentVariable("JWTSETTINGS_SECRET");
+    private static string Issuer => Environment.GetEnvironmentVariable("JWTSETTINGS_ISSUER");
+    private static string Audience => Environment.GetEnvironmentVariable("JWTSETTINGS_AUDIENCE");
 
     [HttpGet("token")]
     public IActionResult GetToken()
@@ -47,21 +23,58 @@ public class UserController : ControllerBase
         var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(principal));
         var user = JsonSerializer.Deserialize<EasyAuthUser>(decoded);
 
-        // Encode les infos utilisateur en base64 JSON → ce sera notre "token"
-        var json = JsonSerializer.Serialize(user);
-        var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.Name, user.UserDetails ?? ""),
+            new Claim("provider", user.IdentityProvider ?? ""),
+            new Claim("userid", user.UserId ?? "")
+        };
 
-        // Redirection vers GitHub Pages avec token dans l'URL
-        var redirectUrl = $"https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant?token={token}";
-        return Redirect(redirectUrl);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecretKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: Issuer,
+            audience: Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: creds
+        );
+
+        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+        // Set secure cookie
+        Response.Cookies.Append("autodo_token", jwt, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddHours(1)
+        });
+
+        // Rediriger sans token dans l'URL
+        return Redirect("https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant");
     }
 
+
+    // Cette route utilisera plus tard JWT (pas EasyAuth)
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        if (!User.Identity.IsAuthenticated)
+            return Unauthorized();
+
+        var name = User.Identity.Name;
+        var provider = User.FindFirst("provider")?.Value;
+
+        return Ok(new { login = name, provider });
+    }
 }
 
 public class EasyAuthUser
 {
     public string IdentityProvider { get; set; }
     public string UserId { get; set; }
-    public string UserDetails { get; set; } // e.g., GitHub username or email
+    public string UserDetails { get; set; } // GitHub username/email
     public string[] UserRoles { get; set; }
 }

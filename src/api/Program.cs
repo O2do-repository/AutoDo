@@ -1,16 +1,42 @@
 
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services
+    .AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = Environment.GetEnvironmentVariable("JWTSETTINGS_ISSUER"),
+            ValidAudience = Environment.GetEnvironmentVariable("JWTSETTINGS_AUDIENCE"),
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWTSETTINGS_SECRET"))
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 
 
 // Ajouter CORS
 // CORS: autoriser frontend prod et dev
 string[] allowedOrigins =
 {
-    "https://o2do-repository.github.io", // production (GitHub Pages)
+    "https://o2do-repository.github.io",
     "http://localhost:3000/AutoDo/",             // développement (Vite)            
 };
 
