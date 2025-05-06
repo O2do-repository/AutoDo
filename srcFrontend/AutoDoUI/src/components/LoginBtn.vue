@@ -4,12 +4,13 @@ import { useRouter } from 'vue-router';
 
 const backendBaseUrl = import.meta.env.VITE_API_URL || 'https://votre-api.azurewebsites.net';
 const router = useRouter();
-const user = ref<{ login: string; provider: string } | null>(null);
+const user = ref<{ login: string; provider: string; userId?: string } | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
 // Redirection vers Azure EasyAuth GitHub
 function redirectToLogin() {
+  // Rediriger vers l'authentification GitHub d'Azure
   window.location.href = `${backendBaseUrl}/.auth/login/github?post_login_redirect_uri=${encodeURIComponent(`${backendBaseUrl}/user/token`)}`;
 }
 
@@ -20,7 +21,7 @@ onMounted(async () => {
     const storedToken = localStorage.getItem('autodo_token');
     
     if (storedToken) {
-      // Si on a déjà un token, on vérifie s'il est valide
+      // Si on a déjà un token, vérifier s'il est valide
       const res = await fetch(`${backendBaseUrl}/user/me`, {
         headers: {
           Authorization: `Bearer ${storedToken}`
@@ -28,8 +29,9 @@ onMounted(async () => {
       });
       
       if (res.ok) {
-        // Token valide, on redirige
-        user.value = await res.json();
+        // Token valide, récupérer les infos utilisateur
+        const userData = await res.json();
+        user.value = userData;
         router.push('/consultant/list-consultant');
         return;
       } else {
@@ -38,35 +40,46 @@ onMounted(async () => {
       }
     }
     
-    // Après redirection de GitHub/EasyAuth
-    try {
-      const tokenRes = await fetch(`${backendBaseUrl}/user/token`, {
-        credentials: 'include' // important pour EasyAuth
-      });
-      
-      if (tokenRes.ok) {
-        const data = await tokenRes.json();
-        if (data.token) {
-          localStorage.setItem('autodo_token', data.token);
-          
-          // Maintenant qu'on a un token, on l'utilise pour vérifier l'identité
-          const meRes = await fetch(`${backendBaseUrl}/user/me`, {
-            headers: {
-              Authorization: `Bearer ${data.token}`
-            }
-          });
-          
-          if (meRes.ok) {
-            user.value = await meRes.json();
-            router.push('/consultant/list-consultant');
-          }
+    // Si on est redirigé après login, on est censé avoir un token
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirected = urlParams.get('redirected');
+    
+    if (redirected === 'true') {
+      // Récupérer le token après redirection d'EasyAuth
+      try {
+        const tokenRes = await fetch(`${backendBaseUrl}/user/token`, {
+          credentials: 'include' // important pour EasyAuth
+        });
+        
+        if (!tokenRes.ok) {
+          throw new Error("Impossible de récupérer le token");
         }
+        
+        const data = await tokenRes.json();
+        localStorage.setItem('autodo_token', data.token);
+        
+        // Vérifier l'identité avec le nouveau token
+        const meRes = await fetch(`${backendBaseUrl}/user/me`, {
+          headers: {
+            Authorization: `Bearer ${data.token}`
+          }
+        });
+        
+        if (meRes.ok) {
+          const userData = await meRes.json();
+          user.value = userData;
+          router.push('/consultant/list-consultant');
+        } else {
+          throw new Error("Token invalide");
+        }
+      } catch (err) {
+        console.error("Erreur d'authentification:", err);
+        error.value = "Échec de l'authentification";
       }
-    } catch (err) {
-      console.error("Erreur d'authentification:", err);
     }
   } catch (err) {
-    console.error("Erreur:", err);
+    console.error("Erreur d'authentification:", err);
+    error.value = "Une erreur s'est produite";
   } finally {
     loading.value = false;
   }
