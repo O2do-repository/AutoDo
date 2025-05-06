@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/profil")]
+[Authorize]
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
