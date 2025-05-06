@@ -93,6 +93,16 @@ app.UseAuthorization();
 app.MapControllers();
 
 
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == HttpMethods.Options)
+    {
+        context.Response.StatusCode = StatusCodes.Status204NoContent;
+        return;
+    }
+
+    await next();
+});
 
 
 app.Run();
