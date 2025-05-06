@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -5,6 +6,7 @@ using System.Threading.Tasks;
 
 [ApiController]
 [Route("/rfp")] 
+[Authorize]
 public class RfpController : ControllerBase
 {
     private readonly IRfpService _rfpService;

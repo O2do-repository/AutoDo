@@ -5,9 +5,11 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("user")]
+[Authorize]
 public class UserController : ControllerBase
 {
     private static string JwtSecretKey => Environment.GetEnvironmentVariable("JWTSETTINGS_SECRET");

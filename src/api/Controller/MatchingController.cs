@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/matching")]
+[Authorize]
 public class MatchingController : ControllerBase
 {
     private readonly IMatchingService _matchingService;
