@@ -17,11 +17,6 @@ public class UserController : ControllerBase
     [HttpGet("token")]
     public IActionResult GetToken()
     {
-        if (string.IsNullOrWhiteSpace(JwtSecretKey) || string.IsNullOrWhiteSpace(Issuer) || string.IsNullOrWhiteSpace(Audience))
-        {
-            return StatusCode(500, "JWT configuration is missing.");
-        }
-
         var principal = HttpContext.Request.Headers["X-MS-CLIENT-PRINCIPAL"];
         if (string.IsNullOrEmpty(principal)) return Unauthorized();
 
@@ -48,7 +43,9 @@ public class UserController : ControllerBase
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return Ok(new { token = jwt });
+        
+        var redirectUrl = "https://o2do-repository.github.io/AutoDo/#/auth-redirect?token=" + jwt;
+        return Redirect(redirectUrl);
     }
 
 
