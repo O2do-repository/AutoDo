@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import { useAuth } from '@/composables/useauth';
 import { useRouter } from 'vue-router';
 
+const { fetchUser } = useAuth();
 const router = useRouter();
 
-onMounted(() => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
+onMounted(async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/token`, {
+      credentials: 'include'
+    });
 
-  if (token) {
-    localStorage.setItem('autodo_token', token);
+    const data = await response.json();
+    if (!data.token) throw new Error("Token manquant");
 
-    // Nettoyage de l'URL et redirection
+    localStorage.setItem('autodo_token', data.token);
+    await fetchUser();
     router.replace('/consultant/list-consultant');
-  } else {
-    // Pas de token → rediriger vers login
+  } catch (err) {
+    console.error("Échec auth redirect", err);
     router.replace('/');
   }
 });

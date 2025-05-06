@@ -48,19 +48,9 @@ public class UserController : ControllerBase
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // Cookie accessible côté serveur uniquement
-        // Response.Cookies.Append("autodo_token", jwt, new CookieOptions
-        // {
-        //     HttpOnly = true,
-        //     Secure = true,
-        //     SameSite = SameSiteMode.None, // Pour que le frontend GitHub Pages puisse l'envoyer
-        //     Expires = DateTimeOffset.UtcNow.AddHours(1)
-        // });
-
-        // Rediriger vers ton app avec le token dans l’URL
-        var redirectUrl = $"https://o2do-repository.github.io/AutoDo/#/auth-redirect?token={jwt}";
-        return Redirect(redirectUrl);
+        return Ok(new { token = jwt });
     }
+
 
 
 
