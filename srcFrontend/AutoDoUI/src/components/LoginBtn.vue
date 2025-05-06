@@ -3,37 +3,70 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const backendBaseUrl = import.meta.env.VITE_API_URL || 'https://votre-api.azurewebsites.net';
-const authCheckUrl = `${backendBaseUrl}/user/me`;
-
 const router = useRouter();
 const user = ref<{ login: string; provider: string } | null>(null);
 const loading = ref(true);
+const error = ref<string | null>(null);
 
 // Redirection vers Azure EasyAuth GitHub
 function redirectToLogin() {
-  window.location.href = `${backendBaseUrl}/.auth/login/github`;
+  window.location.href = `${backendBaseUrl}/.auth/login/github?post_login_redirect_uri=${encodeURIComponent(`${backendBaseUrl}/user/token`)}`;
 }
 
 // Vérifie l'authentification à l'arrivée
 onMounted(async () => {
   try {
-    const res = await fetch(authCheckUrl, {
-      credentials: 'include'
-    });
-
-    if (res.status === 401) {
-      loading.value = false;
-      return;
+    // Vérifier si on a déjà un token
+    const storedToken = localStorage.getItem('autodo_token');
+    
+    if (storedToken) {
+      // Si on a déjà un token, on vérifie s'il est valide
+      const res = await fetch(`${backendBaseUrl}/user/me`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`
+        }
+      });
+      
+      if (res.ok) {
+        // Token valide, on redirige
+        user.value = await res.json();
+        router.push('/consultant/list-consultant');
+        return;
+      } else {
+        // Token invalide ou expiré, on le supprime
+        localStorage.removeItem('autodo_token');
+      }
     }
-
-    const data = await res.json();
-    user.value = data;
-    console.log("Connecté :", data);
-
-    // Redirection automatique si déjà loggé
-    router.push('/consultant/list-consultant');
+    
+    // Après redirection de GitHub/EasyAuth
+    try {
+      const tokenRes = await fetch(`${backendBaseUrl}/user/token`, {
+        credentials: 'include' // important pour EasyAuth
+      });
+      
+      if (tokenRes.ok) {
+        const data = await tokenRes.json();
+        if (data.token) {
+          localStorage.setItem('autodo_token', data.token);
+          
+          // Maintenant qu'on a un token, on l'utilise pour vérifier l'identité
+          const meRes = await fetch(`${backendBaseUrl}/user/me`, {
+            headers: {
+              Authorization: `Bearer ${data.token}`
+            }
+          });
+          
+          if (meRes.ok) {
+            user.value = await meRes.json();
+            router.push('/consultant/list-consultant');
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Erreur d'authentification:", err);
+    }
   } catch (err) {
-    console.error("Erreur lors de la récupération de l'utilisateur :", err);
+    console.error("Erreur:", err);
   } finally {
     loading.value = false;
   }
@@ -51,14 +84,14 @@ onMounted(async () => {
       <v-card-title class="text-h5 text-center mb-4">
         Connexion
       </v-card-title>
-
       <v-card-text class="text-center">
         <v-icon icon="mdi-github" size="56" color="primary" class="mb-4" />
-
         <p class="mb-6">
           Connecte-toi avec ton compte GitHub (membre O2do requis).
         </p>
-
+        <div v-if="error" class="text-error mb-4">
+          {{ error }}
+        </div>
         <v-btn
           color="primary"
           size="large"
