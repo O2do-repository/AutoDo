@@ -35,16 +35,15 @@ builder.Services.AddAuthorization();
 // Ajouter CORS
 
 
-// Configuration de CORS pour autoriser toutes les origines
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins", policy =>
+    options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy
-            .AllowAnyOrigin()  // Permet toutes les origines
-            .AllowAnyMethod()  // Permet toutes les méthodes HTTP
-            .AllowAnyHeader()  // Permet tous les headers
-            .AllowCredentials();  // Permet l'envoi de cookies si nécessaire
+    policy
+        .WithOrigins("https://o2do-repository.github.io")
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
 
@@ -94,16 +93,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == HttpMethods.Options)
-    {
-        context.Response.StatusCode = StatusCodes.Status204NoContent;
-        return;
-    }
-
-    await next();
-});
 
 
 app.Run();
