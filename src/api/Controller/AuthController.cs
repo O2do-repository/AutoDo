@@ -17,6 +17,11 @@ public class UserController : ControllerBase
     [HttpGet("token")]
     public IActionResult GetToken()
     {
+        if (string.IsNullOrWhiteSpace(JwtSecretKey) || string.IsNullOrWhiteSpace(Issuer) || string.IsNullOrWhiteSpace(Audience))
+        {
+            return StatusCode(500, "JWT configuration is missing.");
+        }
+
         var principal = HttpContext.Request.Headers["X-MS-CLIENT-PRINCIPAL"];
         if (string.IsNullOrEmpty(principal)) return Unauthorized();
 
@@ -43,20 +48,22 @@ public class UserController : ControllerBase
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // On définit le cookie pour les requêtes côté serveur
-        Response.Cookies.Append("autodo_token", jwt, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddHours(1)
-        });
+        // Cookie accessible côté serveur uniquement
+        // Response.Cookies.Append("autodo_token", jwt, new CookieOptions
+        // {
+        //     HttpOnly = true,
+        //     Secure = true,
+        //     SameSite = SameSiteMode.None, // Pour que le frontend GitHub Pages puisse l'envoyer
+        //     Expires = DateTimeOffset.UtcNow.AddHours(1)
+        // });
 
-        // On retourne aussi le token pour le frontend
-        return Ok(new { token = jwt });
+        // Rediriger vers ton app avec le token dans l’URL
+        var redirectUrl = $"https://o2do-repository.github.io/AutoDo/#/auth-redirect?token={jwt}";
+        return Redirect(redirectUrl);
     }
 
-    // Cette route utilisera JWT (pas EasyAuth)
+
+
     [HttpGet("me")]
     public IActionResult Me()
     {
