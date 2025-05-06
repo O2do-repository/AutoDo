@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("user")]
-[Authorize]
+
 public class UserController : ControllerBase
 {
     private static string JwtSecretKey => Environment.GetEnvironmentVariable("JWTSETTINGS_SECRET");
