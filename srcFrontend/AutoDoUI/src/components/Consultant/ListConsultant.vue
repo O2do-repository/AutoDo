@@ -109,19 +109,16 @@ export default defineComponent({
     const fetchConsultants = async () => {
     loading.value = true;
     try {
-      const token = localStorage.getItem('easyauth_token'); // Récupérer le token depuis localStorage
-      if (!token) {
-        throw new Error('Utilisateur non authentifié');
-      }
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`,
-        {
-          method: 'GET',
-          credentials: 'include'
-
+      const token = localStorage.getItem('easyauth_token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
+
       if (!response.ok) throw new Error('Failed to fetch consultants');
-      
+
       const data = await response.json();
       if (data.success && Array.isArray(data.data)) {
         consultants.value = data.data; 
@@ -134,6 +131,7 @@ export default defineComponent({
       loading.value = false;
     }
   };
+
   const handleConsultantDeleted = ({ uuid, message }: { uuid: string; message: string }) => {
     consultants.value = consultants.value.filter(c => c.consultantUuid !== uuid);
     snackbarMessage.value = message;

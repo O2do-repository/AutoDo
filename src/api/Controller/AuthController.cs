@@ -43,7 +43,7 @@ public class UserController : ControllerBase
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // Set secure cookie
+        // On définit le cookie pour les requêtes côté serveur
         Response.Cookies.Append("autodo_token", jwt, new CookieOptions
         {
             HttpOnly = true,
@@ -52,12 +52,11 @@ public class UserController : ControllerBase
             Expires = DateTimeOffset.UtcNow.AddHours(1)
         });
 
-        // Rediriger sans token dans l'URL
-        return Redirect("https://o2do-repository.github.io/AutoDo/#/consultant/list-consultant");
+        // On retourne aussi le token pour le frontend
+        return Ok(new { token = jwt });
     }
 
-
-    // Cette route utilisera plus tard JWT (pas EasyAuth)
+    // Cette route utilisera JWT (pas EasyAuth)
     [HttpGet("me")]
     public IActionResult Me()
     {
@@ -66,8 +65,9 @@ public class UserController : ControllerBase
 
         var name = User.Identity.Name;
         var provider = User.FindFirst("provider")?.Value;
+        var userId = User.FindFirst("userid")?.Value;
 
-        return Ok(new { login = name, provider });
+        return Ok(new { login = name, provider, userId });
     }
 }
 
