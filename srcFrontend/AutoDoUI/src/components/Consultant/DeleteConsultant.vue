@@ -26,7 +26,8 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
+import { ref } from 'vue';
   
   const props = defineProps<{ consultantUuid: string }>();
 
@@ -52,8 +53,8 @@
   loading.value = true;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant/${props.consultantUuid}`, {
-      credentials: 'include',
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/consultant/${props.consultantUuid}`, {
+
       method: 'DELETE',
     });
 

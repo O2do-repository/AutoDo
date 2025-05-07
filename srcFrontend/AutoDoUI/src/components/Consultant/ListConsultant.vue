@@ -75,6 +75,7 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DeleteConsultant from '@/components/Consultant/DeleteConsultant.vue';
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey'
 
 
 interface Consultant {
@@ -109,14 +110,14 @@ export default defineComponent({
     const fetchConsultants = async () => {
     loading.value = true;
     try {
-      const token = localStorage.getItem('easyauth_token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const apiKey = localStorage.getItem('apiKey');
 
+      
+      const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/consultant`, {
+        method: 'GET',
+
+      });
+      
       if (!response.ok) throw new Error('Failed to fetch consultants');
 
       const data = await response.json();
@@ -142,7 +143,7 @@ export default defineComponent({
 
     const deleteConsultant = async (uuid: string) => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant/${uuid}`, {
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/consultant/${uuid}`, {
           method: 'DELETE',
         });
 

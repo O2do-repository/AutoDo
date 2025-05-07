@@ -24,7 +24,8 @@
 </template>
   
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
+import { ref } from 'vue';
     import { useRouter } from 'vue-router';
 
 
@@ -56,8 +57,8 @@
     loading.value = true;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/${props.profileUuid}`, {
-        credentials: 'include',
+      const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil/${props.profileUuid}`, {
+
         method: 'DELETE',
       });
 

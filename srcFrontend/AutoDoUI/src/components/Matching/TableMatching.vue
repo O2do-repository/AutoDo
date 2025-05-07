@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -50,8 +51,8 @@ const headers = ref([
 
 const fetchMatchings = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/matching`,
-      {credentials: 'include',}
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/matching`,
+
     );
     if (!response.ok) throw new Error("Erreur, impossible de récupérer les matchings");
     
@@ -144,7 +145,7 @@ const saveMatchingGroup = async (matchings: Matching[]) => {
   for (let item of matchings) {
     if (item.editable) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/matching/${item.matchingUuid}`, {
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/matching/${item.matchingUuid}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

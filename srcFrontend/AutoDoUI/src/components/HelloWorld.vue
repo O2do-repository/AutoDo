@@ -39,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted } from 'vue';
 
 interface RFP {
@@ -70,7 +71,7 @@ const headers = ref([
 
 const fetchRFPList = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/rfp`);
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/rfp`);
 
     if (!response.ok) {
       throw new Error("Erreur lors de la récupération des RFP ");

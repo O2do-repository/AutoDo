@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/consultant")]
-[Authorize]
 public class ConsultantController : ControllerBase
 {
     private readonly IConsultantService _consultantService;

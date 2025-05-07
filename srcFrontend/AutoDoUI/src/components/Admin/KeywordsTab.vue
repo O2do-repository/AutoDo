@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted } from 'vue'
 
 interface Keyword {
@@ -21,7 +22,7 @@ const snackbarColor = ref('')
 
 const fetchKeywords = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword`);
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`);
     const resData = await response.json();
 
     if (!response.ok || !resData.success) {
@@ -44,7 +45,7 @@ const submitKeyword = async () => {
   success.value = false;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword`, {
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
@@ -83,8 +84,7 @@ const removeKeyword = async (uuid: string) => {
   success.value = false;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/keyword/${uuid}`, {
-      credentials: 'include',
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword/${uuid}`, {
       method: 'DELETE'
     });
 

@@ -2,6 +2,7 @@
 import { defineComponent, ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import GoBackBtn from '@/components/utils/GoBackBtn.vue';
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 
 interface Consultant {
   email: string;
@@ -105,8 +106,8 @@ export default defineComponent({
     // Fetch des entreprises
     const fetchEnterprises = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`,
-          {credentials: 'include',}
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise`,
+          
         );
         if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
 
@@ -132,8 +133,8 @@ export default defineComponent({
         const { valid } = await formRef.value.validate();
         if (!valid) return;
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/consultant`, {
-          credentials: 'include',
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/consultant`, {
+
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(consultant.value)

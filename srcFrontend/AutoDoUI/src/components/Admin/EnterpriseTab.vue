@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted } from 'vue'
 
 interface Entreprise {
@@ -21,7 +22,7 @@ const snackbarColor = ref('')
 
 const fetchEntreprises = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`);
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise`);
     const resData = await response.json();
 
     if (!response.ok || !resData.success) {
@@ -44,8 +45,7 @@ const submitEntreprise = async () => {
   success.value = false;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise`, {
-      credentials: 'include',
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
@@ -85,7 +85,7 @@ const removeEntreprise = async (uuid: string) => {
   console.log("UUID à supprimer:", uuid); // Ajoutez ceci pour déboguer
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/enterprise/${uuid}`, {
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise/${uuid}`, {
       
       method: 'DELETE'
     });

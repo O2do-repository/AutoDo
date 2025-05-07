@@ -2,6 +2,7 @@
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GoBackBtn from '@/components/utils/GoBackBtn.vue';
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 
 // Définition de l'interface Profile
 interface Profile {
@@ -52,8 +53,8 @@ export default defineComponent({
     // Fonction pour récupérer les compétences
     const fetchSkills = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/skill`,
-          {credentials: 'include',}
+        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`,
+
         );
         if (!res.ok) throw new Error('Erreur récupération des skills');
         const data = await res.json();
@@ -66,8 +67,8 @@ export default defineComponent({
     // Fonction pour récupérer les mots-clés
     const fetchKeywords = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/keyword`,
-          {credentials: 'include',}
+        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`,
+
         );
         if (!res.ok) throw new Error('Erreur récupération des keywords');
         const data = await res.json();
@@ -137,8 +138,8 @@ export default defineComponent({
         const { valid } = await formRef.value.validate();
         if (!valid) return;
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/profil`, {
-          credentials: 'include',
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil`, {
+
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profile.value)

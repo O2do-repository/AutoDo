@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/enterprise")]
-[Authorize]
 public class EnterpriseController : ControllerBase
 {
     private readonly IEnterpriseService _enterpriseService;
