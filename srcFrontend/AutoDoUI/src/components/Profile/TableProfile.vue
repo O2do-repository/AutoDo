@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import DeleteProfile from "./DeleteProfile.vue";
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 
 interface Profile {
   profileUuid: string;
@@ -91,8 +92,8 @@ const fetchProfiles = async () => {
   }
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/profil/consultant/${consultant.value.consultantUuid}`,{
-      credentials: 'include',
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil/consultant/${consultant.value.consultantUuid}`,{
+
     });
     if (!response.ok) throw new Error('Erreur lors de la récupération des profils');
     

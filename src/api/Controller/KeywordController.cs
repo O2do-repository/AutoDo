@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/keyword")]
-[Authorize]
 public class KeywordController : ControllerBase
 {
     private readonly IKeywordService _keywordService;

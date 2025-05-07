@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 [ApiController]
 [Route("/rfp")] 
-[Authorize]
 public class RfpController : ControllerBase
 {
     private readonly IRfpService _rfpService;

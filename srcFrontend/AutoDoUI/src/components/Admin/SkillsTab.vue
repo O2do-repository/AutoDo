@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted } from 'vue'
 
 interface Skill {
@@ -20,7 +21,7 @@ const snackbarColor = ref('')
 
 const fetchSkills = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/skill`)
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`)
     const resData = await response.json()
 
     if (!response.ok || !resData.success) {
@@ -42,7 +43,7 @@ const submitSkill = async () => {
   success.value = false
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/skill`, {
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
@@ -80,8 +81,7 @@ const removeSkill = async (uuid: string) => {
   success.value = false
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/skill/${uuid}`, {
-      credentials: 'include',
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill/${uuid}`, {
       method: 'DELETE'
     })
 
