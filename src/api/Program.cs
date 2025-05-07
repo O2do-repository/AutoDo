@@ -75,20 +75,20 @@ app.UseCors("FrontendPolicy");
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-API-KEY");
+// app.Use(async (context, next) =>
+// {
+//     if (context.Request.Method == "OPTIONS")
+//     {
+//         context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+//         context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//         context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-API-KEY");
 
-        context.Response.StatusCode = 204; // No Content
-        return;
-    }
+//         context.Response.StatusCode = 204; // No Content
+//         return;
+//     }
 
-    await next();
-});
+//     await next();
+// });
 
 app.Use(async (context, next) =>
 {
