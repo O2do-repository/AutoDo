@@ -64,14 +64,14 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(allowedOrigins)
             .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowAnyHeader();
     });
 });
 
 
 var app = builder.Build();
 
+app.UseCors("FrontendPolicy");
 
 app.MapGet("/", () => "Hello AutoDo, Test feature branch");
 
@@ -112,6 +112,23 @@ app.Use(async (context, next) =>
     
     await next();
 });
+
+
+
+// Middleware de base
+app.UseHttpsRedirection();
+app.UseRouting();
+
+// Middleware d’authentification et d’autorisation
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+
+
+
+app.MapControllers();
+
 app.MapPost("/api/validate-key", async (HttpContext context) =>
 {
     using var reader = new StreamReader(context.Request.Body);
@@ -131,23 +148,5 @@ app.MapPost("/api/validate-key", async (HttpContext context) =>
     return Results.Ok(new { valid = false });
 });
 
-
-
-// Middleware de base
-app.UseHttpsRedirection();
-app.UseRouting();
-
-// Middleware d’authentification et d’autorisation
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-
-
-
-app.MapControllers();
-
-
-app.UseCors("FrontendPolicy");
 
 app.Run();
