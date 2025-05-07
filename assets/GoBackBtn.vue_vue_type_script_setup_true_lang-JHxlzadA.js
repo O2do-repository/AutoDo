@@ -1,0 +1,1 @@
+import{d as r,ab as s,a as n,c,w as o,g as l,e as i,k as u,j as _}from"./index-Ch00-T5v.js";const k=r({__name:"GoBackBtn",setup(d){const a=s(),t=()=>{a.back()};return(m,e)=>(n(),c(_,{onClick:t,outlined:"",color:"primary",size:"small",icon:""},{default:o(()=>[l(u,null,{default:o(()=>e[0]||(e[0]=[i("mdi-arrow-left")])),_:1})]),_:1}))}});export{k as _};
