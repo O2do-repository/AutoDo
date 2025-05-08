@@ -15,37 +15,14 @@ public class MatchingService :IMatchingService
     {
         int score = 0;
 
-        // 1. Matching sur l'expérience
-        if (profile.ExperienceLevel == rfp.ExperienceLevel)
-            score += 40;
+        score += MatchingScoring.ScoreJobTitleMatch(profile, rfp);  // /20
+        score += MatchingScoring.ScoreExperienceMatch(profile, rfp); // /20
+        score += MatchingScoring.ScoreSkillsMatch(profile, rfp); // /40
+        score += MatchingScoring.ScoreLocationMatch(rfp); // 20
 
-        // 2. Matching sur le titre du job
-        if (!string.IsNullOrEmpty(profile.JobTitle) && !string.IsNullOrEmpty(rfp.JobTitle))
-        {
-            string profileJobTitle = profile.JobTitle.ToLower();
-            string rfpJobTitle = rfp.JobTitle.ToLower();
-
-            if (profileJobTitle == rfpJobTitle)
-                score += 40; // Correspondance exacte
-            else if (profileJobTitle.Contains(rfpJobTitle) || rfpJobTitle.Contains(profileJobTitle))
-                score += 20; // Correspondance partielle
-        }
-
-        // 3. Matching sur les skills 
-        if (profile.Skills != null && rfp.Skills != null)
-        {
-            var profileSkillsLower = profile.Skills.Select(s => s.ToLower()).ToHashSet();
-            var rfpSkillsLower = rfp.Skills.Select(s => s.ToLower()).ToHashSet();
-
-            int matchingSkills = profileSkillsLower.Intersect(rfpSkillsLower).Count();
-            if (matchingSkills > 0)
-            {
-                score += matchingSkills * 10; // 10 points par skill commun
-            }
-        }
-
-        return Math.Min(score, 100); // On limite le score max à 100
+        return Math.Min(score, 100);
     }
+    
 
     public async Task<List<Matching>> MatchingsForProfileAsync(Profile profile)
     {
