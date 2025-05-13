@@ -78,7 +78,6 @@ const fetchRFPList = async () => {
     }
 
     const data = await response.json();
-    console.log("Données reçues du backend :", data);
 
     rfps.value = Array.isArray(data) ? data : [data];
   } catch (err) {

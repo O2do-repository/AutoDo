@@ -92,6 +92,9 @@ public static class MatchingScoring
     // Score basé sur la correspondance des compétences
     public static int ScoreSkillsMatch(Profile profile, RFP rfp)
     {
+        
+        var rfpSkills = rfp.Skills ?? Enumerable.Empty<string>();
+
         // Regroupe tous les tokens de compétences et mots-clés du profil
         var profileTokens = profile.Skills?
             .Concat(profile.Keywords ?? Enumerable.Empty<string>())
@@ -101,19 +104,20 @@ public static class MatchingScoring
 
         int shouldMatched = 0, niceMatched = 0;
         int shouldTotal = 0, niceTotal = 0;
+        int unknownMatched = 0, unknownTotal = 0;
 
         // Parcourt chaque compétence attendue dans le RFP
-        foreach (var rawSkill in rfp.Skills ?? Enumerable.Empty<string>())
+        foreach (var rawSkill in rfpSkills)
         {
             var (text, importance) = ParseSkill(rawSkill);
             var tokens = TokenizeAndNormalize(text);
 
-            // Vérifie si au moins un token correspond à un token du profil
             bool matched = tokens.Any(token =>
                 profileTokens.Any(p => WordsMatch(p, token)));
 
             switch (importance)
             {
+                case "must have":
                 case "should have":
                     shouldTotal++;
                     if (matched) shouldMatched++;
@@ -122,23 +126,38 @@ public static class MatchingScoring
                     niceTotal++;
                     if (matched) niceMatched++;
                     break;
+                default:
+                    unknownTotal++;
+                    if (matched) unknownMatched++;
+                    break;
             }
         }
 
-        // Calcule un score pondéré selon l’importance des compétences
-        double shouldScore = shouldTotal > 0 ? (double)shouldMatched / shouldTotal * 35 : 0;
-        double niceScore = niceTotal > 0 ? (double)niceMatched / niceTotal * 5 : 0;
+        int totalKnown = shouldTotal + niceTotal;
+        int matchedKnown = shouldMatched + niceMatched;
 
-        return (int)Math.Round(shouldScore + niceScore);
+        if (totalKnown > 0)
+        {
+            double shouldScore = shouldTotal > 0 ? (double)shouldMatched / shouldTotal * 35 : 0;
+            double niceScore = niceTotal > 0 ? (double)niceMatched / niceTotal * 5 : 0;
+            return (int)Math.Round(shouldScore + niceScore);
+        }
+        else
+        {
+            double unknownScore = unknownTotal > 0 ? (double)unknownMatched / unknownTotal * 40 : 0;
+            return (int)Math.Round(unknownScore);
+        }
     }
+
 
     // Extrait le texte et l’importance depuis un champ de compétence du RFP
     private static (string text, string importance) ParseSkill(string rawSkill)
     {
         var lower = rawSkill.ToLowerInvariant();
-        string importance = "other";
+        string importance = "N/A";
 
-        if (lower.Contains("should have")) importance = "should have";
+        if (lower.Contains("must have")) importance = "must have";
+        else if (lower.Contains("should have")) importance = "should have";
         else if (lower.Contains("nice to have")) importance = "nice to have";
 
         var parts = rawSkill.Split("(importance:", StringSplitOptions.RemoveEmptyEntries);

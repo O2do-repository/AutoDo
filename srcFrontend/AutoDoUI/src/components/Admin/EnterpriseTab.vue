@@ -82,7 +82,6 @@ const removeEntreprise = async (uuid: string) => {
   loading.value = true;
   error.value = null;
   success.value = false;
-  console.log("UUID à supprimer:", uuid); // Ajoutez ceci pour déboguer
 
   try {
     const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise/${uuid}`, {
