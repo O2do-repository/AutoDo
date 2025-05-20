@@ -10,12 +10,14 @@ public class RfpService : IRfpService
 {
     private readonly AutoDoDbContext _context;
     private readonly string _jsonFilePath;
-        private readonly IMatchingService _matchingService;
+    private readonly IMatchingService _matchingService;
+    private readonly ITranslationService _translationService;
 
-    public RfpService(AutoDoDbContext context,IMatchingService matchingService)
+    public RfpService(AutoDoDbContext context,IMatchingService matchingService, ITranslationService translationService)
     {
         _context = context;
         _matchingService = matchingService;
+        _translationService = translationService;
         _jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"../api/RfpJson/opportunities.json");
     }
 
@@ -93,6 +95,19 @@ public class RfpService : IRfpService
         foreach (var rfp in rfps)
         {
             rfp.Skills ??= new List<string>();
+
+            // Traduction des champs vers l'anglais
+            rfp.JobTitle = await _translationService.TranslateTextAsync(rfp.JobTitle);
+            rfp.DescriptionBrut = await _translationService.TranslateTextAsync(rfp.DescriptionBrut);
+
+            var translatedSkills = new List<string>();
+            foreach (var skill in rfp.Skills)
+            {
+                var translatedSkill = await _translationService.TranslateTextAsync(skill);
+                translatedSkills.Add(translatedSkill);
+            }
+            rfp.Skills = translatedSkills;
+
             var existing = existingReferences.SingleOrDefault(x => x.Reference == rfp.Reference);
 
             if (existing != null)
@@ -105,12 +120,13 @@ public class RfpService : IRfpService
                 existing.Workplace = rfp.Workplace;
                 existing.RfpPriority = rfp.RfpPriority;
                 existing.ExperienceLevel = rfp.ExperienceLevel;
+                existing.Skills = rfp.Skills;
             }
             else
             {
                 rfp.RFPUuid = Guid.NewGuid();
                 _context.Rfps.Add(rfp);
-                newRfps.Add(rfp); 
+                newRfps.Add(rfp);
             }
         }
 

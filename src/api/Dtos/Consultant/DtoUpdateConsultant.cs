@@ -15,8 +15,7 @@ public class DtoUpdateConsultant{
     public string Name { get; set; }
     [Required]
     public string Surname { get; set; }
-    [Required]
-    [Url(ErrorMessage = "Le champ CV doit être une URL valide.")]
+
     public string CopyCI {get;set;}
     [Url(ErrorMessage = "Le champ CV doit être une URL valide.")]   
     public string Picture{get;set;}

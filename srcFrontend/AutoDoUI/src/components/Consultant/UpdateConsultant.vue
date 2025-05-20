@@ -7,7 +7,7 @@ import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 interface Consultant {
   email: string;
   availabilityDate: string;
-  expirationDateCI: string;
+  expirationDateCI: string| null;
   intern: boolean | null;
   name: string;
   surname: string;
@@ -127,7 +127,9 @@ export default defineComponent({
         if (!consultant.value.picture || consultant.value.picture.trim() === '') {
           consultant.value.picture = placeholderImage;
         }
-
+        if (consultant.value.expirationDateCI === '') {
+          consultant.value.expirationDateCI = null;
+        }
         if (!formRef.value) return;
 
         const { valid } = await formRef.value.validate();
@@ -232,10 +234,10 @@ export default defineComponent({
 
 
             <v-col cols="6">
-              <v-text-field label="Lien Copie CI *" v-model="consultant.copyCI" :rules="[required, urlRule]" required variant="outlined" color="primary" />
+              <v-text-field label="Lien Copie CI" v-model="consultant.copyCI"  variant="outlined" color="primary" />
             </v-col>
             <v-col cols="6">
-              <v-text-field label="Expiration CI *" v-model="consultant.expirationDateCI" type="date" :rules="[required, dateRule]" variant="outlined" color="primary" />
+              <v-text-field label="Expiration CI" v-model="consultant.expirationDateCI" type="date" variant="outlined" color="primary" />
             </v-col>
 
             <v-col cols="6">

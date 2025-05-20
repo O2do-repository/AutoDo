@@ -20,12 +20,8 @@ public class Consultant
     [Required]
     public string Phone { get; set; }
     public string Picture{get;set;}
-    [Required]
+
     public string CopyCI {get;set;}
     // Un consultant peut avoir plusieurs profils
     public List<Profile> Profiles { get; set; }
-}
-
-internal class requiredAttribute : Attribute
-{
 }
