@@ -54,7 +54,7 @@ public class ConsultantController : ControllerBase
                 ConsultantUuid = Guid.NewGuid(),
                 Email = consultantDto.Email,
                 AvailabilityDate = consultantDto.AvailabilityDate,
-                ExpirationDateCI = consultantDto.ExpirationDateCI,
+                ExpirationDateCI = consultantDto.ExpirationDateCI ?? DateTime.MinValue,
                 Intern = consultantDto.Intern,
                 Name = consultantDto.Name,
                 Surname = consultantDto.Surname,

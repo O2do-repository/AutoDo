@@ -75,7 +75,9 @@ public class RfpTest
         var mockMatchingService = new Mock<IMatchingService>();
         
         // Instancier le service avec le mock de IMatchingService
-        var rfpService = new RfpService(context, mockMatchingService.Object);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
 
         // Act
         var result = await rfpService.FilterRfpDeadlineNotReachedYet();
@@ -92,7 +94,9 @@ public class RfpTest
         SeedDatabase(context);
         var mockMatchingService = new Mock<IMatchingService>();
 
-        var rfpService = new RfpService(context, mockMatchingService.Object);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
 
 
         // Act
@@ -124,7 +128,9 @@ public class RfpTest
         var mockMatchingService = new Mock<IMatchingService>();
 
         // Instancier le service avec le mock de IMatchingService
-        var rfpService = new RfpService(context, mockMatchingService.Object);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
 
         // Act
         var result = await rfpService.FilterRfpDeadlineNotReachedYet();
@@ -141,7 +147,9 @@ public class RfpTest
         SeedDatabase(context);
 
         var mockMatchingService = new Mock<IMatchingService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
 
         var updatedRfp = new RFP
         {
@@ -178,7 +186,9 @@ public class RfpTest
         SeedDatabase(context);
 
         var mockMatchingService = new Mock<IMatchingService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
 
         var newRfps = new List<RFP>
         {

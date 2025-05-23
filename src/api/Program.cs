@@ -38,6 +38,10 @@ builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IEnterpriseService, EnterpriseService>();
 builder.Services.AddScoped<IKeywordService, KeywordService>();
 
+builder.Services.Configure<AzureTranslatorOptions>(
+    builder.Configuration.GetSection("AzureTranslator"));
+builder.Services.AddScoped<ITranslationService, TranslationService>();
+
 
 builder.Services.AddDbContext<AutoDoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
