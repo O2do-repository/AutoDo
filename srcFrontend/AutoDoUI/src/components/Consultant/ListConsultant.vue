@@ -122,20 +122,16 @@ export default defineComponent({
 
     const search = ref('');
     const filteredConsultants = computed(() => {
-    const term = search.value.toLowerCase();
+      const term = search.value.toLowerCase();
 
-    return consultants.value
-      .filter((c) =>  
-        c.name.toLowerCase().includes(term) ||
-        c.surname.toLowerCase().includes(term) ||
-        c.email.toLowerCase().includes(term)
-      )
-      .sort((a, b) => {
-        const lastNameCompare = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        if (lastNameCompare !== 0) return lastNameCompare;
-        return a.surname.toLowerCase().localeCompare(b.surname.toLowerCase());
-      });
-  });
+      return consultants.value
+        .filter((c) =>  
+          c.name.toLowerCase().includes(term) ||
+          c.surname.toLowerCase().includes(term) ||
+          c.email.toLowerCase().includes(term)
+        )
+        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    });
 
 
 

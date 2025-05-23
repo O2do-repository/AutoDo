@@ -59,7 +59,7 @@ onMounted(() => {
         </v-col>
 
         <v-col cols="12" sm="6">
-          <strong>Prénom et nom :</strong>  {{ consultant.surname }} {{ consultant.name }}
+          <strong>nom et prénom :</strong>  {{ consultant.name }} {{ consultant.surname }}
         </v-col>
         <v-col cols="12" sm="6">
           <strong>Email :</strong> {{ consultant.email }}
