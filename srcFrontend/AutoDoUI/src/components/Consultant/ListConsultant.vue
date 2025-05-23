@@ -130,7 +130,10 @@ export default defineComponent({
           c.surname.toLowerCase().includes(term) ||
           c.email.toLowerCase().includes(term)
         )
-        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name || '', 'fr', {
+        sensitivity: 'base',
+        ignorePunctuation: true,
+      }));
     });
 
 
