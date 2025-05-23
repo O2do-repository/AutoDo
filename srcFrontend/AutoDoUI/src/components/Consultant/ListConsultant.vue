@@ -1,17 +1,29 @@
 <template>
   <v-container>
+    <v-row justify="center" class="mb-4">
+    <v-col cols="12" md="6">
+      <v-text-field
+        v-model="search"
+        label="Rechercher un consultant"
+        prepend-inner-icon="mdi-magnify"
+        clearable
+        variant="outlined"
+      />
+    </v-col>
+  </v-row>
+
     <v-row justify="center">
       <v-col cols="12" class="text-center mb-6">
         <h2 class="purple--text">A perfect blend of genius and caffeine</h2>
       </v-col>
 
       <v-col
-        v-for="consultant in consultants"
-        :key="consultant.consultantUuid"
-        cols="12"
-        sm="4"
-        md="2"
-        class="text-center"
+      v-for="consultant in filteredConsultants"
+      :key="consultant.consultantUuid"
+      cols="12"
+      sm="4"
+      md="2"
+      class="text-center"
       >
         <v-card 
           class="consultant-card"
@@ -37,7 +49,7 @@
             </v-avatar>
 
 
-            <div class="consultant-name">{{ consultant.surname }} {{ consultant.name }}</div>
+            <div class="consultant-name">{{ consultant.name }} {{ consultant.surname }}</div>
             <div class="consultant-email text-caption grey--text">{{ consultant.email }}</div>
           </v-card-text>
         </v-card>
@@ -106,6 +118,25 @@ export default defineComponent({
 
     // Image par défaut
     const defaultImage = 'https://via.placeholder.com/150?text=No+Image';
+
+    const search = ref('');
+    const filteredConsultants = computed(() => {
+    const term = search.value.toLowerCase();
+
+    return consultants.value
+      .filter((c) =>  
+        c.name.toLowerCase().includes(term) ||
+        c.surname.toLowerCase().includes(term) ||
+        c.email.toLowerCase().includes(term)
+      )
+      .sort((a, b) => {
+        const lastNameCompare = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        if (lastNameCompare !== 0) return lastNameCompare;
+        return a.surname.toLowerCase().localeCompare(b.surname.toLowerCase());
+      });
+  });
+
+
 
     const fetchConsultants = async () => {
     loading.value = true;
@@ -180,7 +211,9 @@ export default defineComponent({
       goToConsultantProfiles,
       defaultImage,
       setPlaceholder,
-      handleConsultantDeleted
+      handleConsultantDeleted,
+      search,
+      filteredConsultants
     };
   },
 });
