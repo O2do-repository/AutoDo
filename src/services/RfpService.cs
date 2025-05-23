@@ -97,14 +97,19 @@ public class RfpService : IRfpService
             rfp.Skills ??= new List<string>();
 
             // Traduction des champs vers l'anglais
-            rfp.JobTitle = await _translationService.TranslateTextAsync(rfp.JobTitle);
-            rfp.DescriptionBrut = await _translationService.TranslateTextAsync(rfp.DescriptionBrut);
+            var translatedJobTitle = await _translationService.TranslateTextAsync(rfp.JobTitle);
+            if (!string.IsNullOrWhiteSpace(translatedJobTitle))
+                rfp.JobTitle = translatedJobTitle;
+
+            var translatedDescription = await _translationService.TranslateTextAsync(rfp.DescriptionBrut);
+            if (!string.IsNullOrWhiteSpace(translatedDescription))
+                rfp.DescriptionBrut = translatedDescription;
 
             var translatedSkills = new List<string>();
             foreach (var skill in rfp.Skills)
             {
                 var translatedSkill = await _translationService.TranslateTextAsync(skill);
-                translatedSkills.Add(translatedSkill);
+                translatedSkills.Add(!string.IsNullOrWhiteSpace(translatedSkill) ? translatedSkill : skill);
             }
             rfp.Skills = translatedSkills;
 
