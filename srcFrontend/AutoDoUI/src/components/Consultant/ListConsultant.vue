@@ -29,6 +29,7 @@
           class="consultant-card"
           elevation="3"
           @click="goToConsultantProfiles(consultant)"
+          :color="consultant.enterprise === 'O2do' ? 'primary' : undefined"
         >
         <DeleteConsultant
           :consultantUuid="consultant.consultantUuid"
@@ -100,7 +101,7 @@ interface Consultant {
   intern: boolean;
   copyCI: string;
   picture: string;
-  enterprise: number;
+  enterprise: string;
   phone: string;
 }
 
