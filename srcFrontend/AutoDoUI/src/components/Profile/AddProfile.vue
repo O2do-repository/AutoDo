@@ -262,7 +262,7 @@ export default defineComponent({
 
             <!-- Compétences -->
             <v-col cols="12">
-              <v-select 
+              <v-autocomplete 
                 label="Compétences *" 
                 v-model="profile.Skills" 
                 :items="availableSkills" 
@@ -277,7 +277,7 @@ export default defineComponent({
 
             <!-- Mots-clés -->
             <v-col cols="12">
-              <v-select 
+              <v-autocomplete 
                 label="Mots-clés *" 
                 v-model="profile.keywords" 
                 :items="availableKeywords" 

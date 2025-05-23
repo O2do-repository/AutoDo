@@ -284,7 +284,7 @@
 
               <!-- Entreprise -->
               <v-col cols="6">
-                <v-select
+                <v-autocomplete 
                   label="Entreprise *"
                   v-model="consultant.enterprise"
                   :items="enterprises"
