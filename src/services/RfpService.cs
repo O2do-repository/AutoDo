@@ -13,7 +13,7 @@ public class RfpService : IRfpService
     private readonly IMatchingService _matchingService;
     private readonly ITranslationService _translationService;
 
-    public RfpService(AutoDoDbContext context,IMatchingService matchingService, ITranslationService translationService)
+    public RfpService(AutoDoDbContext context, IMatchingService matchingService, ITranslationService translationService)
     {
         _context = context;
         _matchingService = matchingService;
@@ -41,7 +41,7 @@ public class RfpService : IRfpService
             {
                 // Charger toutes les références déjà présentes en base
                 var existingReferences = _context.Rfps
-                    .Where(rfp => rfps.Select(x => x.Reference).Contains(rfp.Reference)) 
+                    .Where(rfp => rfps.Select(x => x.Reference).Contains(rfp.Reference))
                     .ToList();
 
                 foreach (var rfp in rfps)
@@ -153,7 +153,7 @@ public class RfpService : IRfpService
             try
             {
                 LoadRfpFromJson();
-                
+
                 var rfps = await _context.Rfps.ToListAsync();
 
                 await _matchingService.MatchingsForRfpsAsync(rfps);
@@ -163,9 +163,29 @@ public class RfpService : IRfpService
             catch (Exception)
             {
                 await transaction.RollbackAsync();
-                throw; 
+                throw;
             }
         }
     }
+
+
+        // Delete RFP
+    public void DeleteOldRFPs()
+    {
+        var today = DateTime.Today;
+
+        var oldRFPs = _context.Rfps
+            .Where(r => r.DeadlineDate < today)
+            .ToList();
+
+        if (!oldRFPs.Any())
+        {
+            throw new InvalidOperationException("No expired RFPs found to delete.");
+        }
+
+        _context.Rfps.RemoveRange(oldRFPs);
+        _context.SaveChanges();
+    }
+
 
 }

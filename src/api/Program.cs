@@ -30,6 +30,8 @@ builder.Services.AddDbContext<AutoDoDbContext>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddHostedService<CleanUpRFPService>();
+
 builder.Services.AddScoped<IRfpService, RfpService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IMatchingService, MatchingService>();
@@ -37,6 +39,8 @@ builder.Services.AddScoped<IConsultantService, ConsultantService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IEnterpriseService, EnterpriseService>();
 builder.Services.AddScoped<IKeywordService, KeywordService>();
+
+
 
 builder.Services.Configure<AzureTranslatorOptions>(
     builder.Configuration.GetSection("AzureTranslator"));
