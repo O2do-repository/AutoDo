@@ -78,6 +78,7 @@ public class ConsultantService : IConsultantService
         existingConsultant.Picture = updatedConsultant.Picture;
         existingConsultant.CopyCI = updatedConsultant.CopyCI;
         existingConsultant.enterprise = updatedConsultant.enterprise;
+        existingConsultant.Comment = updatedConsultant.Comment;
 
         _context.Consultants.Update(existingConsultant);
         _context.SaveChanges();

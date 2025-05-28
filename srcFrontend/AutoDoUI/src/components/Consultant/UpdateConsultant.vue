@@ -15,6 +15,7 @@ interface Consultant {
   phone: string;
   copyCI: string;
   picture: string;
+  comment : string;
 }
 
 interface Enterprise {
@@ -39,7 +40,8 @@ export default defineComponent({
       enterprise: '',
       phone: '',
       copyCI: '',
-      picture: ''
+      picture: '',
+      comment:''
     });
 
     const enterprises = ref<Enterprise[]>([]);
@@ -267,6 +269,11 @@ export default defineComponent({
             <v-col cols="6">
               <v-text-field label="Date de disponibilité *" v-model="consultant.availabilityDate" type="date" :rules="[required, dateRule]" required variant="outlined" color="primary" />
             </v-col>
+            <v-col cols="6">
+                <v-textarea clearable label="Note" variant="outlined" color ="primary" rows="1"
+                  auto-grow v-model="consultant.comment" >
+                </v-textarea>
+              </v-col>
           </v-row>
         </v-form>
       </v-card-text>
