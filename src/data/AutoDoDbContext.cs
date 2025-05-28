@@ -21,6 +21,13 @@ public class AutoDoDbContext : DbContext
     {
         //_useInMemory = true;
     }
+    protected override void OnConfiguring(DbCo ntextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer("Server=tcp:autodo.database.windows.net,1433;Initial Catalog=Autodo;Persist Security Info=False;User ID=sqladminautodo;Password=65Sy?xRaNiU2;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+        }
+    }
 
 
     public AutoDoDbContext() : base(new DbContextOptions<AutoDoDbContext>())
