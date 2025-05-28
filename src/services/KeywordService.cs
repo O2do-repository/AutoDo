@@ -16,6 +16,15 @@ public class KeywordService : IKeywordService
     // Ajouter un nouveau mot-clé
     public Keyword AddKeyword(Keyword keyword)
     {
+
+        var existingKeyword = _context.Keywords
+            .SingleOrDefault(k => k.Name.ToLower() == keyword.Name.ToLower());
+
+        if (existingKeyword != null)
+        {
+            throw new InvalidOperationException($"Le mot-clé '{keyword.Name}' existe déjà.");
+        }
+
         keyword.KeywordUuid = Guid.NewGuid();
 
         _context.Keywords.Add(keyword);

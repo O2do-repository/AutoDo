@@ -60,6 +60,14 @@ public class KeywordController : ControllerBase
                 data = newKeyword
             });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
         catch (Exception ex)
         {
             return BadRequest(new

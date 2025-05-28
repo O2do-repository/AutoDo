@@ -16,8 +16,17 @@ public class EnterpriseService : IEnterpriseService
     // Ajouter une nouvelle entreprise
     public Enterprise AddEnterprise(Enterprise enterprise)
     {
-        enterprise.EnterpriseUuid = Guid.NewGuid();
 
+
+        var existingEnterprise= _context.Enterprises
+            .SingleOrDefault(k => k.Name.ToLower() == enterprise.Name.ToLower());
+
+        if (existingEnterprise != null)
+        {
+            throw new InvalidOperationException($"L'entreprise '{enterprise.Name}' existe déjà.");
+        }
+
+        enterprise.EnterpriseUuid = Guid.NewGuid();
         _context.Enterprises.Add(enterprise);
         _context.SaveChanges();
 

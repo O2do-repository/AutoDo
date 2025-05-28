@@ -15,36 +15,20 @@ public class ConsultantService : IConsultantService
     }
 
 
-public Consultant AddConsultant(Consultant consultant)
-{
-    var existingConsultant = _context.Consultants
-        .SingleOrDefault(c => c.ConsultantUuid == consultant.ConsultantUuid);
-
-    if (existingConsultant == null)
+    public Consultant AddConsultant(Consultant consultant)
     {
-        // Insert
+        var existingConsultant = _context.Consultants
+            .SingleOrDefault(c => c.Email == consultant.Email);
+
+        if (existingConsultant != null)
+        {
+            throw new InvalidOperationException($"Un consultant avec l'email '{consultant.Email}' existe déjà.");
+        }
         _context.Consultants.Add(consultant);
+        _context.SaveChanges();
+
+        return consultant;
     }
-    else
-    {
-
-        existingConsultant.Email = consultant.Email;
-        existingConsultant.AvailabilityDate = consultant.AvailabilityDate;
-        existingConsultant.ExpirationDateCI = consultant.ExpirationDateCI;
-        existingConsultant.Intern = consultant.Intern;
-        existingConsultant.Name = consultant.Name;
-        existingConsultant.Surname = consultant.Surname;
-        existingConsultant.Phone = consultant.Phone;
-        existingConsultant.Picture = consultant.Picture;
-        existingConsultant.CopyCI = consultant.CopyCI;
-        existingConsultant.enterprise = consultant.enterprise;
-
-    }
-
-    _context.SaveChanges();
-
-    return consultant;
-}
 
     public Consultant GetConsultantById(Guid consultantUuid)
     {
