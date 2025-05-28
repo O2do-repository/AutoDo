@@ -60,6 +60,14 @@ public class EnterpriseController : ControllerBase
                 data = newEnterprise
             });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
         catch (Exception ex)
         {
             return BadRequest(new

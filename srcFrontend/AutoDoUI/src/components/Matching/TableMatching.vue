@@ -108,12 +108,9 @@ const filteredGroups = computed(() => {
   const searchLower = search.value.toLowerCase();
 
   return consultantGroups.value.map(group => {
-    // Vérifie si le nom complet du consultant correspond
-    const consultantMatches =
-      group.fullName.toLowerCase().includes(searchLower);
+    const consultantMatches = group.fullName.toLowerCase().includes(searchLower);
 
     const filteredJobTitleGroups = group.jobTitleGroups.map(jobGroup => {
-      // Vérifie si le titre du job correspond
       const jobTitleMatches = jobGroup.jobTitle.toLowerCase().includes(searchLower);
 
       const filteredMatchings = jobGroup.matchings.filter(matching =>
@@ -123,12 +120,12 @@ const filteredGroups = computed(() => {
         matching.score.toString().includes(searchLower)
       );
 
-      // Si le titre du job match, inclure tous les matchings
-      if (jobTitleMatches) {
+      // ✅ Si consultant OU jobTitle match → on garde tout le groupe
+      if (consultantMatches || jobTitleMatches) {
         return { jobTitle: jobGroup.jobTitle, matchings: jobGroup.matchings };
       }
 
-      // Sinon, n'inclure que les matchings filtrés
+      // Sinon on garde les matchings filtrés
       if (filteredMatchings.length > 0) {
         return { jobTitle: jobGroup.jobTitle, matchings: filteredMatchings };
       }
@@ -136,7 +133,7 @@ const filteredGroups = computed(() => {
       return null;
     }).filter(Boolean) as JobTitleGroup[];
 
-    // Inclure le groupe si le nom du consultant match ou si des matchings filtrés existent
+    // ✅ Afficher le consultant s'il match ou s'il a des job titles filtrés
     if (consultantMatches || filteredJobTitleGroups.length > 0) {
       return { ...group, jobTitleGroups: filteredJobTitleGroups };
     }
@@ -144,6 +141,7 @@ const filteredGroups = computed(() => {
     return null;
   }).filter(Boolean) as ConsultantGroup[];
 });
+
 
 
 const isExpanded = (consultantName: string) => expandedConsultants.value.includes(consultantName);

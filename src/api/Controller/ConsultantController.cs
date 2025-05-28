@@ -49,6 +49,7 @@ public class ConsultantController : ControllerBase
 
         try
         {
+
             var consultant = new Consultant
             {
                 ConsultantUuid = Guid.NewGuid(),
@@ -66,15 +67,26 @@ public class ConsultantController : ControllerBase
 
             var newConsultant = _consultantService.AddConsultant(consultant);
 
-            return CreatedAtAction(nameof(GetConsultantById), new { id = newConsultant.ConsultantUuid }, new {
+
+            return CreatedAtAction(nameof(GetConsultantById), new { id = newConsultant.ConsultantUuid }, new
+            {
                 success = true,
                 message = "Consultant créé avec succès.",
                 data = newConsultant
             });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
         catch (Exception ex)
         {
-            return StatusCode(500, new {
+            return StatusCode(500, new
+            {
                 success = false,
                 message = "Erreur lors de la création du consultant.",
                 details = ex.InnerException?.Message ?? ex.Message

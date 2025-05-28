@@ -39,10 +39,13 @@ public class ProfileService : IProfileService
             .SingleOrDefault(c => c.ConsultantUuid.ToString() == profile.ConsultantUuid.ToString());
 
 
+        
         if (consultant == null)
         {
             throw new Exception($"Le consultant avec UUID {profile.ConsultantUuid} n'existe pas.");
         }
+
+        
         // Link profile to a consultant
         profile.Consultant = consultant;
         profile.ProfileUuid = Guid.NewGuid();

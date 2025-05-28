@@ -16,8 +16,16 @@ public class SkillService : ISkillService
     // Add a new skill 
     public Skill AddSkill(Skill skill)
     {
-        skill.SkillUuid = Guid.NewGuid();
 
+        var existingSkill= _context.Skills
+            .SingleOrDefault(k => k.Name.ToLower() == skill.Name.ToLower());
+
+        if (existingSkill != null)
+        {
+            throw new InvalidOperationException($"La compétence '{skill.Name}' existe déjà.");
+        }
+
+        skill.SkillUuid = Guid.NewGuid();
         _context.Skills.Add(skill);
         _context.SaveChanges();
 
