@@ -150,12 +150,14 @@ public class ProfileTest
         {
             ConsultantUuid = consultantUuid,
             Name = "John Doe",
-            Email = "john.doe@example.com", 
-            Phone = "1234567890",          
+            Email = "john.doe@example.com",
+            Phone = "1234567890",
             Surname = "Doe",
-            Picture =  "https://example.com/cv1.pdf",
+            Picture = "https://example.com/cv1.pdf",
             CopyCI = "https://example.com/cv1.pdf  ",
-            enterprise = "O2do"   
+            enterprise = "O2do",
+            Comment = ""
+            
         });
         context.SaveChanges();  
 
@@ -193,12 +195,13 @@ public class ProfileTest
         {
             ConsultantUuid = consultantUuid,
             Name = "John Doe",
-            Email = "john.doe@example.com", 
-            Phone = "1234567890",          
-            Surname = "Doe"   ,
-            Picture =  "https://example.com/cv1.pdf",
+            Email = "john.doe@example.com",
+            Phone = "1234567890",
+            Surname = "Doe",
+            Picture = "https://example.com/cv1.pdf",
             CopyCI = "https://example.com/cv1.pdf  ",
-            enterprise = "O2do"                     
+            enterprise = "O2do",
+            Comment = ""                     
         });
         context.SaveChanges();  
 
