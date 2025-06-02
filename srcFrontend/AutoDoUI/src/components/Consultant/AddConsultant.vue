@@ -16,6 +16,8 @@
     Phone: string;
     CopyCI: string;
     Picture: string;
+    Comment: string;
+
   }
 
   // Interface pour Enterprise
@@ -41,7 +43,9 @@
         enterprise: '',
         Phone: '',
         CopyCI: '',
-        Picture: ''
+        Picture: '',
+        Comment: ''
+
       });
 
       const router = useRouter();
@@ -333,6 +337,13 @@
                   required
                 ></v-text-field>
               </v-col>
+
+              <v-col cols="6">
+                <v-textarea clearable label="Note" variant="outlined" color ="primary" rows="1"
+                  auto-grow v-model="consultant.Comment" >
+                </v-textarea>
+              </v-col>
+
             </v-row>
           </v-form>
 
