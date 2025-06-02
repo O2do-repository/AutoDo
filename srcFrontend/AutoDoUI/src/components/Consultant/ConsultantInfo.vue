@@ -18,6 +18,7 @@ interface Consultant {
   picture: string;
   copyCI: string;
   comment: string;
+
 }
 
 const consultant = ref<Consultant | null>(null);
@@ -80,9 +81,11 @@ onMounted(() => {
         <v-col cols="12" sm="6">
           <strong>Date d'expiration CI :</strong> {{ consultant.expirationDateCI }}
         </v-col>
+
         <v-col cols="12" sm="6">
           <strong>Note :</strong> {{ consultant.comment }}
         </v-col>
+
         <v-col cols="12">
           <strong>Copie de la carte d'identité : </strong> 
           <v-btn 

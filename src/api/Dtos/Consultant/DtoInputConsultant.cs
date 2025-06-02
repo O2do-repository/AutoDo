@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+
 public class DtoInputConsultant
 {
+
 
     [Required]
     public string Email { get; set; }
@@ -15,7 +17,6 @@ public class DtoInputConsultant
     public string Name { get; set; }
     [Required]
     public string Surname { get; set; }
-
     public string CopyCI { get; set; }
     [Url(ErrorMessage = "Le champ CV doit être une URL valide.")]
     public string Picture { get; set; }

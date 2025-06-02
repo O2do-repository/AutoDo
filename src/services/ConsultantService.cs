@@ -80,6 +80,7 @@ public class ConsultantService : IConsultantService
         existingConsultant.enterprise = updatedConsultant.enterprise;
         existingConsultant.Comment = updatedConsultant.Comment;
 
+
         _context.Consultants.Update(existingConsultant);
         _context.SaveChanges();
 
