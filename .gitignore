@@ -4,6 +4,7 @@
 bin/
 obj/
 
+
 # Ignorer les fichiers spécifiques aux IDE
 .idea/
 

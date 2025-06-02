@@ -8,7 +8,9 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "dotnet dev-certs https --trust && dotnet restore && cd /workspaces/AutoDo/srcFrontend/AutoDoUI && npm install",
 
-	
+	"env": {
+		"DB_PATH": "DB_PATH"
+	},
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -37,8 +39,6 @@
 	//			"protocol": "https"
 	//		}
 	// }
-
-
 
 
 

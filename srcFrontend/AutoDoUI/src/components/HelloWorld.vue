@@ -6,7 +6,6 @@
       {{ error }}
     </v-alert>
 
-    <!-- Barre de recherche -->
     <v-text-field
       v-model="search"
       label="Rechercher un RFP"
@@ -40,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted } from 'vue';
 
 interface RFP {
@@ -67,19 +67,17 @@ const headers = ref([
   { key: 'rfpPriority', title: 'Priorité', align: 'center' as const },
   { key: 'workplace', title: 'Lieu', align: 'start' as const },
   { key: 'rfpUrl', title: 'Lien', align: 'center' as const, sortable: false },
-  { key: 'actions', title: 'Actions', align: 'center' as const, sortable: false },
 ]);
 
 const fetchRFPList = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/rfp`);
+    const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/rfp`);
 
     if (!response.ok) {
       throw new Error("Erreur lors de la récupération des RFP ");
     }
 
     const data = await response.json();
-    console.log("Données reçues du backend :", data);
 
     rfps.value = Array.isArray(data) ? data : [data];
   } catch (err) {
