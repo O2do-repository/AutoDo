@@ -33,6 +33,7 @@ public class ConsultantServiceTest
                 enterprise = "O2do",
                 Profiles = new List<Profile>(),
                 Comment=""
+
             },
             new Consultant
             {
@@ -49,6 +50,7 @@ public class ConsultantServiceTest
                 CopyCI = "http://localhost:8888/",
                 Profiles = new List<Profile>(),
                 Comment=""
+
             }
         });
         context.SaveChanges();
@@ -120,6 +122,7 @@ public class ConsultantServiceTest
             enterprise = "O2do",
             Profiles = new List<Profile>(),
             Comment=""
+
         };
 
         // Act
@@ -233,6 +236,7 @@ public class ConsultantServiceTest
             enterprise = "O2do",
             Profiles = new List<Profile>(),
             Comment=""
+
         };
 
         // Act & Assert
@@ -265,6 +269,7 @@ public class ConsultantServiceTest
             enterprise = "O2do",
             Profiles = new List<Profile>(),
             Comment=""
+
         };
 
         // Act

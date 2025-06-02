@@ -16,6 +16,7 @@ interface Consultant {
   copyCI: string;
   picture: string;
   comment : string;
+
 }
 
 interface Enterprise {
@@ -42,6 +43,7 @@ export default defineComponent({
       copyCI: '',
       picture: '',
       comment:''
+
     });
 
     const enterprises = ref<Enterprise[]>([]);
@@ -274,6 +276,7 @@ export default defineComponent({
                   auto-grow v-model="consultant.comment" >
                 </v-textarea>
               </v-col>
+
           </v-row>
         </v-form>
       </v-card-text>

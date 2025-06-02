@@ -8,14 +8,17 @@ public class Consultant
     [Required]
     public string Email { get; set; }
     [Required]
+
     public DateTime AvailabilityDate { get; set; }
     public DateTime ExpirationDateCI { get; set; }
     [Required]
     public bool Intern { get; set; } = false;
+
     [Required]
     public string Name { get; set; }
     [Required]
     public string Surname { get; set; }
+
     public String enterprise { get; set; }
     [Required]
     public string Phone { get; set; }

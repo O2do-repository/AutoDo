@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 
+
 public class DtoOutputConsultant
 {
     public Guid ConsultantUuid { get; set; }
