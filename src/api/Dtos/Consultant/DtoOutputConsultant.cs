@@ -18,4 +18,5 @@ public class DtoOutputConsultant
     public string Picture { get; set; }
     public string CopyCI { get; set; }
     public string Comment{ get; set; }
+
 }

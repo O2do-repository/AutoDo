@@ -31,8 +31,10 @@ public class ConsultantServiceTest
                 Picture = "http://localhost:8888/",
                 CopyCI = "http://localhost:8888/",
                 enterprise = "O2do",
+
                 Profiles = new List<Profile>(),
                 Comment=""
+
             },
             new Consultant
             {
@@ -47,8 +49,10 @@ public class ConsultantServiceTest
                 enterprise = "MI6",
                 Picture = "http://localhost:8888/",
                 CopyCI = "http://localhost:8888/",
+
                 Profiles = new List<Profile>(),
                 Comment=""
+
             }
         });
         context.SaveChanges();
@@ -118,8 +122,10 @@ public class ConsultantServiceTest
             Picture = "http://localhost:8888/",
             CopyCI = "http://localhost:8888/",
             enterprise = "O2do",
+
             Profiles = new List<Profile>(),
             Comment=""
+
         };
 
         // Act
@@ -233,6 +239,7 @@ public class ConsultantServiceTest
             enterprise = "O2do",
             Profiles = new List<Profile>(),
             Comment=""
+
         };
 
         // Act & Assert
@@ -265,6 +272,7 @@ public class ConsultantServiceTest
             enterprise = "O2do",
             Profiles = new List<Profile>(),
             Comment=""
+
         };
 
         // Act

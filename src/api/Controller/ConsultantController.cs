@@ -31,6 +31,7 @@ public class ConsultantController : ControllerBase
             CopyCI = consultant.CopyCI,
             Picture = consultant.Picture,
             Comment = consultant.Comment
+            Picture = consultant.Picture
         }).ToList();
 
         return Ok(new {
@@ -65,6 +66,7 @@ public class ConsultantController : ControllerBase
                 CopyCI = consultantDto.CopyCI,
                 Picture = consultantDto.Picture,
                 Comment = consultantDto.Comment
+                Picture = consultantDto.Picture
             };
 
             var newConsultant = _consultantService.AddConsultant(consultant);
@@ -161,6 +163,7 @@ public class ConsultantController : ControllerBase
                 enterprise = ConsultantDto.enterprise,
                 Phone = ConsultantDto.Phone,
                 Comment = ConsultantDto.Comment
+                Phone = ConsultantDto.Phone
             };
 
             var result = _consultantService.UpdateConsultant(updatedConsultant);

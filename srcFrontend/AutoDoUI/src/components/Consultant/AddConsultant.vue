@@ -17,6 +17,8 @@
     CopyCI: string;
     Picture: string;
     Comment: string;
+
+
   }
 
   // Interface pour Enterprise
@@ -44,6 +46,8 @@
         CopyCI: '',
         Picture: '',
         Comment: ''
+
+
       });
 
       const router = useRouter();
@@ -340,6 +344,7 @@
                   auto-grow v-model="consultant.Comment" >
                 </v-textarea>
               </v-col>
+
             </v-row>
           </v-form>
 

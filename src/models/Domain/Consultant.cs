@@ -12,6 +12,7 @@ public class Consultant
     public DateTime ExpirationDateCI { get; set; }
     [Required]
     public bool Intern { get; set; } = false;
+
     [Required]
     public string Name { get; set; }
     [Required]
@@ -26,5 +27,6 @@ public class Consultant
     public string Comment { get; set;}
     // Un consultant peut avoir plusieurs profils
     public List<Profile> Profiles { get; set; }
+
 
 }

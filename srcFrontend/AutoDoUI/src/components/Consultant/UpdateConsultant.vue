@@ -16,6 +16,7 @@ interface Consultant {
   copyCI: string;
   picture: string;
   comment : string;
+
 }
 
 interface Enterprise {

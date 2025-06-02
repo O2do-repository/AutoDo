@@ -18,6 +18,8 @@ interface Consultant {
   picture: string;
   copyCI: string;
   comment: string;
+
+
 }
 
 const consultant = ref<Consultant | null>(null);
