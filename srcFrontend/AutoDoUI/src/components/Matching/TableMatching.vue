@@ -62,7 +62,7 @@ const fetchMatchings = async () => {
       ...m,
       editable: false 
     }));
-    expandedConsultants.value = consultantGroups.value.map(group => group.name);
+    
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Erreur, impossible de récupérer les matchings";
   }
@@ -121,7 +121,7 @@ const filteredGroups = computed(() => {
         matching.score.toString().includes(searchLower)
       );
 
-      // ✅ Si consultant OU jobTitle match → on garde tout le groupe
+      // Si consultant OU jobTitle match → on garde tout le groupe
       if (consultantMatches || jobTitleMatches) {
         return { jobTitle: jobGroup.jobTitle, matchings: jobGroup.matchings };
       }
@@ -134,7 +134,7 @@ const filteredGroups = computed(() => {
       return null;
     }).filter(Boolean) as JobTitleGroup[];
 
-    // ✅ Afficher le consultant s'il match ou s'il a des job titles filtrés
+    // Afficher le consultant s'il match ou s'il a des job titles filtrés
     if (consultantMatches || filteredJobTitleGroups.length > 0) {
       return { ...group, jobTitleGroups: filteredJobTitleGroups };
     }
@@ -191,6 +191,16 @@ const saveMatchingGroup = async (matchings: Matching[]) => {
     }
   }
 };
+
+  // Ajoute une notification si le matching depasse 60 et tant que le statut matching est "new"
+  const hasNewHighScoreMatching = (group: ConsultantGroup): boolean => {
+    return group.jobTitleGroups.some(jobGroup =>
+      jobGroup.matchings.some(matching =>
+        matching.score > 60 && matching.statutMatching.toLowerCase() === 'new'
+      )
+    );
+  };
+
 
 const hasEditableItems = computed(() => {
   return consultantGroups.value.some(group =>
@@ -262,9 +272,22 @@ onMounted(fetchMatchings);
           <v-icon size="large" class="mr-2">mdi-account</v-icon>
           <span class="text-h5">{{ group.fullName }}</span>
           <v-spacer></v-spacer>
-          <v-chip class="ml-2 mr-2" color="primary">
-            {{ group.jobTitleGroups.reduce((acc, jg) => acc + jg.matchings.length, 0) }} matching{{ group.jobTitleGroups.reduce((acc, jg) => acc + jg.matchings.length, 0) > 1 ? 's' : '' }}
+          <v-chip class="ml-2 mr-2 d-flex align-center" color="primary">
+            <span>
+              {{ group.jobTitleGroups.reduce((acc, jg) => acc + jg.matchings.length, 0) }}
+              matching{{ group.jobTitleGroups.reduce((acc, jg) => acc + jg.matchings.length, 0) > 1 ? 's' : '' }}
+            </span>
+            <v-icon
+              v-if="hasNewHighScoreMatching(group)"
+              color="red"
+              size="small"
+              class="ml-1"
+              title="Matching à haut score non traité"
+            >
+              mdi-bell-alert
+            </v-icon>
           </v-chip>
+
           <v-icon>{{ isExpanded(group.name) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
         </v-card-title>
 

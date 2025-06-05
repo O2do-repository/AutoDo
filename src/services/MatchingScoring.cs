@@ -76,7 +76,7 @@ public static class MatchingScoring
             : rfp.ExperienceLevel;
 
         if (finalExperience == Experience.Unspecified)
-            return (0, "Niveau d’expérience non identifiable dans le RFP (ni dans l’intitulé, ni explicitement spécifié).");
+            return (20, "Niveau d’expérience non identifiable dans le RFP (ni dans l’intitulé, ni explicitement spécifié).");
 
         if (profile.ExperienceLevel == finalExperience)
             return (20, $"Le profil possède exactement le niveau d’expérience requis : {finalExperience}.");

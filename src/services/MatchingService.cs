@@ -100,6 +100,7 @@ public class MatchingService :IMatchingService
             .Include(m => m.Rfp)
             .Include(m => m.Profile)
                 .ThenInclude(p => p.Consultant) 
+            .OrderByDescending(m => m.Score) 
             .ToListAsync();
     }
 
