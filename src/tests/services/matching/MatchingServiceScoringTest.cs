@@ -100,9 +100,9 @@ public class MatchingServiceScoringTest
 
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest3"); // Software Engineer
 
-        var score = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
+        var (score, _) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
+        Assert.InRange(score, 10, 20);
 
-        Assert.InRange(score, 10, 20); // Expect a decent match
     }
 
     [Fact]
@@ -125,8 +125,8 @@ public class MatchingServiceScoringTest
 
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest1"); // Data Test
 
-        var score = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
-
+        var (score, _) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
+    
         Assert.Equal(0, score);
     }
     [Fact]
@@ -150,7 +150,7 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Engineer"
         };
 
-        var score = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
+        var (score, _) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
 
         Assert.Equal(15, score);
     }
@@ -175,7 +175,7 @@ public class MatchingServiceScoringTest
 
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest3");
 
-        var score = MatchingScoring.ScoreExperienceMatch(profile, rfp);
+        var (score, _) = MatchingScoring.ScoreExperienceMatch(profile, rfp);
 
         Assert.Equal(20, score);
     }
@@ -185,7 +185,7 @@ public class MatchingServiceScoringTest
         using var context = GetInMemoryDbContext();
         SeedDatabase(context);
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest2"); // Software Engineer
-        var score = MatchingScoring.ScoreLocationMatch(rfp);
+        var (score, _) = MatchingScoring.ScoreLocationMatch(rfp);
 
         Assert.Equal(0, score);
     }
@@ -196,7 +196,7 @@ public class MatchingServiceScoringTest
         SeedDatabase(context);
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest1"); // Software Engineer
 
-        var score = MatchingScoring.ScoreLocationMatch(rfp);
+        var (score, _) = MatchingScoring.ScoreLocationMatch(rfp);
 
         Assert.Equal(20, score);
     }
@@ -220,7 +220,7 @@ public class MatchingServiceScoringTest
             Keywords = new List<string> { "Architect", "DevOps" }
         };
 
-        var score = MatchingScoring.ScoreSkillsMatch(profile, rfp);
+        var (score, _) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
 
         Assert.True(score > 0 && score < 35);
     }
@@ -243,7 +243,7 @@ public class MatchingServiceScoringTest
             Keywords = new List<string> { "Architect", "DevOps" }
         };
 
-        var score = MatchingScoring.ScoreSkillsMatch(profile, rfp);
+        var (score, _) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
 
         Assert.True(score == 5);
     }

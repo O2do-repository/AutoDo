@@ -12,6 +12,7 @@ public class AutoDoDbContext : DbContext
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Keyword> Keywords { get; set; }
     public DbSet<Enterprise> Enterprises {get;set;}
+    public DbSet<MatchingFeedback> MatchingFeedbacks{ get; set; }
     
 
     private readonly bool _useInMemory;
@@ -25,6 +26,14 @@ public class AutoDoDbContext : DbContext
     public AutoDoDbContext() : base(new DbContextOptions<AutoDoDbContext>())
     {
     }
+
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     if (!optionsBuilder.IsConfigured)
+    //     {
+    //         optionsBuilder.UseSqlServer("");
+    //     }
+    // }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -69,7 +78,7 @@ public class AutoDoDbContext : DbContext
                 .HasMaxLength(255)
                 .IsRequired();
 
-             entity.HasIndex(c => c.Email).IsUnique();
+            entity.HasIndex(c => c.Email).IsUnique();
 
 
             entity.HasMany(c => c.Profiles)
@@ -137,7 +146,7 @@ public class AutoDoDbContext : DbContext
             entity.Property(e => e.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
 
             entity.HasIndex(e => e.Name).IsUnique();
-            
+
         });
 
 
@@ -148,7 +157,7 @@ public class AutoDoDbContext : DbContext
             entity.ToTable("Matching");
             entity.HasKey(m => m.MatchingUuid);
             entity.Property(m => m.MatchingUuid).HasColumnName("MatchingUuid").IsRequired();
-            entity.Property(m => m.Comment).HasColumnName("Comment").HasMaxLength(500);
+            entity.Property(m => m.Comment).HasColumnName("Comment").HasMaxLength(2000);
             entity.Property(m => m.Score).HasColumnName("Score").IsRequired();
             entity.Property(m => m.StatutMatching)
                 .HasConversion(mx => mx.ToString(), mx => (StatutMatching)Enum.Parse(typeof(StatutMatching), mx));
@@ -166,6 +175,40 @@ public class AutoDoDbContext : DbContext
 
             entity.HasIndex(m => new { m.RfpUuid, m.ProfileUuid }).IsUnique();
         });
+
+        modelBuilder.Entity<MatchingFeedback>(entity =>
+        {
+            entity.ToTable("MatchingFeedback");
+
+            entity.HasKey(mf => mf.MatchingFeedbackUuid);
+
+            entity.Property(mf => mf.MatchingUuid).IsRequired();
+
+            entity.HasOne(mf => mf.Matching)
+                .WithOne(m => m.MatchingFeedback)
+                .HasForeignKey<MatchingFeedback>(mf => mf.MatchingUuid)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(mf => mf.MatchingUuid).IsUnique();
+
+            entity.Property(mf => mf.TotalScore).IsRequired();
+            entity.Property(mf => mf.JobTitleScore).IsRequired();
+            entity.Property(mf => mf.ExperienceScore).IsRequired();
+            entity.Property(mf => mf.SkillsScore).IsRequired();
+            entity.Property(mf => mf.LocationScore).IsRequired();
+
+            entity.Property(mf => mf.JobTitleFeedback).HasMaxLength(10000);
+            entity.Property(mf => mf.ExperienceFeedback).HasMaxLength(10000);
+            entity.Property(mf => mf.SkillsFeedback).HasMaxLength(10000);
+            entity.Property(mf => mf.LocationFeedback).HasMaxLength(10000);
+
+            entity.Property(mf => mf.CreatedAt).IsRequired();
+            entity.Property(mf => mf.LastUpdatedAt).IsRequired();
+        });
+
+
+
+
 
     } 
 }

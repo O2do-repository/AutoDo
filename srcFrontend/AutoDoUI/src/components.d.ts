@@ -16,6 +16,7 @@ declare module 'vue' {
     EnterpriseTab: typeof import('./components/Admin/EnterpriseTab.vue')['default']
     GoBackBtn: typeof import('./components/utils/GoBackBtn.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    HoverFeedback: typeof import('./components/Matching/HoverFeedback.vue')['default']
     KeywordsTab: typeof import('./components/Admin/KeywordsTab.vue')['default']
     ListConsultant: typeof import('./components/Consultant/ListConsultant.vue')['default']
     Login: typeof import('./components/LoginEnter.vue')['default']

@@ -33,6 +33,7 @@ public class TranslationService : ITranslationService
 
             request.Headers.Add("Ocp-Apim-Subscription-Key", _options.Key);
             request.Headers.Add("Ocp-Apim-Subscription-Region", _options.Region);
+            
 
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();

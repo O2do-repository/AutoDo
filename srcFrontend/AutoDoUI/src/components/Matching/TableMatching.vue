@@ -47,6 +47,7 @@ const headers = ref([
   { key: 'publicationDate', title: "Date de publication", align: 'start' as const },
   { key: 'statutMatching', title: 'Statut', align: 'start' as const },
   { key: 'comment', title: 'Commentaire', align: 'start' as const },
+  { key: 'feedback', title: 'Feedback ', align: 'center' as const }, 
 ]);
 
 const fetchMatchings = async () => {
@@ -328,6 +329,7 @@ onMounted(fetchMatchings);
                     style="width: 300px; text-align: right;"
                     class="comment-textarea"
                   />
+                  
                 </template>
 
                 <!-- Statut -->
@@ -342,6 +344,11 @@ onMounted(fetchMatchings);
                     style="max-width: 150px"
                   />
                 </template>
+                <template v-slot:item.feedback="{ item }">
+                  <HoverFeedback :matching-uuid="item.matchingUuid" />
+                </template>
+
+                
               </v-data-table>
 
               <!-- Bouton Sauvegarder conditionnel -->
