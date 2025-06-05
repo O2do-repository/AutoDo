@@ -13,15 +13,18 @@ public class Matching
 
     [Required]
     public Guid RfpUuid { get; set; }
+    public Guid MatchingFeedbackUuid { get; set; }
 
     [Required]
     public int Score { get; set; }
     [Required]
-    public StatutMatching StatutMatching{get; set;} = StatutMatching.New;
+    public StatutMatching StatutMatching { get; set; } = StatutMatching.New;
 
     [ForeignKey("ProfileUuid")]
     public Profile Profile { get; set; }
 
     [ForeignKey("RfpUuid")]
     public RFP Rfp { get; set; }
+    public MatchingFeedback MatchingFeedback { get; set; }
+
 }

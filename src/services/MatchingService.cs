@@ -11,43 +11,80 @@ public class MatchingService :IMatchingService
     {
         _context = context;
     }
-    public int CalculateMatchingScore(Profile profile, RFP rfp)
+    public MatchingFeedback CalculateMatchingFeedback(Profile profile, RFP rfp, Guid matchingUuid)
     {
-        int score = 0;
+        var (jobScore, jobFeedback) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
+        var (expScore, expFeedback) = MatchingScoring.ScoreExperienceMatch(profile, rfp);
+        var (skillScore, skillFeedback) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
+        var (locScore, locFeedback) = MatchingScoring.ScoreLocationMatch(rfp);
 
-        score += MatchingScoring.ScoreJobTitleMatch(profile, rfp);  // /20
-        score += MatchingScoring.ScoreExperienceMatch(profile, rfp); // /20
-        score += MatchingScoring.ScoreSkillsMatch(profile, rfp); // /40
-        score += MatchingScoring.ScoreLocationMatch(rfp); // 20
+        int total = jobScore + expScore + skillScore + locScore;
 
-        return Math.Min(score, 100);
+        return new MatchingFeedback
+        {
+            MatchingFeedbackUuid = Guid.NewGuid(),
+            MatchingUuid = matchingUuid,
+            TotalScore = Math.Min(total, 100),
+            JobTitleScore = jobScore,
+            ExperienceScore = expScore,
+            SkillsScore = skillScore,
+            LocationScore = locScore,
+            JobTitleFeedback = jobFeedback,
+            ExperienceFeedback = expFeedback,
+            SkillsFeedback = skillFeedback,
+            LocationFeedback = locFeedback,
+            CreatedAt = DateTime.UtcNow,
+            LastUpdatedAt = DateTime.UtcNow
+        };
     }
+
     
 
     public async Task<List<Matching>> MatchingsForProfileAsync(Profile profile)
     {
         var rfps = await _context.Rfps.ToListAsync();
 
-        var newMatchings = rfps.Select(rfp => new Matching
+        var newMatchings = new List<Matching>();
+        var newFeedbacks = new List<MatchingFeedback>();
+
+        foreach (var rfp in rfps)
         {
-            MatchingUuid = Guid.NewGuid(),
-            ProfileUuid = profile.ProfileUuid,
-            RfpUuid = rfp.RFPUuid,
-            Score = CalculateMatchingScore(profile, rfp),
-            Comment = "",
-            StatutMatching = StatutMatching.New
-        }).ToList();
+            var matchingUuid = Guid.NewGuid();
 
-        // Supprimer les anciens matchings du profil (on écrase l'existant)
-        _context.Matchings.RemoveRange(_context.Matchings.Where(m => m.ProfileUuid == profile.ProfileUuid));
+            var feedback = CalculateMatchingFeedback(profile, rfp, matchingUuid);
 
-        // Ajouter les nouveaux matchings
+            var matching = new Matching
+            {
+                MatchingUuid = matchingUuid,
+                ProfileUuid = profile.ProfileUuid,
+                RfpUuid = rfp.RFPUuid,
+                Score = feedback.TotalScore,
+                Comment = "", 
+                StatutMatching = StatutMatching.New
+            };
+
+            newMatchings.Add(matching);
+            newFeedbacks.Add(feedback);
+        }
+
+        // Supprimer les anciens matchings et feedbacks du profil
+        var oldMatchings = _context.Matchings.Where(m => m.ProfileUuid == profile.ProfileUuid).ToList();
+        var oldMatchingUuids = oldMatchings.Select(m => m.MatchingUuid).ToList();
+
+        var oldFeedbacks = _context.MatchingFeedbacks.Where(fb => oldMatchingUuids.Contains(fb.MatchingUuid)).ToList();
+
+        _context.MatchingFeedbacks.RemoveRange(oldFeedbacks);
+        _context.Matchings.RemoveRange(oldMatchings);
+
+        // Ajouter les nouveaux
         _context.Matchings.AddRange(newMatchings);
+        _context.MatchingFeedbacks.AddRange(newFeedbacks);
 
         await _context.SaveChangesAsync();
 
         return newMatchings;
     }
+
     public async Task<List<Matching>> GetAllMatchingsAsync()
     {
         return await _context.Matchings
@@ -90,30 +127,52 @@ public class MatchingService :IMatchingService
     public async Task<List<Matching>> MatchingsForRfpsAsync(List<RFP> rfps)
     {
         var profiles = await _context.Profiles.ToListAsync();
-        
+
         var newMatchings = new List<Matching>();
-        
+        var newFeedbacks = new List<MatchingFeedback>();
+
         foreach (var profile in profiles)
         {
-            var matchingsForProfile = rfps.Select(rfp => new Matching
+            foreach (var rfp in rfps)
             {
-                MatchingUuid = Guid.NewGuid(),
-                ProfileUuid = profile.ProfileUuid,
-                RfpUuid = rfp.RFPUuid,
-                Score = CalculateMatchingScore(profile, rfp),
-                Comment = "",
-                StatutMatching = StatutMatching.New
-            }).ToList();
+                var matchingUuid = Guid.NewGuid();
+                var feedback = CalculateMatchingFeedback(profile, rfp, matchingUuid);
 
-            var rfpUuids = rfps.Select(rfp => rfp.RFPUuid).ToHashSet();
-            _context.Matchings.RemoveRange(_context.Matchings.Where(m => m.ProfileUuid == profile.ProfileUuid && rfpUuids.Contains(m.RfpUuid)));
+                var matching = new Matching
+                {
+                    MatchingUuid = matchingUuid,
+                    ProfileUuid = profile.ProfileUuid,
+                    RfpUuid = rfp.RFPUuid,
+                    Score = feedback.TotalScore,
+                    Comment = "",
+                    StatutMatching = StatutMatching.New
+                };
 
-            newMatchings.AddRange(matchingsForProfile);
+                newMatchings.Add(matching);
+                newFeedbacks.Add(feedback);
+            }
+
+            // Supprimer les anciens matchings et feedbacks du profil pour les RFPs concernés
+            var rfpUuids = rfps.Select(r => r.RFPUuid).ToList();
+
+            var oldMatchings = _context.Matchings
+                .Where(m => m.ProfileUuid == profile.ProfileUuid && rfpUuids.Contains(m.RfpUuid))
+                .ToList();
+
+            var oldMatchingUuids = oldMatchings.Select(m => m.MatchingUuid).ToList();
+
+            var oldFeedbacks = _context.MatchingFeedbacks
+                .Where(fb => oldMatchingUuids.Contains(fb.MatchingUuid))
+                .ToList();
+
+            _context.MatchingFeedbacks.RemoveRange(oldFeedbacks);
+            _context.Matchings.RemoveRange(oldMatchings);
         }
 
-        if (newMatchings.Count > 0)
-            _context.Matchings.AddRange(newMatchings);
-        
+        // Ajouter les nouveaux
+        _context.Matchings.AddRange(newMatchings);
+        _context.MatchingFeedbacks.AddRange(newFeedbacks);
+
         await _context.SaveChangesAsync();
 
         return newMatchings;
