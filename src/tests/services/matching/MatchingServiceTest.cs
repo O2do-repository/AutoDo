@@ -370,7 +370,7 @@ public class MatchingServiceTest
         Assert.DoesNotContain(result, m => m.MatchingUuid == lowScoreMatching.MatchingUuid);
     }
     [Fact]
-    public async Task MatchingsForRfpsAsync_Should_Create_Matchings_For_Each_Profile()
+    public async Task Test_MatchingsForRfpsAsync_Should_Create_Matchings_For_Each_Profile()
     {
         // Arrange
         var dbContext = GetInMemoryDbContext();
@@ -429,7 +429,107 @@ public class MatchingServiceTest
         Assert.Equal(profiles.Count, result.Count);
     }
 
+    [Fact]
+    public async Task Test_Matching_Should_Have_Associated_Feedback()
+    {
+        var dbContext = GetInMemoryDbContext();
+        var service = new MatchingService(dbContext);
 
+        var matching = new Matching
+        {
+            MatchingUuid = Guid.NewGuid(),
+            ProfileUuid = Guid.NewGuid(),
+            RfpUuid = Guid.NewGuid(),
+            Score = 85,
+            Comment = "Good match",
+            StatutMatching = StatutMatching.New
+        };
+
+        var feedback = new MatchingFeedback
+        {
+            MatchingFeedbackUuid = Guid.NewGuid(),
+            MatchingUuid = matching.MatchingUuid,
+            TotalScore = 85,
+            JobTitleScore = 20,
+            ExperienceScore = 15,
+            SkillsScore = 30,
+            LocationScore = 20,
+            JobTitleFeedback = "Title matched well",
+            ExperienceFeedback = "Junior fit",
+            SkillsFeedback = "Skills aligned",
+            LocationFeedback = "Remote OK",
+            CreatedAt = DateTime.UtcNow,
+            LastUpdatedAt = DateTime.UtcNow
+        };
+
+        dbContext.Matchings.Add(matching);
+        dbContext.MatchingFeedbacks.Add(feedback);
+        await dbContext.SaveChangesAsync();
+
+        var loadedMatching = dbContext.Matchings
+            .Include(m => m.MatchingFeedback)
+            .FirstOrDefault(m => m.MatchingUuid == matching.MatchingUuid);
+
+        Assert.NotNull(loadedMatching.MatchingFeedback);
+        Assert.Equal(85, loadedMatching.MatchingFeedback.TotalScore);
+    }
+
+    [Fact]
+    public async Task Test_Matching_Should_Include_Profile_And_Rfp_Navigation()
+    {
+        var dbContext = GetInMemoryDbContext();
+
+        var profile = new Profile
+        {
+            ProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"),
+            Ratehour = 50,
+            CV = "https://example.com/cv1.pdf",
+            CVDate = new DateTime(2023, 5, 1),
+            JobTitle = "Software Engineer",
+            ExperienceLevel = Experience.Junior,
+            ConsultantUuid = Guid.NewGuid(),
+            Skills = new List<string> { "Java", "JavaScript" },
+            Keywords = new List<string> { "Architect", "devOps" }
+        };
+
+        var rfp = new RFP
+        {
+            RFPUuid = Guid.NewGuid(),
+            DeadlineDate = DateTime.Today.AddDays(5),
+            Skills = new List<string> { "C#", "Vue.js" },
+            DescriptionBrut = "Junior Web Developer for eCommerce site",
+            JobTitle = "Junior Developer",
+            Reference = "RFP-11223",
+            RfpPriority = "Low",
+            RfpUrl = "https://example.com/rfp/11223",
+            Workplace = "On-site"
+        };
+
+        var matching = new Matching
+        {
+            MatchingUuid = Guid.NewGuid(),
+            ProfileUuid = profile.ProfileUuid,
+            RfpUuid = rfp.RFPUuid,
+            Score = 75,
+            Comment = "Match OK",
+            StatutMatching = StatutMatching.New
+        };
+
+        dbContext.Profiles.Add(profile);
+        dbContext.Rfps.Add(rfp);
+        dbContext.Matchings.Add(matching);
+        await dbContext.SaveChangesAsync();
+
+        var loaded = dbContext.Matchings
+            .Include(m => m.Profile)
+            .Include(m => m.Rfp)
+            .FirstOrDefault(m => m.MatchingUuid == matching.MatchingUuid);
+
+        Assert.NotNull(loaded.Profile);
+        Assert.NotNull(loaded.Rfp);
+        Assert.Equal(profile.ProfileUuid, loaded.Profile.ProfileUuid);
+        Assert.Equal(rfp.RFPUuid, loaded.Rfp.RFPUuid);
+    }
 
 
 }

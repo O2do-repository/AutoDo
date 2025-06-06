@@ -4,12 +4,17 @@ using System.Text.RegularExpressions;
 
 public static class MatchingScoring
 {
+    private static readonly Regex TokenRegex = new Regex(
+        @"[a-zA-Z0-9#+.]+", 
+        RegexOptions.Compiled | RegexOptions.CultureInvariant, 
+        TimeSpan.FromMilliseconds(250));
+
     // Score basé sur la correspondance entre les intitulés de poste du profil et du RFP
     public static (int score, string feedback) ScoreJobTitleMatch(Profile profile, RFP rfp)
     {
         var profileJobTitle = profile.JobTitle ?? "(non renseigné)";
         var rfpJobTitle = rfp.JobTitle ?? "(non renseigné)";
-        
+
         var introFeedback = $"Intitulé du profil : « {profileJobTitle} »\nIntitulé du RFP : « {rfpJobTitle} »\n";
 
         if (string.IsNullOrWhiteSpace(profile.JobTitle) || string.IsNullOrWhiteSpace(rfp.JobTitle))
@@ -265,23 +270,29 @@ public static class MatchingScoring
     {
         if (string.IsNullOrWhiteSpace(input)) return new();
 
-        // Normalisation Unicode pour enlever les accents
         var normalized = input
             .ToLowerInvariant()
             .Normalize(NormalizationForm.FormD);
-        
+
         var cleaned = new string(normalized
             .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
             .ToArray());
 
-        // Utilisation d'une regex pour séparer les mots, tout en gardant les noms techniques comme ".net", "node.js"
-        var words = Regex.Matches(cleaned, @"[a-zA-Z0-9#.+]+")
-            .Select(m => m.Value)
-            .Where(word => word.Length > 2 && !StopWords.Contains(word))
-            .Distinct()
-            .ToList();
+        try
+        {
+            var words = TokenRegex.Matches(cleaned)
+                .Select(m => m.Value)
+                .Where(word => word.Length > 2 && !StopWords.Contains(word))
+                .Distinct()
+                .ToList();
+            return words;
+        }
+        catch (RegexMatchTimeoutException ex)
+        {
+            Console.WriteLine("Regex timeout dépassé : " + ex.Message);
+            return new List<string>();
+        }
 
-        return words;
     }
 
     // Compare deux mots avec tolérance à 1 faute de frappe (Levenshtein <= 1)
