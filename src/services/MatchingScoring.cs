@@ -54,7 +54,7 @@ public static class MatchingScoring
             var detailedMatches = string.Join("\n", matchedPairs.Select(p => $"« {p.rfpWord} » (RFP) ↔ « {p.profileWord} » (profil)"));
             feedback = $"{introFeedback}\n{matchCount} mot(s) clé trouvés sur {rfpWords.Count} dans l’intitulé du RFP.\n" +
                     $"Détail des correspondances :\n{detailedMatches}\n" +
-                    $"🔎 Taux de correspondance : {(int)(ratio * 100)}%.";
+                    $"Taux de correspondance : {(int)(ratio * 100)}%.";
         }
         else
         {

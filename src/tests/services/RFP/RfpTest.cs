@@ -21,11 +21,11 @@ public class RfpTest
     {
         context.Rfps.AddRange(new List<RFP>
         {
-            new RFP 
-            { 
-                RFPUuid = Guid.NewGuid(), 
-                DeadlineDate = DateTime.Today.AddDays(-1), 
-                Skills = new List<string> { "C#", "Vue.js" }, 
+            new RFP
+            {
+                RFPUuid = Guid.NewGuid(),
+                DeadlineDate = DateTime.Today.AddDays(-1),
+                Skills = new List<string> { "C#", "Vue.js" },
                 DescriptionBrut = "Senior C# Developer for web application",
                 JobTitle = "Senior Developer",
                 Reference = "RFP-12345",
@@ -34,11 +34,11 @@ public class RfpTest
                 Workplace = "Remote"
             }, // Expired
 
-            new RFP 
-            { 
-                RFPUuid = Guid.NewGuid(), 
-                DeadlineDate = DateTime.Today, 
-                Skills = new List<string> { "C#", "Vue.js" }, 
+            new RFP
+            {
+                RFPUuid = Guid.NewGuid(),
+                DeadlineDate = DateTime.Today,
+                Skills = new List<string> { "C#", "Vue.js" },
                 DescriptionBrut = "Full Stack Developer for SaaS platform",
                 JobTitle = "Full Stack Developer",
                 Reference = "RFP-67890",
@@ -47,10 +47,10 @@ public class RfpTest
                 Workplace = "Hybrid"
             }, // Valid
 
-            new RFP 
-            { 
-                RFPUuid = Guid.NewGuid(), 
-                DeadlineDate = DateTime.Today.AddDays(5), 
+            new RFP
+            {
+                RFPUuid = Guid.NewGuid(),
+                DeadlineDate = DateTime.Today.AddDays(5),
                 Skills = new List<string> { "C#", "Vue.js" },
                 DescriptionBrut = "Junior Web Developer for eCommerce site",
                 JobTitle = "Junior Developer",
@@ -70,10 +70,10 @@ public class RfpTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-                
+
         // Mocking IMatchingService
         var mockMatchingService = new Mock<IMatchingService>();
-        
+
         // Instancier le service avec le mock de IMatchingService
         var mockTranslationService = new Mock<ITranslationService>();
         var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
@@ -112,10 +112,10 @@ public class RfpTest
     {
         // Arrange
         var context = GetInMemoryDbContext();
-        context.Rfps.Add(new RFP 
-        { 
-            RFPUuid = Guid.NewGuid(), 
-            DeadlineDate = DateTime.Today.AddDays(-5), 
+        context.Rfps.Add(new RFP
+        {
+            RFPUuid = Guid.NewGuid(),
+            DeadlineDate = DateTime.Today.AddDays(-5),
             Skills = new List<string> { "C#", "Vue.js" },
             DescriptionBrut = "Junior Web Developer for eCommerce site",
             JobTitle = "Junior Developer",
@@ -123,7 +123,7 @@ public class RfpTest
             RfpPriority = "Low",
             RfpUrl = "https://example.com/rfp/11223",
             Workplace = "On-site"
-        }); 
+        });
         context.SaveChanges();
         var mockMatchingService = new Mock<IMatchingService>();
 
@@ -228,5 +228,59 @@ public class RfpTest
         mockMatchingService.Verify(m => m.MatchingsForRfpsAsync(
             It.Is<List<RFP>>(list => list.All(r => r.Reference.StartsWith("RFP-NEW")) && list.Count == 2)), Times.Once);
     }
+    [Fact]
+    public void Test_DeleteOldRFPs_Should_Delete_RFPs_When_Deadline_Is_Expired()
+    {
+        // Arrange
+        var context = GetInMemoryDbContext();
+
+        // Seed the database with one expired and one active RFP
+        var expiredRfp = new RFP
+        {
+            RFPUuid = Guid.NewGuid(),
+            Reference = "RFP-001",
+            DeadlineDate = DateTime.Today.AddDays(-5), // Expired
+            DescriptionBrut = "Description expirée",
+            ExperienceLevel = Experience.Junior,
+            Skills = new List<string> { "C#", "ASP.NET Core" },
+            JobTitle = "Développeur .NET",
+            RfpUrl = "http://example.com/rfp-001",
+            Workplace = "Paris",
+            PublicationDate = DateTime.UtcNow.AddDays(-10),
+            RfpPriority = "High"
+        };
+
+        var activeRfp = new RFP
+        {
+            RFPUuid = Guid.NewGuid(),
+            Reference = "RFP-002",
+            DeadlineDate = DateTime.Today.AddDays(5), // Still valid
+            DescriptionBrut = "Nouvelle mission",
+            ExperienceLevel = Experience.Senior,
+            Skills = new List<string> { "React", "Node.js" },
+            JobTitle = "Développeur Fullstack",
+            RfpUrl = "http://example.com/rfp-002",
+            Workplace = "Lyon",
+            PublicationDate = DateTime.UtcNow.AddDays(-2),
+            RfpPriority = "Medium"
+        };
+
+
+        context.Rfps.AddRange(expiredRfp, activeRfp);
+        context.SaveChanges();
+
+        var mockMatchingService = new Mock<IMatchingService>();
+        var mockTranslationService = new Mock<ITranslationService>();
+        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
+        // Act
+        rfpService.DeleteOldRFPs();
+
+        // Assert
+        var remainingRfps = context.Rfps.ToList();
+        Assert.Single(remainingRfps);
+        Assert.Equal("RFP-002", remainingRfps.First().Reference);
+    }
+
 
 }
