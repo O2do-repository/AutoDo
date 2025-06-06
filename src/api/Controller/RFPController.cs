@@ -30,20 +30,6 @@ public class RfpController : ControllerBase
             return StatusCode(500, new { message = "Une erreur est survenue.", error = ex.Message });
         }
     }
-    [HttpPost("import")]
-    public async Task<IActionResult> ImportRfpFromJson()
-    {
-        try
-        {
-            await _rfpService.ImportRfpAndGenerateMatchings();
-
-            return Ok("Importation des RFPs et génération des matchings réussie !");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest($"Erreur : {ex.Message}");
-        }
-    }
     [HttpPost("import/json")]
     public async Task<IActionResult> ImportFromRawJson([FromBody] List<DtoInputRFP> rfps)
     {
