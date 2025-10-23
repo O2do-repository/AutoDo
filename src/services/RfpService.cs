@@ -10,13 +10,10 @@ public class RfpService : IRfpService
 {
     private readonly AutoDoDbContext _context;
     private readonly IMatchingService _matchingService;
-    private readonly ITranslationService _translationService;
-
-    public RfpService(AutoDoDbContext context, IMatchingService matchingService, ITranslationService translationService)
+    public RfpService(AutoDoDbContext context, IMatchingService matchingService)
     {
         _context = context;
         _matchingService = matchingService;
-        _translationService = translationService;
     }
 
     public async Task<List<RFP>> FilterRfpDeadlineNotReachedYet()
@@ -39,23 +36,6 @@ public class RfpService : IRfpService
         foreach (var rfp in rfps)
         {
             rfp.Skills ??= new List<string>();
-
-            // Traduction des champs vers l'anglais
-            var translatedJobTitle = await _translationService.TranslateTextAsync(rfp.JobTitle);
-            if (!string.IsNullOrWhiteSpace(translatedJobTitle))
-                rfp.JobTitle = translatedJobTitle;
-
-            var translatedDescription = await _translationService.TranslateTextAsync(rfp.DescriptionBrut);
-            if (!string.IsNullOrWhiteSpace(translatedDescription))
-                rfp.DescriptionBrut = translatedDescription;
-
-            var translatedSkills = new List<string>();
-            foreach (var skill in rfp.Skills)
-            {
-                var translatedSkill = await _translationService.TranslateTextAsync(skill);
-                translatedSkills.Add(!string.IsNullOrWhiteSpace(translatedSkill) ? translatedSkill : skill);
-            }
-            rfp.Skills = translatedSkills;
 
             var existing = existingReferences.SingleOrDefault(x => x.Reference == rfp.Reference);
 

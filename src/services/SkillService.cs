@@ -1,23 +1,25 @@
+using Microsoft.Extensions.Logging;
+
 public class SkillService : ISkillService
 {
     private readonly AutoDoDbContext _context;
-
-    public SkillService(AutoDoDbContext context)
+    private readonly ITranslationService _translationService;
+    public SkillService(AutoDoDbContext context, ITranslationService translationService)
     {
         _context = context;
+        _translationService = translationService;
     }
-    
+
     // Get skill
     public List<Skill> GetAllSkills()
     {
         return _context.Skills.ToList();
     }
-    
-    // Add a new skill 
-    public Skill AddSkill(Skill skill)
-    {
 
-        var existingSkill= _context.Skills
+    // Add a new skill 
+    public async Task<Skill> AddSkill(Skill skill)
+    {
+        var existingSkill = _context.Skills
             .SingleOrDefault(k => k.Name.ToLower() == skill.Name.ToLower());
 
         if (existingSkill != null)
@@ -26,8 +28,26 @@ public class SkillService : ISkillService
         }
 
         skill.SkillUuid = Guid.NewGuid();
+
+        // Nom d'origine
+        var originalName = skill.Name;
+
+        // Traductions automatiques
+        try
+        {
+            skill.NameEn = await _translationService.TranslateTextAsync(originalName, "en");
+            skill.NameFr = await _translationService.TranslateTextAsync(originalName, "fr");
+            skill.NameNl = await _translationService.TranslateTextAsync(originalName, "nl");
+        }
+        catch (Exception ex)
+        {
+            skill.NameEn = originalName;
+            skill.NameFr = originalName;
+            skill.NameNl = originalName;
+        }
+
         _context.Skills.Add(skill);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return skill;
     }
@@ -46,4 +66,31 @@ public class SkillService : ISkillService
         _context.Skills.Remove(existingSkill);
         _context.SaveChanges();
     }
+    
+    public async Task TranslateAllSkills()
+    {
+        var skills = _context.Skills.ToList();
+
+        foreach (var skill in skills)
+        {
+            var originalName = skill.Name;
+
+            try
+            {
+                skill.NameEn = await _translationService.TranslateTextAsync(originalName, "en");
+                skill.NameFr = await _translationService.TranslateTextAsync(originalName, "fr");
+                skill.NameNl = await _translationService.TranslateTextAsync(originalName, "nl");
+            }
+            catch (Exception ex)
+            {
+                // Optionnel : log l'erreur, ou garde les champs tels quels
+                skill.NameEn = originalName;
+                skill.NameFr = originalName;
+                skill.NameNl = originalName;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
 }

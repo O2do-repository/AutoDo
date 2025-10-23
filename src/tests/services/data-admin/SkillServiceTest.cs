@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +22,18 @@ public class SkillServiceTests
             new Skill
             {
                 SkillUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"),
-                Name = "Java"
+                Name = "Java",
+                NameFr = "Java",
+                NameNl = "Java",
+                NameEn = "Java"
             },
             new Skill
             {
                 SkillUuid = new Guid("987e4567-e89b-12d3-a456-426614174111"),
-                Name = "C#"
+                Name = "C#",
+                NameFr = "C#",
+                NameNl = "C#",
+                NameEn = "C#"
             }
         });
         context.SaveChanges();
@@ -38,7 +45,8 @@ public class SkillServiceTests
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var skillService = new SkillService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var skillService = new SkillService(context, mockTranslationService.Object);
 
         // Act
         var result = skillService.GetAllSkills();
@@ -50,24 +58,35 @@ public class SkillServiceTests
     }
 
     [Fact]
-    public void Test_AddSkill_Should_Add_Skill()
+    public async Task Test_AddSkill_Should_Add_Skill()
     {
         // Arrange
         var context = GetInMemoryDbContext();
-        var skillService = new SkillService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+
+        // Simuler les traductions (mock)
+        mockTranslationService.Setup(t => t.TranslateTextAsync("Python", "en")).ReturnsAsync("Python");
+        mockTranslationService.Setup(t => t.TranslateTextAsync("Python", "fr")).ReturnsAsync("Python");
+        mockTranslationService.Setup(t => t.TranslateTextAsync("Python", "nl")).ReturnsAsync("Python");
+
+        var skillService = new SkillService(context, mockTranslationService.Object);
         var newSkill = new Skill
         {
             Name = "Python"
         };
 
         // Act
-        var result = skillService.AddSkill(newSkill);
+        var result = await skillService.AddSkill(newSkill);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Python", result.Name);
-        Assert.NotEqual(Guid.Empty, result.SkillUuid);  // Should generate a new GUID
+        Assert.Equal("Python", result.NameEn);
+        Assert.Equal("Python", result.NameFr);
+        Assert.Equal("Python", result.NameNl);
+        Assert.NotEqual(Guid.Empty, result.SkillUuid);
     }
+
 
     [Fact]
     public void Test_DeleteSkill_Should_Remove_Skill_Successfully()
@@ -75,7 +94,8 @@ public class SkillServiceTests
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var skillService = new SkillService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var skillService = new SkillService(context, mockTranslationService.Object);
         var skillUuid = new Guid("123e4567-e89b-12d3-a456-426614174000");
 
         // Act
@@ -92,7 +112,8 @@ public class SkillServiceTests
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var skillService = new SkillService(context);  
+        var mockTranslationService = new Mock<ITranslationService>();
+        var skillService = new SkillService(context, mockTranslationService.Object);
         var nonExistentUuid = Guid.NewGuid();  // UUID qui n'existe pas dans la base de données
 
         // Act & Assert

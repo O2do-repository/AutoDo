@@ -28,8 +28,8 @@ public class ProfileController : ControllerBase
             CvDate = profile.CVDate,
             JobTitle = profile.JobTitle,
             ExperienceLevel = profile.ExperienceLevel,
-            Skills = profile.Skills ?? new List<string>(),
-            Keywords = profile.Keywords ?? new List<string>()
+            Skills = profile.Skills ?? new List<Skill>(),
+            Keywords = profile.Keywords ?? new List<Keyword>()
         }).ToList();
 
         return Ok(new
@@ -54,8 +54,9 @@ public class ProfileController : ControllerBase
             CvDate = profile.CVDate,
             JobTitle = profile.JobTitle,
             ExperienceLevel = profile.ExperienceLevel,
-            Skills = profile.Skills ?? new List<string>(),
-            Keywords = profile.Keywords ?? new List<string>()
+            Skills = profile.Skills ?? new List<Skill>(),
+            Keywords = profile.Keywords ?? new List<Keyword>()
+
         }).ToList();
 
         return Ok(new
@@ -89,12 +90,9 @@ public class ProfileController : ControllerBase
                 CVDate = profileDto.CvDate,
                 JobTitle = profileDto.JobTitle,
                 ExperienceLevel = profileDto.ExperienceLevel,
-                Skills = profileDto.Skills.ToList(),
-                Keywords = profileDto.Keywords.ToList()
             };
 
-            var newProfile = _profileService.AddProfile(profile);
-
+            var newProfile = await _profileService.AddProfile(profile, profileDto.SkillUuids, profileDto.KeywordUuids);
             var matchings = await _matchingService.MatchingsForProfileAsync(newProfile);
 
             return StatusCode(201, new
@@ -118,12 +116,12 @@ public class ProfileController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> UpdateProfile([FromBody] DtoUpdateProfile profileDto)
     {
-        if (profileDto == null)
+        if (profileDto == null || profileDto.ProfileUuid == Guid.Empty)
         {
             return BadRequest(new
             {
                 success = false,
-                message = "Données de profil invalides."
+                message = "Données de profil invalides ou UUID manquant."
             });
         }
 
@@ -138,11 +136,9 @@ public class ProfileController : ControllerBase
                 CVDate = profileDto.CvDate,
                 JobTitle = profileDto.JobTitle,
                 ExperienceLevel = profileDto.ExperienceLevel,
-                Skills = profileDto.Skills?.ToList() ?? new List<string>(),
-                Keywords = profileDto.Keywords?.ToList() ?? new List<string>()
             };
 
-            var updatedProfile = _profileService.UpdateProfile(profile);
+            var updatedProfile = await _profileService.UpdateProfile(profile, profileDto.SkillUuids, profileDto.KeywordUuids);
             var matchings = await _matchingService.MatchingsForProfileAsync(updatedProfile);
 
             return Ok(new
@@ -162,6 +158,7 @@ public class ProfileController : ControllerBase
             });
         }
     }
+
 
     [HttpDelete("{profileUuid}")]
     public IActionResult DeleteProfile(Guid profileUuid)
@@ -186,4 +183,51 @@ public class ProfileController : ControllerBase
             });
         }
     }
+    [HttpPut("translate-profile")]
+    public async Task<IActionResult> UpdateAllProfiles()
+    {
+        try
+        {
+            var updatedCount = await _profileService.UpdateAllProfiles();
+            return Ok(new
+            {
+                success = true,
+                message = $"Mise à jour de {updatedCount} profils terminée.",
+                count = updatedCount
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Erreur lors de la mise à jour en masse.",
+                details = ex.Message
+            });
+        }
+    }
+    // [HttpPut("backup-skills-keywords")]
+    // public async Task<IActionResult> BackupSkillsAndKeywords()
+    // {
+    //     try
+    //     {
+    //         var updatedCount = await _profileService.BackupOldProfileSkillAndKeywordData();
+    //         return Ok(new
+    //         {
+    //             success = true,
+    //             message = $"Sauvegarde des champs Skills et Keywords effectuée pour {updatedCount} profils.",
+    //             count = updatedCount
+    //         });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, new
+    //         {
+    //             success = false,
+    //             message = "Erreur lors de la sauvegarde des champs Skills et Keywords.",
+    //             details = ex.Message
+    //         });
+    //     }
+    // }
+
 }

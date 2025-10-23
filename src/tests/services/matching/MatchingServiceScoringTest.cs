@@ -94,8 +94,16 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill { Name = "Java" },
+                new Skill { Name = "JavaScript" }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword { Name = "Architect" },
+                new Keyword { Name = "devOps" }
+            }
         };
 
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest3"); // Software Engineer
@@ -119,8 +127,16 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill { Name = "Java" },
+                new Skill { Name = "JavaScript" }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword { Name = "Architect" },
+                new Keyword { Name = "devOps" }
+            }
         };
 
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest1"); // Data Test
@@ -141,8 +157,16 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Dev",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill { Name = "Java" },
+                new Skill { Name = "JavaScript" }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword { Name = "Architect" },
+                new Keyword { Name = "devOps" }
+            }
         };
 
         var rfp = new RFP
@@ -169,8 +193,16 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Dev",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill { Name = "Java" },
+                new Skill { Name = "JavaScript" }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword { Name = "Architect" },
+                new Keyword { Name = "devOps" }
+            }
         };
 
         var rfp = context.Rfps.First(r => r.Reference == "RFPTest3");
@@ -216,8 +248,16 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Dev",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill { Name = "Java" },
+                new Skill { Name = "JavaScript" }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword { Name = "Architect" },
+                new Keyword { Name = "devOps" }
+            }
         };
 
         var (score, _) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
@@ -239,8 +279,16 @@ public class MatchingServiceScoringTest
             JobTitle = "Software Dev",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Python", "Docker" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill { Name = "Java" },
+                new Skill { Name = "JavaScript" }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword { Name = "Architect" },
+                new Keyword { Name = "devOps" }
+            }
         };
 
         var (score, _) = MatchingScoring.ScoreSkillsMatch(profile, rfp);

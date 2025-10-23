@@ -1,6 +1,8 @@
 public interface IKeywordService
 {
     List<Keyword> GetAllKeywords();
-    Keyword AddKeyword(Keyword keyword);
+    Task<Keyword> AddKeyword(Keyword keyword);
     void DeleteKeyword(Guid keywordUuid);
+    Task TranslateAllKeywords();
+
 }

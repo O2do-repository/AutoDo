@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace data.Migrations
 {
     [DbContext(typeof(AutoDoDbContext))]
-    partial class AutoDoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250612132147_AddTraductionInSkillKeyword")]
+    partial class AddTraductionInSkillKeyword
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,67 +280,27 @@ namespace data.Migrations
 
                     b.Property<string>("JobTitle")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
                         .HasColumnName("JobTitle");
 
-                    b.Property<string>("JobTitleEn")
+                    b.Property<string>("Keywords")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("JobTitleEn");
-
-                    b.Property<string>("JobTitleFr")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("JobTitleFr");
-
-                    b.Property<string>("JobTitleNl")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("JobTitleNl");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Ratehour")
                         .HasColumnType("int")
                         .HasColumnName("Ratehour");
+
+                    b.Property<string>("Skills")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProfileUuid");
 
                     b.HasIndex("ConsultantUuid");
 
                     b.ToTable("Profile", (string)null);
-                });
-
-            modelBuilder.Entity("ProfileKeyword", b =>
-                {
-                    b.Property<Guid>("KeywordUuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProfileUuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("KeywordUuid", "ProfileUuid");
-
-                    b.HasIndex("ProfileUuid");
-
-                    b.ToTable("ProfileKeyword");
-                });
-
-            modelBuilder.Entity("ProfileSkill", b =>
-                {
-                    b.Property<Guid>("ProfileUuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SkillUuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ProfileUuid", "SkillUuid");
-
-                    b.HasIndex("SkillUuid");
-
-                    b.ToTable("ProfileSkill");
                 });
 
             modelBuilder.Entity("RFP", b =>
@@ -481,36 +444,6 @@ namespace data.Migrations
                         .IsRequired();
 
                     b.Navigation("Consultant");
-                });
-
-            modelBuilder.Entity("ProfileKeyword", b =>
-                {
-                    b.HasOne("Keyword", null)
-                        .WithMany()
-                        .HasForeignKey("KeywordUuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Profile", null)
-                        .WithMany()
-                        .HasForeignKey("ProfileUuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ProfileSkill", b =>
-                {
-                    b.HasOne("Profile", null)
-                        .WithMany()
-                        .HasForeignKey("ProfileUuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Skill", null)
-                        .WithMany()
-                        .HasForeignKey("SkillUuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Consultant", b =>

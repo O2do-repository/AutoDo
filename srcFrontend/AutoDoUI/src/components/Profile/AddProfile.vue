@@ -4,108 +4,101 @@ import { useRouter } from 'vue-router';
 import GoBackBtn from '@/components/utils/GoBackBtn.vue';
 import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 
-// Définition de l'interface Profile
-interface Profile {
+interface ProfilePayload {
   consultantUuid: string;
   RateHour: number | null;
   CV: string;
   CVDate: string;
   JobTitle: string;
   ExperienceLevel: string;
-  Skills: string[];
-  keywords: string[];
+  SkillUuids: string[];
+  KeywordUuids: string[];
 }
 
 export default defineComponent({
   name: 'AddProfile',
-  components: {
-    GoBackBtn
-  },
+  components: { GoBackBtn },
   setup() {
-    // Déclaration des variables
-    const profile = ref<Profile>({
+    const router = useRouter();
+
+    const profile = ref<ProfilePayload>({
       consultantUuid: '',
       RateHour: null,
       CV: '',
       CVDate: '',
       JobTitle: '',
       ExperienceLevel: '',
-      Skills: [],
-      keywords: []
+      SkillUuids: [],
+      KeywordUuids: []
     });
 
-    const router = useRouter();
     const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
-    const availableSkills = ref<string[]>([]);
-    const availableKeywords = ref<string[]>([]);
-    const formRef = ref<any>(null);
+    const availableSkills = ref<{ name: string; uuid: string }[]>([]);
+    const availableKeywords = ref<{ name: string; uuid: string }[]>([]);
 
-    // CV placeholder
+    const selectedSkillUuids = ref<string[]>([]);
+    const selectedKeywordUuids = ref<string[]>([]);
+
+    const formRef = ref<any>(null);
     const placeholderCV = 'https://example.com/default-cv';
     const validCV = ref('');
 
-    // Règles de validation
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    const success = ref(false);
+
+    // ✅ Validation rules
     const required = (v: any) => !!v || 'Champ obligatoire';
-    const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
-    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
+    const numberRule = (v: any) =>
+      (!isNaN(v) && Number(v) >= 0) || 'Entier positif requis';
+    const urlRule = (value: string) =>
+      /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) ||
+      'Lien invalide (ex: https://...)';
     const dateRule = (v: string) => !!v || 'Date requise';
 
-    // Fonction pour récupérer les compétences
+    // ✅ Fetch Skills & Keywords
     const fetchSkills = async () => {
       try {
-        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`,
-
-        );
+        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`);
         if (!res.ok) throw new Error('Erreur récupération des skills');
         const data = await res.json();
-        availableSkills.value = data.data.map((item: any) => item.name);
+        availableSkills.value = data.data.map((item: any) => ({
+          name: item.name,
+          uuid: item.skillUuid
+        }));
       } catch (error) {
         console.error('Erreur skills :', error);
       }
     };
 
-    // Fonction pour récupérer les mots-clés
     const fetchKeywords = async () => {
       try {
-        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`,
-
-        );
+        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`);
         if (!res.ok) throw new Error('Erreur récupération des keywords');
         const data = await res.json();
-        availableKeywords.value = data.data.map((item: any) => item.name);
+        availableKeywords.value = data.data.map((item: any) => ({
+          name: item.name,
+          uuid: item.keywordUuid
+        }));
       } catch (error) {
         console.error('Erreur keywords :', error);
       }
     };
 
-    // Vérifier si le lien CV est valide
     const checkCV = () => {
-      if (!profile.value.CV || profile.value.CV.trim() === '') {
-        validCV.value = '';
-        return;
-      }
-
-
-      validCV.value = profile.value.CV;
+      validCV.value = profile.value.CV?.trim() ? profile.value.CV : '';
     };
 
-    // Gérer le placeholder pour le CV
     const clearPlaceholder = () => {
-      if (profile.value.CV === placeholderCV) {
-        profile.value.CV = '';
-      }
+      if (profile.value.CV === placeholderCV) profile.value.CV = '';
     };
 
     const restorePlaceholder = () => {
-      if (!profile.value.CV) {
-        profile.value.CV = placeholderCV;
-      }
+      if (!profile.value.CV) profile.value.CV = placeholderCV;
     };
 
-    // Surveiller les changements du CV
     watch(() => profile.value.CV, checkCV);
 
-    // Récupérer le consultant UUID
     onMounted(() => {
       const storedUuid = sessionStorage.getItem('selectedConsultantUuid');
       if (storedUuid) {
@@ -113,48 +106,46 @@ export default defineComponent({
       } else {
         console.error('Aucun consultant sélectionné');
       }
-
       fetchSkills();
       fetchKeywords();
     });
 
-    const loading = ref(false);
-    const error = ref<string | null>(null);
-    const success = ref(false);
-
-
-    // Soumettre le profil
     const submitProfile = async () => {
       loading.value = true;
       error.value = null;
       success.value = false;
+
       try {
         if (!profile.value.CV || profile.value.CV.trim() === '') {
           profile.value.CV = placeholderCV;
         }
 
-        if (!formRef.value) return;
-
         const { valid } = await formRef.value.validate();
         if (!valid) return;
 
-        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil`, {
+        // ✅ Construire payload
+        const payload = {
+          consultantUuid: profile.value.consultantUuid,
+          RateHour: profile.value.RateHour,
+          CV: profile.value.CV,
+          CVDate: profile.value.CVDate,
+          JobTitle: profile.value.JobTitle,
+          ExperienceLevel: profile.value.ExperienceLevel,
+          SkillUuids: selectedSkillUuids.value,
+          KeywordUuids: selectedKeywordUuids.value
+        };
 
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(profile.value)
+          body: JSON.stringify(payload)
         });
 
         const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message);
-        }
+        if (!response.ok) throw new Error(data.message || 'Erreur lors de l’envoi');
 
-        success.value = data.message ;
-        setTimeout(() => {
-          router.push('/consultant/consultant-info');
-        }, 1000);
-
+        success.value = true;
+        setTimeout(() => router.push('/consultant/consultant-info'), 1000);
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
       } finally {
@@ -167,6 +158,8 @@ export default defineComponent({
       experienceLevels,
       availableSkills,
       availableKeywords,
+      selectedSkillUuids,
+      selectedKeywordUuids,
       formRef,
       required,
       numberRule,
@@ -194,109 +187,113 @@ export default defineComponent({
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
-            <!-- Lien du CV -->
+            <!-- CV -->
             <v-col cols="12">
-              <v-text-field 
-                label="Lien du CV *" 
-                v-model="profile.CV" 
-                variant="outlined" 
+              <v-text-field
+                label="Lien du CV *"
+                v-model="profile.CV"
+                variant="outlined"
                 color="primary"
                 :placeholder="placeholderCV"
-                :rules="[required, urlRule]" 
+                :rules="[required, urlRule]"
                 @focus="clearPlaceholder"
                 @blur="restorePlaceholder"
-                required 
+                required
               />
             </v-col>
 
             <!-- Job Title -->
             <v-col cols="6">
-              <v-text-field 
-                label="Job Title *" 
-                v-model="profile.JobTitle" 
-                :rules="[required]" 
-                variant="outlined" 
+              <v-text-field
+                label="Job Title *"
+                v-model="profile.JobTitle"
+                :rules="[required]"
+                variant="outlined"
                 color="primary"
-                required 
+                required
               />
             </v-col>
 
             <!-- Niveau d'expérience -->
             <v-col cols="6">
-              <v-select 
-                label="Niveau d'expérience *" 
-                v-model="profile.ExperienceLevel" 
-                :items="experienceLevels" 
-                :rules="[required]" 
-                variant="outlined" 
+              <v-select
+                label="Niveau d'expérience *"
+                v-model="profile.ExperienceLevel"
+                :items="experienceLevels"
+                :rules="[required]"
+                variant="outlined"
                 color="primary"
-                required 
+                required
               />
             </v-col>
 
-            <!-- Tarif / heure -->
+            <!-- Tarif -->
             <v-col cols="6">
-              <v-text-field 
-                label="Tarif / heure *" 
-                v-model.number="profile.RateHour" 
-                type="number" 
-                :rules="[required, numberRule]" 
-                variant="outlined" 
+              <v-text-field
+                label="Tarif / heure *"
+                v-model.number="profile.RateHour"
+                type="number"
+                :rules="[required, numberRule]"
+                variant="outlined"
                 color="primary"
-                required 
+                required
               />
             </v-col>
 
-            <!-- Date du CV -->
+            <!-- Date CV -->
             <v-col cols="6">
-              <v-text-field 
-                label="Date du CV *" 
-                v-model="profile.CVDate" 
-                type="date" 
-                :rules="[required, dateRule]" 
-                variant="outlined" 
+              <v-text-field
+                label="Date du CV *"
+                v-model="profile.CVDate"
+                type="date"
+                :rules="[required, dateRule]"
+                variant="outlined"
                 color="primary"
-                required 
+                required
               />
             </v-col>
 
-            <!-- Compétences -->
+            <!-- Skills -->
             <v-col cols="12">
-              <v-autocomplete 
-                label="Compétences *" 
-                v-model="profile.Skills" 
-                :items="availableSkills" 
-                multiple 
-                chips 
+              <v-autocomplete
+                label="Compétences *"
+                v-model="selectedSkillUuids"
+                :items="availableSkills"
+                item-title="name"
+                item-value="uuid"
+                multiple
+                chips
                 closable-chips
-                :rules="[required]" 
-                variant="outlined" 
+                :rules="[required]"
+                variant="outlined"
                 color="primary"
               />
             </v-col>
 
-            <!-- Mots-clés -->
+            <!-- Keywords -->
             <v-col cols="12">
-              <v-autocomplete 
-                label="Mots-clés *" 
-                v-model="profile.keywords" 
-                :items="availableKeywords" 
-                multiple 
-                chips 
+              <v-autocomplete
+                label="Mots-clés *"
+                v-model="selectedKeywordUuids"
+                :items="availableKeywords"
+                item-title="name"
+                item-value="uuid"
+                multiple
+                chips
                 closable-chips
-                :rules="[required]" 
-                variant="outlined" 
+                :rules="[required]"
+                variant="outlined"
                 color="primary"
               />
             </v-col>
           </v-row>
         </v-form>
       </v-card-text>
-      <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
-      <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
-      <v-alert v-if="success" type="success" class="mt-4">{{ success }}</v-alert>
 
-      <!-- Bouton Publier -->
+      <v-alert v-if="loading" type="info" class="mt-4">Chargement...</v-alert>
+      <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
+      <v-alert v-if="success" type="success" class="mt-4">Profil créé avec succès</v-alert>
+
       <v-card-actions class="d-flex justify-end">
         <v-btn color="primary" @click="submitProfile">Publier</v-btn>
       </v-card-actions>

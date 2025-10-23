@@ -129,14 +129,19 @@ onMounted(fetchEntreprises)
       </v-col>
       <v-col cols="2">
         <v-btn 
-            color="primary" 
-            @click="submitEntreprise"
-            icon
-            variant="text"
-            :disabled="!newEntreprise.trim()"
+          color="primary" 
+          @click="submitEntreprise"
+          icon
+          variant="text"
+          :disabled="!newEntreprise.trim() || loading"
+          :loading="loading"
         >
+          <template v-slot:loader>
+            <v-progress-circular indeterminate color="Primary" size="20"></v-progress-circular>
+          </template>
           <v-icon large>mdi-plus-circle</v-icon>
         </v-btn>
+
       </v-col>
       <v-col cols="6">
         <v-card
