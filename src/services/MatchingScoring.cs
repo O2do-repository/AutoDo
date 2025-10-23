@@ -12,28 +12,51 @@ public static class MatchingScoring
     // Score basé sur la correspondance entre les intitulés de poste du profil et du RFP
     public static (int score, string feedback) ScoreJobTitleMatch(Profile profile, RFP rfp)
     {
-        var profileJobTitle = profile.JobTitle ?? "(non renseigné)";
         var rfpJobTitle = rfp.JobTitle ?? "(non renseigné)";
+        var introFeedback = $"Intitulé du profil : « {profile.JobTitleFr} / {profile.JobTitleEn} / {profile.JobTitleNl} »\n" +
+                            $"Intitulé du RFP : « {rfpJobTitle} »\n";
 
-        var introFeedback = $"Intitulé du profil : « {profileJobTitle} »\nIntitulé du RFP : « {rfpJobTitle} »\n";
-
-        if (string.IsNullOrWhiteSpace(profile.JobTitle) || string.IsNullOrWhiteSpace(rfp.JobTitle))
+        if (string.IsNullOrWhiteSpace(rfp.JobTitle) ||
+            (string.IsNullOrWhiteSpace(profile.JobTitleFr) &&
+            string.IsNullOrWhiteSpace(profile.JobTitleEn) &&
+            string.IsNullOrWhiteSpace(profile.JobTitleNl)))
+        {
             return (0, introFeedback + "L’intitulé de poste est manquant dans le profil ou le RFP.");
+        }
 
         var rfpWords = TokenizeAndNormalize(rfp.JobTitle);
         if (rfpWords.Count == 0)
             return (0, introFeedback + "Aucun mot significatif trouvé dans l’intitulé du RFP.");
 
-        var profileWords = TokenizeAndNormalize(profile.JobTitle);
-        var skillWords = profile.Skills?.SelectMany(TokenizeAndNormalize) ?? Enumerable.Empty<string>();
-        var keywordWords = profile.Keywords?.SelectMany(TokenizeAndNormalize) ?? Enumerable.Empty<string>();
+        // Job titles in multiple languages
+        var profileJobWords = TokenizeAndNormalize(profile.JobTitleFr)
+            .Concat(TokenizeAndNormalize(profile.JobTitleEn))
+            .Concat(TokenizeAndNormalize(profile.JobTitleNl));
 
-        var allProfileWords = profileWords
+        // Skills: Name + translations
+        var skillWords = profile.Skills?.SelectMany(s =>
+            TokenizeAndNormalize(s.Name)
+            .Concat(TokenizeAndNormalize(s.NameFr))
+            .Concat(TokenizeAndNormalize(s.NameEn))
+            .Concat(TokenizeAndNormalize(s.NameNl))
+        ) ?? Enumerable.Empty<string>();
+
+        // Keywords: Name + translations
+        var keywordWords = profile.Keywords?.SelectMany(k =>
+            TokenizeAndNormalize(k.Name)
+            .Concat(TokenizeAndNormalize(k.NameFr))
+            .Concat(TokenizeAndNormalize(k.NameEn))
+            .Concat(TokenizeAndNormalize(k.NameNl))
+        ) ?? Enumerable.Empty<string>();
+
+        // All unique normalized words from profile
+        var allProfileWords = profileJobWords
             .Concat(skillWords)
             .Concat(keywordWords)
             .Distinct()
             .ToList();
 
+        // Matching words
         var matchedPairs = rfpWords
             .SelectMany(rfpWord => allProfileWords
                 .Where(profileWord => WordsMatch(rfpWord, profileWord))
@@ -114,15 +137,29 @@ public static class MatchingScoring
     }
 
     // Score basé sur la correspondance des compétences
-    public static (int score, string feedback) ScoreSkillsMatch(Profile profile, RFP rfp)
+   public static (int score, string feedback) ScoreSkillsMatch(Profile profile, RFP rfp)
     {
         var rfpSkills = rfp.Skills ?? Enumerable.Empty<string>();
 
-        var profileTokens = profile.Skills?
-            .Concat(profile.Keywords ?? Enumerable.Empty<string>())
-            .SelectMany(TokenizeAndNormalize)
+        // Combine and normalize all skill and keyword translations
+        var skillTokens = profile.Skills?.SelectMany(s =>
+            TokenizeAndNormalize(s.Name)
+            .Concat(TokenizeAndNormalize(s.NameFr))
+            .Concat(TokenizeAndNormalize(s.NameEn))
+            .Concat(TokenizeAndNormalize(s.NameNl))
+        ) ?? Enumerable.Empty<string>();
+
+        var keywordTokens = profile.Keywords?.SelectMany(k =>
+            TokenizeAndNormalize(k.Name)
+            .Concat(TokenizeAndNormalize(k.NameFr))
+            .Concat(TokenizeAndNormalize(k.NameEn))
+            .Concat(TokenizeAndNormalize(k.NameNl))
+        ) ?? Enumerable.Empty<string>();
+
+        var profileTokens = skillTokens
+            .Concat(keywordTokens)
             .Distinct()
-            .ToList() ?? new List<string>();
+            .ToList();
 
         int shouldMatched = 0, niceMatched = 0;
         int shouldTotal = 0, niceTotal = 0;
@@ -213,6 +250,7 @@ public static class MatchingScoring
 
         return (score, feedbackBuilder.ToString().Trim());
     }
+
 
 
 

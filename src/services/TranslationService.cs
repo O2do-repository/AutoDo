@@ -15,7 +15,7 @@ public class TranslationService : ITranslationService
         _logger = logger;
     }
 
-    public async Task<string> TranslateTextAsync(string text, string toLang = "en")
+    public async Task<string> TranslateTextAsync(string text, string toLang)
     {
         if (string.IsNullOrWhiteSpace(text)) return text;
 
@@ -33,7 +33,7 @@ public class TranslationService : ITranslationService
 
             request.Headers.Add("Ocp-Apim-Subscription-Key", _options.Key);
             request.Headers.Add("Ocp-Apim-Subscription-Region", _options.Region);
-            
+
 
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -43,4 +43,5 @@ public class TranslationService : ITranslationService
             return (string)(jsonResponse[0].translations[0].text ?? text);
         }, logger: _logger);
     }
+
 }

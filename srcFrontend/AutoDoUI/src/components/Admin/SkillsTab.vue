@@ -128,10 +128,15 @@ onMounted(fetchSkills)
           @click="submitSkill"
           icon
           variant="text"
-          :disabled="!newSkill.trim()"
+          :disabled="!newSkill.trim() || loading"
+          :loading="loading"
         >
+          <template v-slot:loader>
+            <v-progress-circular indeterminate color="primary" size="20"></v-progress-circular>
+          </template>
           <v-icon large>mdi-plus-circle</v-icon>
         </v-btn>
+
       </v-col>
       <v-col cols="6">
         <v-card

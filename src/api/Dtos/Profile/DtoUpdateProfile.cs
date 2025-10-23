@@ -26,6 +26,6 @@ public class DtoUpdateProfile
     [JsonConverter(typeof(JsonStringEnumConverter))] 
     public Experience ExperienceLevel { get; set; }
 
-    public List<string> Skills { get; set; }
-    public List<string> Keywords { get; set; } 
+    public List<Guid> SkillUuids { get; set; }
+    public List<Guid> KeywordUuids { get; set; }
 }

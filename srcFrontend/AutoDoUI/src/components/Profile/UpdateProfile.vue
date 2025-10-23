@@ -6,26 +6,25 @@ import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 
 interface Profile {
   profileUuid: string;
+  consultantUuid: string;
   rateHour: number | null;
   cv: string;
   cvDate: string;
   jobTitle: string;
   experienceLevel: string;
-  skills: string[];
-  keywords: string[];
+  skills: string[];     // UUIDs
+  keywords: string[];   // UUIDs
 }
 
 export default defineComponent({
   name: 'EditProfile',
-  components: {
-    GoBackBtn
-  },
+  components: { GoBackBtn },
   setup() {
-    // Récupération du profil stocké dans le localStorage
     const storedProfile = localStorage.getItem('selectedProfile');
-    
+
     const profile = ref<Profile>(storedProfile ? JSON.parse(storedProfile) : {
       profileUuid: '',
+      consultantUuid: '',
       rateHour: null,
       cv: '',
       cvDate: '',
@@ -36,116 +35,98 @@ export default defineComponent({
     });
 
     const router = useRouter();
-    const experienceLevels: string[] = ['Junior', 'Medior', 'Senior'];
-    const availableSkills = ref<string[]>([]);
-    const availableKeywords = ref<string[]>([]);
+    const experienceLevels = ['Junior', 'Medior', 'Senior'];
+    const availableSkills = ref<{ name: string; uuid: string }[]>([]);
+    const availableKeywords = ref<{ name: string; uuid: string }[]>([]);
     const formRef = ref<any>(null);
     const errorMessage = ref<string | null>(null);
-
-    // 🧪 CV placeholder et validation
     const placeholderCV = 'https://example.com/default-cv';
     const validCV = ref('');
+    const loading = ref(false);
+    const error = ref<string | null>(null);
+    const success = ref(false);
 
-    // 🧪 Règles de validation
     const required = (v: any) => !!v || 'Champ obligatoire';
     const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
-    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
+    const urlRule = (v: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(v) || "Lien invalide (ex: https://...)";
     const dateRule = (v: string) => !!v || 'Date requise';
 
-    // Vérifier si le lien CV est valide
     const checkCV = () => {
-      if (!profile.value.cv || profile.value.cv.trim() === '') {
-        validCV.value = '';
-        return;
-      }
-
-      // Pour un PDF on ne peut pas vraiment vérifier avec l'API Image
-      // mais on pourrait implémenter une vérification d'URL
-      validCV.value = profile.value.cv;
+      validCV.value = profile.value.cv || '';
     };
-
-    // Gérer le placeholder pour le CV
     const clearPlaceholder = () => {
-      if (profile.value.cv === placeholderCV) {
-        profile.value.cv = '';
-      }
+      if (profile.value.cv === placeholderCV) profile.value.cv = '';
     };
-
     const restorePlaceholder = () => {
-      if (!profile.value.cv) {
-        profile.value.cv = placeholderCV;
-      }
+      if (!profile.value.cv) profile.value.cv = placeholderCV;
     };
-
-    // Surveiller les changements du CV
     watch(() => profile.value.cv, checkCV);
 
-    // Récupération des compétences
     const fetchSkills = async () => {
       try {
-        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`,{
-
-        });
-        if (!res.ok) throw new Error('Erreur récupération des skills');
+        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`);
         const data = await res.json();
-        availableSkills.value = data.data.map((item: any) => item.name);
+        availableSkills.value = data.data.map((item: any) => ({
+          name: item.name,
+          uuid: item.skillUuid
+        }));
       } catch (error) {
         console.error('Erreur skills :', error);
       }
     };
 
-    // Récupération des mots-clés
     const fetchKeywords = async () => {
       try {
-        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`,{
-
-        });
-        if (!res.ok) throw new Error('Erreur récupération des keywords');
+        const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`);
         const data = await res.json();
-        availableKeywords.value = data.data.map((item: any) => item.name);
+        availableKeywords.value = data.data.map((item: any) => ({
+          name: item.name,
+          uuid: item.keywordUuid
+        }));
       } catch (error) {
         console.error('Erreur keywords :', error);
       }
     };
 
-    // Appel des fonctions au montage du composant
     onMounted(() => {
       fetchSkills();
       fetchKeywords();
       checkCV();
     });
 
-    const loading = ref(false);
-    const error = ref<string | null>(null);
-    const success = ref(false);
-
-
-    // Soumettre le profil
     const submitProfile = async () => {
       loading.value = true;
       error.value = null;
       success.value = false;
       try {
+        if (!formRef.value) return;
         if (!profile.value.cv || profile.value.cv.trim() === '') {
           profile.value.cv = placeholderCV;
         }
 
-        if (!formRef.value) return;
-
         const { valid } = await formRef.value.validate();
         if (!valid) return;
 
-        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil`, {
+        const payload = {
+          profileUuid: profile.value.profileUuid,
+          consultantUuid: profile.value.consultantUuid,
+          rateHour: profile.value.rateHour,
+          cv: profile.value.cv,
+          cvDate: profile.value.cvDate,
+          jobTitle: profile.value.jobTitle,
+          experienceLevel: profile.value.experienceLevel,
+          skillUuids: profile.value.skills,
+          keywordUuids: profile.value.keywords
+        };
 
+        const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(profile.value)
+          body: JSON.stringify(payload)
         });
 
         const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message);
-        }
+        if (!response.ok) throw new Error(data.message);
 
         success.value = data.message;
         setTimeout(() => {
@@ -191,12 +172,10 @@ export default defineComponent({
 
     <v-card class="pa-4">
       <GoBackBtn class="mb-4" />
-      
       <v-card-title class="text-h5 font-weight-bold">Modifier le Profil</v-card-title>
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
-            <!-- Lien du CV -->
             <v-col cols="12">
               <v-text-field 
                 label="CV URL *" 
@@ -210,8 +189,6 @@ export default defineComponent({
                 required 
               />
             </v-col>
-
-            <!-- Job Title -->
             <v-col cols="6">
               <v-text-field
                 label="Job Title *"
@@ -222,8 +199,6 @@ export default defineComponent({
                 required
               />
             </v-col>
-
-            <!-- Niveau d'expérience -->
             <v-col cols="6">
               <v-select
                 label="Niveau d'expérience *"
@@ -235,8 +210,6 @@ export default defineComponent({
                 required
               />
             </v-col>
-
-            <!-- Tarif / heure -->
             <v-col cols="6">
               <v-text-field
                 label="Tarif / heure *"
@@ -248,8 +221,6 @@ export default defineComponent({
                 required
               />
             </v-col>
-
-            <!-- Date du CV -->
             <v-col cols="6">
               <v-text-field
                 label="Date du CV *"
@@ -261,13 +232,13 @@ export default defineComponent({
                 required
               />
             </v-col>
-
-            <!-- Compétences -->
             <v-col cols="12">
               <v-autocomplete 
                 label="Compétences *"
                 v-model="profile.skills"
                 :items="availableSkills"
+                item-title="name"
+                item-value="uuid"
                 multiple
                 chips
                 closable-chips
@@ -276,13 +247,13 @@ export default defineComponent({
                 color="primary"
               />
             </v-col>
-
-            <!-- Mots-clés -->
             <v-col cols="12">
               <v-autocomplete 
                 label="Mots-clés *"
                 v-model="profile.keywords"
                 :items="availableKeywords"
+                item-title="name"
+                item-value="uuid"
                 multiple
                 chips
                 closable-chips
@@ -294,6 +265,7 @@ export default defineComponent({
           </v-row>
         </v-form>
       </v-card-text>
+
       <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
       <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
       <v-alert v-if="success" type="success" class="mt-4">{{ success }}</v-alert>

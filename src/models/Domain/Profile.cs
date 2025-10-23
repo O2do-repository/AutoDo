@@ -16,9 +16,16 @@ public class Profile
     public DateTime CVDate { get; set; }
     [Required]
     public string JobTitle { get; set; }
+    [Required]
+    public string JobTitleFr { get; set; }
+    [Required]
+    public string JobTitleEn { get; set; }
+    [Required]
+    public string JobTitleNl { get; set; }
     public Experience ExperienceLevel { get; set; }
-    public List<String> Skills { get; set; }
-    public List<String> Keywords { get; set; }
+    public List<Skill> Skills { get; set; }
+    public List<Keyword> Keywords { get; set; }
+
     [JsonIgnore]
     public Consultant Consultant {get; set;}
 }

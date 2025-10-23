@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +33,7 @@ public class SkillController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateSkill([FromBody] DtoInputSkill skillDto)
+    public async Task<IActionResult> CreateSkill([FromBody] DtoInputSkill skillDto)
     {
         if (skillDto == null)
         {
@@ -51,7 +52,7 @@ public class SkillController : ControllerBase
                 Name = skillDto.Name,
             };
 
-            var newSkill = _skillService.AddSkill(skill);
+            var newSkill = await _skillService.AddSkill(skill);
 
             return StatusCode(201, new
             {
@@ -104,4 +105,28 @@ public class SkillController : ControllerBase
             });
         }
     }
+    [HttpPost("translate")]
+    public async Task<IActionResult> TranslateAllSkills()
+    {
+        try
+        {
+            await _skillService.TranslateAllSkills();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Toutes les compétences ont été traduites avec succès."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Erreur lors de la traduction des compétences.",
+                details = ex.Message
+            });
+        }
+    }
+
 }

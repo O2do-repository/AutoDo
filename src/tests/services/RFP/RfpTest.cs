@@ -75,8 +75,7 @@ public class RfpTest
         var mockMatchingService = new Mock<IMatchingService>();
 
         // Instancier le service avec le mock de IMatchingService
-        var mockTranslationService = new Mock<ITranslationService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
 
         // Act
@@ -93,9 +92,7 @@ public class RfpTest
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
         var mockMatchingService = new Mock<IMatchingService>();
-
-        var mockTranslationService = new Mock<ITranslationService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
 
 
@@ -127,9 +124,8 @@ public class RfpTest
         context.SaveChanges();
         var mockMatchingService = new Mock<IMatchingService>();
 
-        // Instancier le service avec le mock de IMatchingService
-        var mockTranslationService = new Mock<ITranslationService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
 
         // Act
@@ -147,8 +143,7 @@ public class RfpTest
         SeedDatabase(context);
 
         var mockMatchingService = new Mock<IMatchingService>();
-        var mockTranslationService = new Mock<ITranslationService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
 
         var updatedRfp = new RFP
@@ -186,8 +181,7 @@ public class RfpTest
         SeedDatabase(context);
 
         var mockMatchingService = new Mock<IMatchingService>();
-        var mockTranslationService = new Mock<ITranslationService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
 
         var newRfps = new List<RFP>
@@ -270,8 +264,7 @@ public class RfpTest
         context.SaveChanges();
 
         var mockMatchingService = new Mock<IMatchingService>();
-        var mockTranslationService = new Mock<ITranslationService>();
-        var rfpService = new RfpService(context, mockMatchingService.Object, mockTranslationService.Object);
+        var rfpService = new RfpService(context, mockMatchingService.Object);
 
         // Act
         rfpService.DeleteOldRFPs();

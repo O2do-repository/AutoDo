@@ -4,4 +4,5 @@ public class DtoInputSkill
 {
     [Required]
     public string Name { get; set; }
+
 }
