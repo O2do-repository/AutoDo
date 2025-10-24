@@ -18,6 +18,6 @@ public class DtoOutputProfile
     [JsonConverter(typeof(JsonStringEnumConverter))]    
     public Experience ExperienceLevel { get; set; }
 
-    public List<string> Skills { get; set; }
-    public List<string> Keywords { get; set; } 
+    public List<Skill> Skills { get; set; }
+    public List<Keyword> Keywords { get; set; } 
 }

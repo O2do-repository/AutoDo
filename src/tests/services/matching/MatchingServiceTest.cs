@@ -82,17 +82,52 @@ public class MatchingServiceTest
 
         var service = new MatchingService(dbContext);
 
-        var profile =  new Profile
+        var profile = new Profile
         {
             ProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"),
             Ratehour = 50,
             CV = "https://example.com/cv1.pdf",
             CVDate = new DateTime(2023, 5, 1),
             JobTitle = "Software Engineer",
+            JobTitleFr = "Ingénieur Logiciel",
+            JobTitleEn = "Software Engineer",
+            JobTitleNl = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java","JavaScript" },
-            Keywords = new List<string> { "Architect", "devOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
 
         dbContext.Profiles.Add(profile);
@@ -102,9 +137,10 @@ public class MatchingServiceTest
         var result = await service.MatchingsForProfileAsync(profile);
 
         // Assert
-        Assert.NotEmpty(result); // Vérifie que des matchings existent
+        Assert.NotEmpty(result);
         Assert.All(result, m => Assert.True(m.Score >= 0));
     }
+
 
     [Fact]
     public async Task Test_MatchingsForProfileAsync_Should_Erase_Existent_Matchings()
@@ -122,10 +158,45 @@ public class MatchingServiceTest
             CV = "https://example.com/cv1.pdf",
             CVDate = new DateTime(2023, 5, 1),
             JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            JobTitleEn = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java","JavaScript" },
-            Keywords = new List<string> { "Architect", "devOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
         var matching = new Matching{
             MatchingUuid= new Guid(),
@@ -163,10 +234,45 @@ public class MatchingServiceTest
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
             JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            JobTitleEn = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
 
         dbContext.Profiles.Add(profile);
@@ -191,10 +297,45 @@ public class MatchingServiceTest
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
             JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            JobTitleEn = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
 
         dbContext.Profiles.Add(profile);
@@ -294,10 +435,45 @@ public class MatchingServiceTest
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
             JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            JobTitleEn = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
 
         dbContext.Profiles.Add(profile);
@@ -339,10 +515,45 @@ public class MatchingServiceTest
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
             JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            JobTitleEn = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "DevOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
 
         dbContext.Profiles.Add(profile);
@@ -353,7 +564,7 @@ public class MatchingServiceTest
         {
             MatchingUuid = Guid.NewGuid(),
             ProfileUuid = profile.ProfileUuid,
-            RfpUuid = new Guid("123e4567-e89b-12d3-a456-426614174233"), // RFP existant
+            RfpUuid = new Guid("123e4567-e89b-12d3-a456-426614174233"), 
             Score = 0, // Un score faible
             Comment = "Low score Matching",
             StatutMatching = StatutMatching.New
@@ -398,10 +609,45 @@ public class MatchingServiceTest
                 CV = "cv1.pdf",
                 CVDate = DateTime.Today,
                 JobTitle = "Engineer",
+                JobTitleFr = "Engineer",
+                JobTitleNl = "Engineer",
+                JobTitleEn = "Engineer",
                 ExperienceLevel = Experience.Junior,
                 ConsultantUuid = Guid.NewGuid(),
-                Skills = new List<string> { "Java" },
-                Keywords = new List<string> { "DevOps" }
+                Skills = new List<Skill>
+                {
+                    new Skill
+                    {
+                        Name = "Java",
+                        NameFr = "Java",
+                        NameEn = "Java",
+                        NameNl = "Java"
+                    },
+                    new Skill
+                    {
+                        Name = "JavaScript",
+                        NameFr = "JavaScript",
+                        NameEn = "JavaScript",
+                        NameNl = "JavaScript"
+                    }
+                },
+                Keywords = new List<Keyword>
+                {
+                    new Keyword
+                    {
+                        Name = "Architect",
+                        NameFr = "Architecte",
+                        NameEn = "Architect",
+                        NameNl = "Architect"
+                    },
+                    new Keyword
+                    {
+                        Name = "devOps",
+                        NameFr = "DevOps",
+                        NameEn = "DevOps",
+                        NameNl = "DevOps"
+                    }
+                }
             },
             new Profile
             {
@@ -409,10 +655,31 @@ public class MatchingServiceTest
                 CV = "cv2.pdf",
                 CVDate = DateTime.Today,
                 JobTitle = "Engineer",
+                JobTitleFr = "Engineer",
+                JobTitleNl = "Engineer",
+                JobTitleEn = "Engineer",
                 ExperienceLevel = Experience.Junior,
                 ConsultantUuid = Guid.NewGuid(),
-                Skills = new List<string> { "Python" },
-                Keywords = new List<string> { "Data" }
+                Skills = new List<Skill>
+                {
+                    new Skill
+                    {
+                        Name = "Python",
+                        NameFr = "Python",
+                        NameEn = "Python",
+                        NameNl = "Python"
+                    }
+                },
+                Keywords = new List<Keyword>
+                {
+                    new Keyword
+                    {
+                        Name = "Data",
+                        NameFr = "Données",
+                        NameEn = "Data",
+                        NameNl = "Data"
+                    }
+                }
             }
         };
 
@@ -486,10 +753,45 @@ public class MatchingServiceTest
             CV = "https://example.com/cv1.pdf",
             CVDate = new DateTime(2023, 5, 1),
             JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            JobTitleEn = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "devOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
         };
 
         var rfp = new RFP

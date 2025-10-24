@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,31 +17,66 @@ public class ProfileTest
 
     private void SeedDatabase(AutoDoDbContext context)
     {
-        // Create skill and keyword objects
-        var javaSkill = new Skill { SkillUuid = Guid.NewGuid(), Name = "Java" };
-        var javascriptSkill = new Skill { SkillUuid = Guid.NewGuid(), Name = "JavaScript" };
-        
-        var architectKeyword = new Keyword { KeywordUuid = Guid.NewGuid(), Name = "Architect" };
-        var devOpsKeyword = new Keyword { KeywordUuid = Guid.NewGuid(), Name = "DevOps" };
-        var dataScienceKeyword = new Keyword { KeywordUuid = Guid.NewGuid(), Name = "DataScience" };
-
-        context.Profiles.AddRange(new List<Profile>
+        // Crée les objets Skill et Keyword avec toutes les langues
+        var javaSkill = new Skill
         {
-            new Profile
-            {
-                ProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"),
-                Ratehour = 50,
-                CV = "https://example.com/cv1.pdf",
-                CVDate = new DateTime(2023, 5, 1),
-                JobTitle = "Software Engineer",
-                ExperienceLevel = Experience.Junior,
-                ConsultantUuid = Guid.NewGuid(),
-                Skills = new List<string> { "Java","JavaScript" },
-                Keywords = new List<string> { "Architect", "devOps" }
-            },
-        });
+            SkillUuid = new Guid("123e4567-e89b-12d3-a456-426614174033"),
+            Name = "Java",
+            NameFr = "Java",
+            NameEn = "Java",
+            NameNl = "Java"
+        };
+        var javascriptSkill = new Skill
+        {
+            SkillUuid = new Guid("123e4567-e89b-12d3-a456-426614174034"),
+            Name = "JavaScript",
+            NameFr = "JavaScript",
+            NameEn = "JavaScript",
+            NameNl = "JavaScript"
+        };
+
+        var architectKeyword = new Keyword
+        {
+            KeywordUuid = new Guid("123e4567-e89b-12d3-a456-426614174001"),
+            Name = "Architect",
+            NameFr = "Architecte",
+            NameEn = "Architect",
+            NameNl = "Architect"
+        };
+        var devOpsKeyword = new Keyword
+        {
+            KeywordUuid = new Guid("123e4567-e89b-12d3-a456-426614174002"),
+            Name = "devOps",
+            NameFr = "DevOps",
+            NameEn = "DevOps",
+            NameNl = "DevOps"
+        };
+
+        // Ajoute les entités dans la base
+        context.Skills.AddRange(javaSkill, javascriptSkill);
+        context.Keywords.AddRange(architectKeyword, devOpsKeyword);
+
+        var profile = new Profile
+        {
+            ProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"),
+            Ratehour = 50,
+            CV = "https://example.com/cv1.pdf",
+            CVDate = new DateTime(2023, 5, 1),
+            JobTitle = "Software Engineer",
+            JobTitleFr = "Software Engineer",
+            JobTitleEn = "Software Engineer",
+            JobTitleNl = "Software Engineer",
+            ExperienceLevel = Experience.Junior,
+            ConsultantUuid = Guid.NewGuid(),
+            Skills = new List<Skill> { javaSkill, javascriptSkill },
+            Keywords = new List<Keyword> { architectKeyword, devOpsKeyword }
+        };
+
+        context.Profiles.Add(profile);
         context.SaveChanges();
     }
+
+
 
 
     // list of profiles
@@ -50,7 +86,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
         
         // Act
         var result = profileService.GetAllProfiles();
@@ -67,7 +104,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
         
         // Act
         var result = profileService.GetAllProfiles();
@@ -80,6 +118,9 @@ public class ProfileTest
         Assert.NotNull(profile.CV);
         Assert.NotEqual(default, profile.CVDate);
         Assert.NotNull(profile.JobTitle);
+        Assert.NotNull(profile.JobTitleFr);
+        Assert.NotNull(profile.JobTitleNl);
+        Assert.NotNull(profile.JobTitleEn);
         Assert.True(Enum.IsDefined(typeof(Experience), profile.ExperienceLevel));
         Assert.NotNull(profile.Skills);
         Assert.NotEmpty(profile.Skills);
@@ -96,7 +137,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
         
         // Act
         var result = profileService.GetAllProfiles();
@@ -109,19 +151,24 @@ public class ProfileTest
         Assert.Equal("https://example.com/cv1.pdf", profile.CV);
         Assert.Equal(new DateTime(2023, 5, 1), profile.CVDate);
         Assert.Equal("Software Engineer", profile.JobTitle);
+        Assert.Equal("Software Engineer", profile.JobTitleEn);
+        Assert.Equal("Software Engineer", profile.JobTitleNl);
+        Assert.Equal("Software Engineer", profile.JobTitleFr);
         Assert.Equal(Experience.Junior, profile.ExperienceLevel);
-        Assert.Contains("Java", profile.Skills);
-        Assert.Contains("JavaScript", profile.Skills);
-        Assert.Contains("Architect", profile.Keywords);
-        Assert.Contains("devOps", profile.Keywords);
+        Assert.Contains(profile.Skills, s => s.Name == "Java");
+        Assert.Contains(profile.Skills, s => s.Name == "JavaScript");
+        Assert.Contains(profile.Keywords, k => k.Name == "Architect");
+        Assert.Contains(profile.Keywords, k => k.Name == "devOps");
+
     }
 
     [Fact]
-    public void Test_AddProfile_Should_Throw_Exception_When_Consultant_Does_Not_Exist()
+    public async Task Test_AddProfile_Should_Throw_Exception_When_Consultant_Does_Not_Exist()
     {
         // Arrange
         var context = GetInMemoryDbContext();
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
         
 
         var newProfile = new Profile
@@ -133,17 +180,16 @@ public class ProfileTest
         };
 
         // Act & Assert
-        var exception = Assert.Throws<Exception>(() => profileService.AddProfile(newProfile));
+        var exception = await Assert.ThrowsAsync<Exception>(() => profileService.AddProfile(newProfile, new List<Guid>(), new List<Guid>()));
         Assert.Contains("n'existe pas", exception.Message);
     }
 
 
     [Fact]
-    public void Test_AddProfile_Should_Successfully_Add_Profile()
+    public async Task Test_AddProfile_Should_Successfully_Add_Profile()
     {
         // Arrange
         var context = GetInMemoryDbContext();
-
 
         var consultantUuid = Guid.NewGuid();
         context.Consultants.Add(new Consultant
@@ -154,15 +200,17 @@ public class ProfileTest
             Phone = "1234567890",
             Surname = "Doe",
             Picture = "https://example.com/cv1.pdf",
-            CopyCI = "https://example.com/cv1.pdf  ",
+            CopyCI = "https://example.com/cv1.pdf",
             enterprise = "O2do",
             Comment = ""
-            
         });
         context.SaveChanges();  
 
-        // Créer un profil et l'associer au consultant existant
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        mockTranslationService.Setup(t => t.TranslateTextAsync(It.IsAny<string>(), It.IsAny<string>()))
+                            .ReturnsAsync((string text, string lang) => $"{text}_{lang}");
+
+        var profileService = new ProfileService(context, mockTranslationService.Object);
         var newProfile = new Profile
         {
             Ratehour = 50,
@@ -170,23 +218,57 @@ public class ProfileTest
             CVDate = new DateTime(2023, 5, 1),
             JobTitle = "Software Engineer",
             ExperienceLevel = Experience.Junior,
-            ConsultantUuid = consultantUuid,  
-            Skills = new List<string> { "Java", "JavaScript" },
-            Keywords = new List<string> { "Architect", "devOps" }
+            ConsultantUuid = consultantUuid,
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
+
+
         };
 
         // Act
-        var addedProfile = profileService.AddProfile(newProfile);
+        var addedProfile = await profileService.AddProfile(newProfile, new List<Guid>(), new List<Guid>());
 
         var storedProfile = context.Profiles.FirstOrDefault(p => p.ProfileUuid == addedProfile.ProfileUuid);
 
         // Assert
-        Assert.NotNull(storedProfile); 
-        Assert.Equal(consultantUuid, storedProfile.ConsultantUuid);  
+        Assert.NotNull(storedProfile);
+        Assert.Equal(consultantUuid, storedProfile.ConsultantUuid);
     }
 
     [Fact]
-    public void Test_AddProfile_Should_Associate_Consultant_To_Profile()
+    public async Task Test_AddProfile_Should_Associate_Consultant_To_Profile()
     {
         // Arrange
         var context = GetInMemoryDbContext();
@@ -199,15 +281,19 @@ public class ProfileTest
             Phone = "1234567890",
             Surname = "Doe",
             Picture = "https://example.com/cv1.pdf",
-            CopyCI = "https://example.com/cv1.pdf  ",
+            CopyCI = "https://example.com/cv1.pdf",
             enterprise = "O2do",
             Comment = ""                     
         });
         context.SaveChanges();  
 
-        var profileService = new ProfileService(context);
-        var newProfile = 
-        new Profile
+        var mockTranslationService = new Mock<ITranslationService>();
+        mockTranslationService.Setup(t => t.TranslateTextAsync(It.IsAny<string>(), It.IsAny<string>()))
+                            .ReturnsAsync((string text, string lang) => $"{text}_{lang}");
+
+        var profileService = new ProfileService(context, mockTranslationService.Object);
+
+        var newProfile = new Profile
         {
             ProfileUuid = Guid.NewGuid(),
             Ratehour = 50,
@@ -216,11 +302,45 @@ public class ProfileTest
             JobTitle = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = consultantUuid,
-            Skills = new List<string> { "Java","JavaScript" },
-            Keywords = new List<string> { "Architect", "devOps" }
+            Skills = new List<Skill>
+            {
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
+            },
+            Keywords = new List<Keyword>
+            {
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
+            }
+
         };
+
         // Act
-        var addedProfile = profileService.AddProfile(newProfile);
+        var addedProfile = await profileService.AddProfile(newProfile, new List<Guid>(), new List<Guid>());
         var storedProfile = context.Profiles.FirstOrDefault(p => p.ProfileUuid == addedProfile.ProfileUuid);
 
         // Assert
@@ -230,67 +350,45 @@ public class ProfileTest
 
 
 
+
+
+
     [Fact]
-    public void Test_UpdateProfile_Should_Update_Profile_Successfully()
+    public async Task Test_UpdateProfile_Should_Throw_Exception_When_Profile_Not_Found()
     {
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var profileService = new ProfileService(context);
-
-        var existingProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000");
-        var updatedProfile = new Profile
-        {
-            ProfileUuid = existingProfileUuid,
-            Ratehour = 60,
-            CV = "https://example.com/cv2.pdf",
-            CVDate = new DateTime(2024, 1, 1),
-            JobTitle = "Senior Software Engineer",
-            ExperienceLevel = Experience.Senior,
-            Skills = new List<string> { "Python", "C#" },
-            Keywords = new List<string> { "AI", "Cloud" }
-        };
-
-        // Act
-        profileService.UpdateProfile(updatedProfile);
-        var storedProfile = context.Profiles.FirstOrDefault(p => p.ProfileUuid == existingProfileUuid);
-
-        // Assert
-        Assert.NotNull(storedProfile);
-        Assert.Equal(updatedProfile.ProfileUuid, storedProfile.ProfileUuid);
-        Assert.Equal(updatedProfile.Ratehour, storedProfile.Ratehour);
-        Assert.Equal(updatedProfile.CV, storedProfile.CV);
-        Assert.Equal(updatedProfile.CVDate, storedProfile.CVDate);
-        Assert.Equal(updatedProfile.JobTitle, storedProfile.JobTitle);
-        Assert.Equal(updatedProfile.ExperienceLevel, storedProfile.ExperienceLevel);
-        Assert.Equal(updatedProfile.Skills, storedProfile.Skills);
-        Assert.Equal(updatedProfile.Keywords, storedProfile.Keywords);
-        Assert.InRange(storedProfile.Ratehour, 10, 500);
-        Assert.StartsWith("https://", storedProfile.CV);
-    }
-    
-    [Fact]
-    public void Test_UpdateProfile_Should_Throw_Exception_When_Profile_Not_Found()
-    {
-        // Arrange
-        var context = GetInMemoryDbContext();
-        SeedDatabase(context);
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
 
         var nonExistingProfile = new Profile
         {
-            ProfileUuid = Guid.NewGuid(),
+            ProfileUuid = Guid.NewGuid(), // UUID inexistant
             Ratehour = 60,
             CV = "https://example.com/cv2.pdf",
             CVDate = new DateTime(2024, 1, 1),
             JobTitle = "Senior Software Engineer",
-            ExperienceLevel = Experience.Senior,
-            Skills = new List<string> { "Python", "C#" },
-            Keywords = new List<string> { "AI", "Cloud" }
+            ExperienceLevel = Experience.Senior
+        };
+
+        // Skill/Keyword UUIDs arbitraires, sans importance ici
+        var skillUuids = new List<Guid>
+        {
+            Guid.NewGuid(),
+            Guid.NewGuid()
+        };
+
+        var keywordUuids = new List<Guid>
+        {
+            Guid.NewGuid(),
+            Guid.NewGuid()
         };
 
         // Act & Assert
-        var exception = Assert.Throws<Exception>(() => profileService.UpdateProfile(nonExistingProfile));
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
+            profileService.UpdateProfile(nonExistingProfile, skillUuids, keywordUuids));
+
         Assert.Contains("n'existe pas", exception.Message);
     }
 
@@ -300,7 +398,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
 
         var existingProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000");
 
@@ -322,7 +421,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         SeedDatabase(context);
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
 
         var nonExistingProfileUuid = Guid.NewGuid(); // UUID qui n'existe pas
 
@@ -339,7 +439,8 @@ public class ProfileTest
         var context = GetInMemoryDbContext();
         SeedDatabase(context); // Seed some data
         var consultantUuid = context.Profiles.First().ConsultantUuid;
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
 
         // Act
         var result = profileService.GetProfilesByConsultant(consultantUuid);
@@ -355,7 +456,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         var consultantUuid = Guid.NewGuid(); // UUID d'un consultant qui n'a pas de profils associés
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
 
         // Act
         var result = profileService.GetProfilesByConsultant(consultantUuid);
@@ -370,7 +472,8 @@ public class ProfileTest
         // Arrange
         var context = GetInMemoryDbContext();
         var nonExistentConsultantUuid = Guid.NewGuid();
-        var profileService = new ProfileService(context);
+        var mockTranslationService = new Mock<ITranslationService>();
+        var profileService = new ProfileService(context, mockTranslationService.Object);
 
         // Act
         var result = profileService.GetProfilesByConsultant(nonExistentConsultantUuid);

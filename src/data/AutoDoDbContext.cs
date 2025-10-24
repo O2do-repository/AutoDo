@@ -23,17 +23,6 @@ public class AutoDoDbContext : DbContext
         //_useInMemory = true;
     }
 
-    public AutoDoDbContext() : base(new DbContextOptions<AutoDoDbContext>())
-    {
-    }
-
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    // {
-    //     if (!optionsBuilder.IsConfigured)
-    //     {
-    //         optionsBuilder.UseSqlServer("");
-    //     }
-    // }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -97,7 +86,11 @@ public class AutoDoDbContext : DbContext
             entity.Property(p => p.Ratehour).HasColumnName("Ratehour");
             entity.Property(p => p.CV).HasColumnName("CV").HasMaxLength(500).IsRequired();
             entity.Property(p => p.CVDate).HasColumnName("CVDate").IsRequired();
-            entity.Property(p => p.JobTitle).HasColumnName("JobTitle").HasMaxLength(150).IsRequired();
+            entity.Property(p => p.JobTitle).HasColumnName("JobTitle").HasMaxLength(250).IsRequired();
+            entity.Property(p => p.JobTitleFr).HasColumnName("JobTitleFr").HasMaxLength(250).IsRequired();
+            entity.Property(p => p.JobTitleEn).HasColumnName("JobTitleEn").HasMaxLength(250).IsRequired();
+            entity.Property(p => p.JobTitleNl).HasColumnName("JobTitleNl").HasMaxLength(250).IsRequired();
+
             entity.Property(p => p.ExperienceLevel)
                 .HasConversion(x => x.ToString(), x => (Experience)Enum.Parse(typeof(Experience), x));
 
@@ -105,18 +98,25 @@ public class AutoDoDbContext : DbContext
         });
 
         modelBuilder.Entity<Profile>()
-        .Property(p => p.Skills)
-        .HasConversion(
-            v => JsonConvert.SerializeObject(v),
-            v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
-        );
+            .HasMany(p => p.Skills)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "ProfileSkill", // Nom de la table join
+                j => j.HasOne<Skill>().WithMany().HasForeignKey("SkillUuid"),
+                j => j.HasOne<Profile>().WithMany().HasForeignKey("ProfileUuid")
+            );
 
         modelBuilder.Entity<Profile>()
-            .Property(p => p.Keywords)
-            .HasConversion(
-                v => JsonConvert.SerializeObject(v),
-                v => JsonConvert.DeserializeObject<List<string>>(v) ?? new List<string>()
+            .HasMany(p => p.Keywords)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "ProfileKeyword", // Nom de la table join
+                j => j.HasOne<Keyword>().WithMany().HasForeignKey("KeywordUuid"),
+                j => j.HasOne<Profile>().WithMany().HasForeignKey("ProfileUuid")
             );
+
+
+
 
         modelBuilder.Entity<Keyword>(entity =>
         {
@@ -124,6 +124,9 @@ public class AutoDoDbContext : DbContext
             entity.HasKey(k => k.KeywordUuid);
             entity.Property(k => k.KeywordUuid).HasColumnName("KeywordUuid").IsRequired();
             entity.Property(k => k.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+            entity.Property(k => k.NameFr).HasColumnName("NameFr").HasMaxLength(255).IsRequired();
+            entity.Property(k => k.NameEn).HasColumnName("NameEn").HasMaxLength(255).IsRequired();
+            entity.Property(k => k.NameNl).HasColumnName("NameNl").HasMaxLength(255).IsRequired();
 
             entity.HasIndex(k => k.Name).IsUnique();
         });
@@ -134,6 +137,9 @@ public class AutoDoDbContext : DbContext
             entity.HasKey(s => s.SkillUuid);
             entity.Property(s => s.SkillUuid).HasColumnName("SkillUuid").IsRequired();
             entity.Property(s => s.Name).HasColumnName("Name").HasMaxLength(255).IsRequired();
+            entity.Property(s => s.NameFr).HasColumnName("NameFr").HasMaxLength(255).IsRequired();
+            entity.Property(s => s.NameEn).HasColumnName("NameEn").HasMaxLength(255).IsRequired();
+            entity.Property(s => s.NameNl).HasColumnName("NameNl").HasMaxLength(255).IsRequired();
 
             entity.HasIndex(s => s.Name).IsUnique();
         });

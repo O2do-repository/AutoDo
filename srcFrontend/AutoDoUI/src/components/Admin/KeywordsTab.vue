@@ -132,10 +132,15 @@ onMounted(fetchKeywords)
             @click="submitKeyword"
             icon
             variant="text"
-            :disabled="!newKeyword.trim()"
+            :disabled="!newKeyword.trim() || loading"
+            :loading="loading"
         >
+          <template v-slot:loader>
+            <v-progress-circular indeterminate color="primary" size="20"></v-progress-circular>
+          </template>
           <v-icon large>mdi-plus-circle</v-icon>
         </v-btn>
+
       </v-col>
       <v-col cols="6">
         <v-card

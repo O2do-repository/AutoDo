@@ -9,7 +9,6 @@ public class RFP
     [Key]
     public Guid RFPUuid { get; set; }  
     public string Reference { get; set; }
-
     public DateTime DeadlineDate { get; set; } = DateTime.Today.AddYears(1000);
     public string DescriptionBrut { get; set; }
     public Experience ExperienceLevel { get; set; } 

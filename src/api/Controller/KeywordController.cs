@@ -32,7 +32,7 @@ public class KeywordController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateKeyword([FromBody] DtoInputKeyword keywordDto)
+    public async Task<IActionResult> CreateKeyword([FromBody] DtoInputKeyword keywordDto)
     {
         if (keywordDto == null)
         {
@@ -51,7 +51,7 @@ public class KeywordController : ControllerBase
                 Name = keywordDto.Name,
             };
 
-            var newKeyword = _keywordService.AddKeyword(keyword);
+            var newKeyword = await _keywordService.AddKeyword(keyword);
 
             return StatusCode(201, new
             {
@@ -99,6 +99,29 @@ public class KeywordController : ControllerBase
             {
                 success = false,
                 message = "Erreur lors de la suppression du mot-clé.",
+                details = ex.Message
+            });
+        }
+    }
+        [HttpPost("translate")]
+        public async Task<IActionResult> TranslateAllKeywords()
+    {
+        try
+        {
+            await _keywordService.TranslateAllKeywords();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Toutes les compétences ont été traduites avec succès."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Erreur lors de la traduction des compétences.",
                 details = ex.Message
             });
         }
