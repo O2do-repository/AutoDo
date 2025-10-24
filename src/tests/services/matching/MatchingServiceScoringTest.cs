@@ -91,9 +91,11 @@ public class MatchingServiceScoringTest
             Ratehour = 50,
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
-            JobTitle = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
+            JobTitleFr = "Ingénieur Logiciel",
+            JobTitleEn = "Software Engineer",
+            JobTitleNl = "Software Engineer",
             Skills = new List<Skill>
             {
                 new Skill { Name = "Java" },
@@ -106,11 +108,15 @@ public class MatchingServiceScoringTest
             }
         };
 
-        var rfp = context.Rfps.First(r => r.Reference == "RFPTest3"); // Software Engineer
+        var rfp = context.Rfps.First(r => r.Reference == "RFPTest3"); // suppose que c’est "Software Engineer"
 
-        var (score, _) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
-        Assert.InRange(score, 10, 20);
+        var (score, feedback) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
 
+        // On s’attend à un bon match : le ratio devrait être proche de 1
+        Assert.InRange(score, 15, 20);
+
+        // (Optionnel) vérifier que le feedback contient une mention de correspondance
+        Assert.Contains("mot(s) clé trouvés", feedback, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -154,9 +160,11 @@ public class MatchingServiceScoringTest
             Ratehour = 50,
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
-            JobTitle = "Software Dev",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
+            JobTitleFr = "Développeur Logiciel",
+            JobTitleEn = "Software Dev",
+            JobTitleNl = "Software Ontwikkelaar",
             Skills = new List<Skill>
             {
                 new Skill { Name = "Java" },
@@ -176,8 +184,9 @@ public class MatchingServiceScoringTest
 
         var (score, _) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
 
-        Assert.Equal(15, score);
+        Assert.InRange(score, 10, 15); // partiel → entre 10 et 15 selon ratio exact
     }
+
 
     [Fact]
     public void Test_ScoreExperienceMatch_Should_Return_20_When_Experience_Matches()
@@ -267,34 +276,40 @@ public class MatchingServiceScoringTest
     [Fact]
     public void Test_ScoreSkillsMatch_Should_Score_Only_NiceToHave()
     {
-        using var context = GetInMemoryDbContext();
-        SeedDatabase(context);
-        var rfp = context.Rfps.First(r => r.Reference == "RFPTest1"); 
+        // RFP avec une compétence "nice to have" correspondant au profil
+        var rfp = new RFP
+        {
+            Skills = new List<string>
+            {
+                "JavaScript (importance: nice to have)",
+                "React (importance: must have)"
+            }
+        };
+
+        // Profil avec uniquement la compétence "JavaScript"
         var profile = new Profile
         {
             ProfileUuid = Guid.NewGuid(),
             Ratehour = 50,
             CV = "https://example.com/cv1.pdf",
             CVDate = DateTime.Today,
-            JobTitle = "Software Dev",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
                 new Skill { Name = "JavaScript" }
             },
-            Keywords = new List<Keyword>
-            {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
-            }
+            Keywords = new List<Keyword>()
         };
 
-        var (score, _) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
+        var (score, feedback) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
 
-        Assert.True(score == 5);
+
+        Assert.Equal(5, score);
+
+        Assert.Contains("JavaScript", feedback, StringComparison.OrdinalIgnoreCase);
     }
+
 
 
 

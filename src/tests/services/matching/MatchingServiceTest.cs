@@ -82,27 +82,51 @@ public class MatchingServiceTest
 
         var service = new MatchingService(dbContext);
 
-        var profile =  new Profile
+        var profile = new Profile
         {
             ProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000"),
             Ratehour = 50,
             CV = "https://example.com/cv1.pdf",
             CVDate = new DateTime(2023, 5, 1),
             JobTitle = "Software Engineer",
-            JobTitleFr = "Software Engineer",
-            JobTitleNl = "Software Engineer",
+            JobTitleFr = "Ingénieur Logiciel",
             JobTitleEn = "Software Engineer",
+            JobTitleNl = "Software Engineer",
             ExperienceLevel = Experience.Junior,
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
 
@@ -113,9 +137,10 @@ public class MatchingServiceTest
         var result = await service.MatchingsForProfileAsync(profile);
 
         // Assert
-        Assert.NotEmpty(result); // Vérifie que des matchings existent
+        Assert.NotEmpty(result);
         Assert.All(result, m => Assert.True(m.Score >= 0));
     }
+
 
     [Fact]
     public async Task Test_MatchingsForProfileAsync_Should_Erase_Existent_Matchings()
@@ -140,13 +165,37 @@ public class MatchingServiceTest
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
         var matching = new Matching{
@@ -192,13 +241,37 @@ public class MatchingServiceTest
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
 
@@ -231,13 +304,37 @@ public class MatchingServiceTest
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
 
@@ -345,13 +442,37 @@ public class MatchingServiceTest
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
 
@@ -401,13 +522,37 @@ public class MatchingServiceTest
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
 
@@ -469,16 +614,40 @@ public class MatchingServiceTest
                 JobTitleEn = "Engineer",
                 ExperienceLevel = Experience.Junior,
                 ConsultantUuid = Guid.NewGuid(),
-            Skills = new List<Skill>
-            {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
-            },
-            Keywords = new List<Keyword>
-            {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
-            }
+                Skills = new List<Skill>
+                {
+                    new Skill
+                    {
+                        Name = "Java",
+                        NameFr = "Java",
+                        NameEn = "Java",
+                        NameNl = "Java"
+                    },
+                    new Skill
+                    {
+                        Name = "JavaScript",
+                        NameFr = "JavaScript",
+                        NameEn = "JavaScript",
+                        NameNl = "JavaScript"
+                    }
+                },
+                Keywords = new List<Keyword>
+                {
+                    new Keyword
+                    {
+                        Name = "Architect",
+                        NameFr = "Architecte",
+                        NameEn = "Architect",
+                        NameNl = "Architect"
+                    },
+                    new Keyword
+                    {
+                        Name = "devOps",
+                        NameFr = "DevOps",
+                        NameEn = "DevOps",
+                        NameNl = "DevOps"
+                    }
+                }
             },
             new Profile
             {
@@ -493,11 +662,23 @@ public class MatchingServiceTest
                 ConsultantUuid = Guid.NewGuid(),
                 Skills = new List<Skill>
                 {
-                    new Skill { Name = "Python" }
+                    new Skill
+                    {
+                        Name = "Python",
+                        NameFr = "Python",
+                        NameEn = "Python",
+                        NameNl = "Python"
+                    }
                 },
                 Keywords = new List<Keyword>
                 {
-                    new Keyword { Name = "Data" }
+                    new Keyword
+                    {
+                        Name = "Data",
+                        NameFr = "Données",
+                        NameEn = "Data",
+                        NameNl = "Data"
+                    }
                 }
             }
         };
@@ -579,13 +760,37 @@ public class MatchingServiceTest
             ConsultantUuid = Guid.NewGuid(),
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
         };
 

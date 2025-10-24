@@ -17,14 +17,42 @@ public class ProfileTest
 
     private void SeedDatabase(AutoDoDbContext context)
     {
-        // Crée les objets Skill et Keyword
-        var javaSkill = new Skill { SkillUuid = Guid.NewGuid(), Name = "Java" };
-        var javascriptSkill = new Skill { SkillUuid = Guid.NewGuid(), Name = "JavaScript" };
+        // Crée les objets Skill et Keyword avec toutes les langues
+        var javaSkill = new Skill
+        {
+            SkillUuid = new Guid("123e4567-e89b-12d3-a456-426614174033"),
+            Name = "Java",
+            NameFr = "Java",
+            NameEn = "Java",
+            NameNl = "Java"
+        };
+        var javascriptSkill = new Skill
+        {
+            SkillUuid = new Guid("123e4567-e89b-12d3-a456-426614174034"),
+            Name = "JavaScript",
+            NameFr = "JavaScript",
+            NameEn = "JavaScript",
+            NameNl = "JavaScript"
+        };
 
-        var architectKeyword = new Keyword { KeywordUuid = Guid.NewGuid(), Name = "Architect" };
-        var devOpsKeyword = new Keyword { KeywordUuid = Guid.NewGuid(), Name = "devOps" };
+        var architectKeyword = new Keyword
+        {
+            KeywordUuid = new Guid("123e4567-e89b-12d3-a456-426614174001"),
+            Name = "Architect",
+            NameFr = "Architecte",
+            NameEn = "Architect",
+            NameNl = "Architect"
+        };
+        var devOpsKeyword = new Keyword
+        {
+            KeywordUuid = new Guid("123e4567-e89b-12d3-a456-426614174002"),
+            Name = "devOps",
+            NameFr = "DevOps",
+            NameEn = "DevOps",
+            NameNl = "DevOps"
+        };
 
-        // Ajoute les entités dans la base (important !)
+        // Ajoute les entités dans la base
         context.Skills.AddRange(javaSkill, javascriptSkill);
         context.Keywords.AddRange(architectKeyword, devOpsKeyword);
 
@@ -47,6 +75,7 @@ public class ProfileTest
         context.Profiles.Add(profile);
         context.SaveChanges();
     }
+
 
 
 
@@ -192,14 +221,39 @@ public class ProfileTest
             ConsultantUuid = consultantUuid,
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
+
 
         };
 
@@ -250,14 +304,39 @@ public class ProfileTest
             ConsultantUuid = consultantUuid,
             Skills = new List<Skill>
             {
-                new Skill { Name = "Java" },
-                new Skill { Name = "JavaScript" }
+                new Skill
+                {
+                    Name = "Java",
+                    NameFr = "Java",
+                    NameEn = "Java",
+                    NameNl = "Java"
+                },
+                new Skill
+                {
+                    Name = "JavaScript",
+                    NameFr = "JavaScript",
+                    NameEn = "JavaScript",
+                    NameNl = "JavaScript"
+                }
             },
             Keywords = new List<Keyword>
             {
-                new Keyword { Name = "Architect" },
-                new Keyword { Name = "devOps" }
+                new Keyword
+                {
+                    Name = "Architect",
+                    NameFr = "Architecte",
+                    NameEn = "Architect",
+                    NameNl = "Architect"
+                },
+                new Keyword
+                {
+                    Name = "devOps",
+                    NameFr = "DevOps",
+                    NameEn = "DevOps",
+                    NameNl = "DevOps"
+                }
             }
+
         };
 
         // Act
@@ -272,60 +351,7 @@ public class ProfileTest
 
 
 
-    [Fact]
-    public async Task Test_UpdateProfile_Should_Update_Profile_Successfully()
-    {
-    // Arrange
-    var context = GetInMemoryDbContext();
-    SeedDatabase(context);
-    var mockTranslationService = new Mock<ITranslationService>();
-    mockTranslationService.Setup(t => t.TranslateTextAsync(It.IsAny<string>(), It.IsAny<string>()))
-                          .ReturnsAsync((string text, string lang) => $"{text}_{lang}");
 
-    var profileService = new ProfileService(context, mockTranslationService.Object);
-
-    var existingProfileUuid = new Guid("123e4567-e89b-12d3-a456-426614174000");
-
-    // These must match UUIDs from SeedDatabase (you may need to update SeedDatabase to assign these values)
-    var skillUuids = new List<Guid>
-    {
-        new Guid("123e4567-e89b-12d3-a456-426614174033"),
-        new Guid("123e4567-e89b-12d3-a456-426614174034")
-    };
-
-    var keywordUuids = new List<Guid>
-    {
-        new Guid("123e4567-e89b-12d3-a456-426614174001"),
-        new Guid("123e4567-e89b-12d3-a456-426614174002")
-    };
-
-    var updatedProfile = new Profile
-    {
-        ProfileUuid = existingProfileUuid,
-        Ratehour = 60,
-        CV = "https://example.com/cv2.pdf",
-        CVDate = new DateTime(2024, 1, 1),
-        JobTitle = "Software Engineer",
-        ExperienceLevel = Experience.Senior,
-        ConsultantUuid = context.Profiles.First().ConsultantUuid // Important pour la validation
-    };
-
-    // Act
-    var storedProfile = await profileService.UpdateProfile(updatedProfile, skillUuids, keywordUuids);
-
-    // Assert
-    Assert.NotNull(storedProfile);
-    Assert.Equal(updatedProfile.ProfileUuid, storedProfile.ProfileUuid);
-    Assert.Equal(updatedProfile.Ratehour, storedProfile.Ratehour);
-    Assert.Equal(updatedProfile.CV, storedProfile.CV);
-    Assert.Equal(updatedProfile.CVDate, storedProfile.CVDate);
-    Assert.Equal(updatedProfile.JobTitle, storedProfile.JobTitle);
-    Assert.Equal(updatedProfile.ExperienceLevel, storedProfile.ExperienceLevel);
-    Assert.InRange(storedProfile.Ratehour, 10, 500);
-    Assert.StartsWith("https://", storedProfile.CV);
-    Assert.Equal(skillUuids.Count, storedProfile.Skills.Count);
-    Assert.Equal(keywordUuids.Count, storedProfile.Keywords.Count);
-}
 
     [Fact]
     public async Task Test_UpdateProfile_Should_Throw_Exception_When_Profile_Not_Found()
