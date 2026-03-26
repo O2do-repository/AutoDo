@@ -2,17 +2,16 @@
 import { fetchWithApiKey } from '@/utils/fetchWithApiKey';
 import { ref, onMounted } from 'vue'
 
-interface Entreprise {
+interface Enterprise {
   enterpriseUuid: string;
   name: string;
 }
 
-const newEntreprise = ref<string>('')
-const entreprises = ref<Entreprise[]>([])
-const selectedEntrepriseIndex = ref<number | null>(null)
+const newEnterprise = ref<string>('')
+const enterprises = ref<Enterprise[]>([])
+const selectedEnterpriseIndex = ref<number | null>(null)
 const error = ref<string | null>(null);
 const success = ref(false);
-
 
 const dialog = ref(false)
 const loading = ref(false)
@@ -20,24 +19,23 @@ const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('')
 
-const fetchEntreprises = async () => {
+const fetchEnterprises = async () => {
   try {
     const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise`);
     const resData = await response.json();
 
     if (!response.ok || !resData.success) {
-      throw new Error(resData.message || "Erreur lors de la récupération des entreprises");
+      throw new Error(resData.message || "Error while fetching enterprises");
     }
 
-    entreprises.value = resData.data;
+    enterprises.value = resData.data;
   } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+    console.error(error instanceof Error ? error.message : 'An error occurred');
   }
 }
 
-
-const submitEntreprise = async () => {
-  const name = newEntreprise.value.trim();
+const submitEnterprise = async () => {
+  const name = newEnterprise.value.trim();
   if (!name) return;
 
   loading.value = true;
@@ -57,13 +55,13 @@ const submitEntreprise = async () => {
       throw new Error(result.message);
     }
 
-    entreprises.value.push(result.data); // bien récupérer le `data` retourné par le controller
-    newEntreprise.value = '';
+    enterprises.value.push(result.data);
+    newEnterprise.value = '';
     success.value = true;
     snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    error.value = err instanceof Error ? err.message : 'An error occurred';
     snackbarMessage.value = error.value;
     snackbarColor.value = 'red';
   } finally {
@@ -72,20 +70,18 @@ const submitEntreprise = async () => {
   }
 };
 
-
-const confirmDeleteEntreprise = (index: number) => {
-  selectedEntrepriseIndex.value = index
+const confirmDeleteEnterprise = (index: number) => {
+  selectedEnterpriseIndex.value = index
   dialog.value = true
 }
 
-const removeEntreprise = async (uuid: string) => {
+const removeEnterprise = async (uuid: string) => {
   loading.value = true;
   error.value = null;
   success.value = false;
 
   try {
     const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise/${uuid}`, {
-      
       method: 'DELETE'
     });
 
@@ -95,13 +91,13 @@ const removeEntreprise = async (uuid: string) => {
       throw new Error(result.message);
     }
 
-    entreprises.value = entreprises.value.filter(e => e.enterpriseUuid !== uuid);
+    enterprises.value = enterprises.value.filter(e => e.enterpriseUuid !== uuid);
     success.value = true;
     snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
     dialog.value = false;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    error.value = err instanceof Error ? err.message : 'An error occurred';
     snackbarMessage.value = error.value;
     snackbarColor.value = 'red';
   } finally {
@@ -110,8 +106,7 @@ const removeEntreprise = async (uuid: string) => {
   }
 };
 
-
-onMounted(fetchEntreprises)
+onMounted(fetchEnterprises)
 </script>
 
 <template>
@@ -119,10 +114,10 @@ onMounted(fetchEntreprises)
     <v-row class="mt-5">
       <v-col cols="4">
         <v-text-field 
-            v-model="newEntreprise" 
-            label="Ajouter une entreprise" 
+            v-model="newEnterprise" 
+            label="Add a company" 
             variant="outlined"
-            @keyup.enter="submitEntreprise"
+            @keyup.enter="submitEnterprise"
             hide-details
             density="comfortable"
         />
@@ -130,10 +125,10 @@ onMounted(fetchEntreprises)
       <v-col cols="2">
         <v-btn 
           color="primary" 
-          @click="submitEntreprise"
+          @click="submitEnterprise"
           icon
           variant="text"
-          :disabled="!newEntreprise.trim() || loading"
+          :disabled="!newEnterprise.trim() || loading"
           :loading="loading"
         >
           <template v-slot:loader>
@@ -150,19 +145,19 @@ onMounted(fetchEntreprises)
           class="skills-card"
         >
           <v-card-title class="text-h6 py-3 px-4 bg-primary text-white d-flex align-center">
-            Entreprises
-            <v-chip class="ms-2" size="small" color="white" text-color="primary">{{ entreprises.length }}</v-chip>
+            Companies
+            <v-chip class="ms-2" size="small" color="white" text-color="primary">{{ enterprises.length }}</v-chip>
           </v-card-title>
           
           <div class="scroll-container">
             <v-list density="compact" bg-color="transparent">
               <v-list-item
-                v-for="(entreprise, index) in entreprises"
-                :key="entreprise.enterpriseUuid"
+                v-for="(enterprise, index) in enterprises"
+                :key="enterprise.enterpriseUuid"
                 class="skill-item"
                 :class="{ 'even-item': index % 2 === 0 }"
               >
-                <v-list-item-title>{{ entreprise.name }}</v-list-item-title>
+                <v-list-item-title>{{ enterprise.name }}</v-list-item-title>
                 
                 <template v-slot:append>
                   <v-btn
@@ -170,28 +165,28 @@ onMounted(fetchEntreprises)
                     variant="text"
                     color="error"
                     size="small"
-                    @click="confirmDeleteEntreprise(index)"
+                    @click="confirmDeleteEnterprise(index)"
                   ></v-btn>
                 </template>
               </v-list-item>
             </v-list>
 
-            <!-- Dialog de confirmation -->
+            <!-- Confirmation dialog -->
             <v-dialog v-model="dialog" max-width="500">
               <v-card>
-                <v-card-title class="headline">Confirmer la suppression</v-card-title>
+                <v-card-title class="headline">Confirm deletion</v-card-title>
                 <v-card-text>
-                  Êtes-vous sûr de vouloir supprimer cette entreprise ?
+                  Are you sure you want to delete this company?
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="grey" @click="dialog = false">Annuler</v-btn>
+                  <v-btn color="grey" @click="dialog = false">Cancel</v-btn>
                   <v-btn
                     color="red"
                     :loading="loading"
-                    @click="() => selectedEntrepriseIndex !== null && removeEntreprise(entreprises[selectedEntrepriseIndex].enterpriseUuid)"
+                    @click="() => selectedEnterpriseIndex !== null && removeEnterprise(enterprises[selectedEnterpriseIndex].enterpriseUuid)"
                   >
-                    Supprimer
+                    Delete
                   </v-btn>
 
                 </v-card-actions>
@@ -237,3 +232,4 @@ onMounted(fetchEntreprises)
   background-color: rgba(0, 0, 0, 0.02);
 }
 </style>
+  

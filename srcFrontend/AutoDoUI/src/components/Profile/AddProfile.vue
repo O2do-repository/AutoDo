@@ -47,7 +47,7 @@ export default defineComponent({
     const error = ref<string | null>(null);
     const success = ref(false);
 
-    // ✅ Validation rules
+    // Validation rules
     const required = (v: any) => !!v || 'Champ obligatoire';
     const numberRule = (v: any) =>
       (!isNaN(v) && Number(v) >= 0) || 'Entier positif requis';
@@ -56,7 +56,7 @@ export default defineComponent({
       'Lien invalide (ex: https://...)';
     const dateRule = (v: string) => !!v || 'Date requise';
 
-    // ✅ Fetch Skills & Keywords
+    // Fetch Skills & Keywords
     const fetchSkills = async () => {
       try {
         const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`);
@@ -123,7 +123,7 @@ export default defineComponent({
         const { valid } = await formRef.value.validate();
         if (!valid) return;
 
-        // ✅ Construire payload
+        // Construire payload
         const payload = {
           consultantUuid: profile.value.consultantUuid,
           RateHour: profile.value.RateHour,
@@ -183,14 +183,14 @@ export default defineComponent({
     <v-card class="pa-4">
       <GoBackBtn class="mb-4" />
 
-      <v-card-title class="text-h5 font-weight-bold">Nouveau Profil</v-card-title>
+      <v-card-title class="text-h5 font-weight-bold">Create a New Profile</v-card-title>
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
             <!-- CV -->
             <v-col cols="12">
               <v-text-field
-                label="Lien du CV *"
+                label="CV Link *"
                 v-model="profile.CV"
                 variant="outlined"
                 color="primary"
@@ -214,10 +214,10 @@ export default defineComponent({
               />
             </v-col>
 
-            <!-- Niveau d'expérience -->
+            <!-- Experience Level -->
             <v-col cols="6">
               <v-select
-                label="Niveau d'expérience *"
+                label="Experience Level *"
                 v-model="profile.ExperienceLevel"
                 :items="experienceLevels"
                 :rules="[required]"
@@ -227,10 +227,10 @@ export default defineComponent({
               />
             </v-col>
 
-            <!-- Tarif -->
+            <!-- Hourly Rate -->
             <v-col cols="6">
               <v-text-field
-                label="Tarif / heure *"
+                label="Hourly Rate (€) *"
                 v-model.number="profile.RateHour"
                 type="number"
                 :rules="[required, numberRule]"
@@ -240,10 +240,10 @@ export default defineComponent({
               />
             </v-col>
 
-            <!-- Date CV -->
+            <!-- CV Date -->
             <v-col cols="6">
               <v-text-field
-                label="Date du CV *"
+                label="CV Date *"
                 v-model="profile.CVDate"
                 type="date"
                 :rules="[required, dateRule]"
@@ -256,7 +256,7 @@ export default defineComponent({
             <!-- Skills -->
             <v-col cols="12">
               <v-autocomplete
-                label="Compétences *"
+                label="Skills *"
                 v-model="selectedSkillUuids"
                 :items="availableSkills"
                 item-title="name"
@@ -273,7 +273,7 @@ export default defineComponent({
             <!-- Keywords -->
             <v-col cols="12">
               <v-autocomplete
-                label="Mots-clés *"
+                label="Keywords *"
                 v-model="selectedKeywordUuids"
                 :items="availableKeywords"
                 item-title="name"
@@ -290,13 +290,14 @@ export default defineComponent({
         </v-form>
       </v-card-text>
 
-      <v-alert v-if="loading" type="info" class="mt-4">Chargement...</v-alert>
-      <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
-      <v-alert v-if="success" type="success" class="mt-4">Profil créé avec succès</v-alert>
+      <v-alert v-if="loading" type="info" class="mt-4">Submitting data...</v-alert>
+      <v-alert v-if="error" type="error" class="mt-4">Error: {{ error }}</v-alert>
+      <v-alert v-if="success" type="success" class="mt-4">Profile created successfully!</v-alert>
 
       <v-card-actions class="d-flex justify-end">
-        <v-btn color="primary" @click="submitProfile">Publier</v-btn>
+        <v-btn color="primary" @click="submitProfile">Save Profile</v-btn>
       </v-card-actions>
     </v-card>
   </v-container>
 </template>
+

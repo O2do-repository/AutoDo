@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <!-- Onglets avec un peu de marge pour les descendre -->
+    <!-- Tabs with some margin to move them down -->
     <v-row justify="center" class="mt-8 mb-4">
       <v-col cols="12" md="8">
         <v-tabs
@@ -16,7 +16,7 @@
       </v-col>
     </v-row>
 
-    <!-- Contenu des onglets -->
+    <!-- Tabs content -->
     <v-row justify="center">
       <v-col cols="12" md="10" lg="8">
         <v-window v-model="tab" class="mt-4">
@@ -47,12 +47,12 @@ interface TabItem {
 
 const tab = ref<number>(0)
 const tabs: TabItem[] = [
-  { label: 'Entreprise' },
-  { label: 'Compétences' },
-  { label: 'Mot-clés' }
+  { label: 'Company' },
+  { label: 'Skills' },
+  { label: 'Keywords' }
 ]
 </script>
 
 <style scoped>
-/* Plus besoin de .content-wrapper car on utilise v-col */
+/* No need for .content-wrapper since we are using v-col */
 </style>

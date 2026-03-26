@@ -13,7 +13,6 @@ const selectedKeywordIndex = ref<number | null>(null)
 const error = ref<string | null>(null);
 const success = ref(false);
 
-
 const dialog = ref(false)
 const loading = ref(false)
 const snackbar = ref(false)
@@ -26,15 +25,14 @@ const fetchKeywords = async () => {
     const resData = await response.json();
 
     if (!response.ok || !resData.success) {
-      throw new Error(resData.message || "Erreur lors de la récupération des mots-clés");
+      throw new Error(resData.message || "Error while fetching keywords");
     }
 
     keywords.value = resData.data;
   } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue');
+    console.error(error instanceof Error ? error.message : 'An error occurred');
   }
 }
-
 
 const submitKeyword = async () => {
   const name = newKeyword.value.trim();
@@ -57,13 +55,13 @@ const submitKeyword = async () => {
       throw new Error(result.message);
     }
 
-    keywords.value.push(result.data); 
+    keywords.value.push(result.data);
     newKeyword.value = '';
     success.value = true;
     snackbarMessage.value = result.message;
     snackbarColor.value = 'green';
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    error.value = err instanceof Error ? err.message : 'An error occurred';
     snackbarMessage.value = error.value;
     snackbarColor.value = 'red';
   } finally {
@@ -71,7 +69,6 @@ const submitKeyword = async () => {
     loading.value = false;
   }
 };
-
 
 const confirmDeleteKeyword = (index: number) => {
   selectedKeywordIndex.value = index
@@ -91,7 +88,7 @@ const removeKeyword = async (uuid: string) => {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message );
+      throw new Error(result.message);
     }
 
     keywords.value = keywords.value.filter(k => k.keywordUuid !== uuid);
@@ -100,7 +97,7 @@ const removeKeyword = async (uuid: string) => {
     snackbarColor.value = 'green';
     dialog.value = false;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    error.value = err instanceof Error ? err.message : 'An error occurred';
     snackbarMessage.value = error.value;
     snackbarColor.value = 'red';
   } finally {
@@ -108,7 +105,6 @@ const removeKeyword = async (uuid: string) => {
     loading.value = false;
   }
 };
-
 
 onMounted(fetchKeywords)
 </script>
@@ -119,7 +115,7 @@ onMounted(fetchKeywords)
       <v-col cols="4">
         <v-text-field 
             v-model="newKeyword" 
-            label="Ajouter un mot-clé" 
+            label="Add a keyword" 
             variant="outlined"
             @keyup.enter="submitKeyword"
             hide-details
@@ -149,7 +145,7 @@ onMounted(fetchKeywords)
           class="skills-card"
         >
           <v-card-title class="text-h6 py-3 px-4 bg-primary text-white d-flex align-center">
-            Mots-clés
+            Keywords
             <v-chip class="ms-2" size="small" color="white" text-color="primary">{{ keywords.length }}</v-chip>
           </v-card-title>
           
@@ -175,22 +171,22 @@ onMounted(fetchKeywords)
               </v-list-item>
             </v-list>
 
-            <!-- Dialog de confirmation -->
+            <!-- Confirmation dialog -->
             <v-dialog v-model="dialog" max-width="500">
               <v-card>
-                <v-card-title class="headline">Confirmer la suppression</v-card-title>
+                <v-card-title class="headline">Confirm deletion</v-card-title>
                 <v-card-text>
-                  Êtes-vous sûr de vouloir supprimer ce mot-clé ?
+                  Are you sure you want to delete this keyword?
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="grey" @click="dialog = false">Annuler</v-btn>
+                  <v-btn color="grey" @click="dialog = false">Cancel</v-btn>
                   <v-btn
                     color="red"
                     :loading="loading"
                     @click="() => selectedKeywordIndex !== null && removeKeyword(keywords[selectedKeywordIndex].keywordUuid)"
                   >
-                    Supprimer
+                    Delete
                   </v-btn>
 
                 </v-card-actions>

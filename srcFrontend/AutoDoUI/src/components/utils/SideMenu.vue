@@ -6,7 +6,7 @@
       <div>
         <v-list-item>
           <v-list-item-title class="text-h6 font-weight-bold">
-            AutoDo by O2do
+              Fit4jobs
           </v-list-item-title>
         </v-list-item>
 
@@ -19,7 +19,7 @@
 
         <!-- Consultant -->
         <v-list-item to="/consultant/list-consultant" link>
-          <v-list-item-title class="font-weight-bold">Consultants</v-list-item-title>
+          <v-list-item-title class="font-weight-bold">Talents</v-list-item-title>
         </v-list-item>
 
         <!-- Dashboard -->
@@ -31,10 +31,11 @@
       <!-- Bas : bouton déconnexion -->
       <div class="pa-2">
         <v-divider :thickness="3" color="black" class="pb-3"></v-divider>
-        <v-tooltip text="Se déconnecter"  location="right">
+        <v-tooltip text="Disconnect"  location="right">
           <template #activator="{ props }">
             <v-btn  icon color="primary" v-bind="props" @click="logout">
               <v-icon>mdi-logout</v-icon>
+              
             </v-btn>
           </template>
         </v-tooltip>

@@ -54,12 +54,12 @@ export default defineComponent({
     const success = ref(false);
 
     // Validation rules
-    const required = (value: string) => value?.trim() !== '' || 'Champ obligatoire';
-    const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Format invalide (ex: exemple@mail.com)";
-    const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Format invalide (ex: +32444332211)";
-    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Lien invalide (ex: https://...)";
-    const imageUrlRule = (value: string) => /^(https?:\/\/.*)/i.test(value) || "Lien invalide (ex: https://site.com/image)";
-    const dateRule = (value: string) => !!value || 'Veuillez choisir une date';
+    const required = (value: string) => value?.trim() !== '' || 'Required field';
+    const emailRule = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Invalid format (ex: example@mail.com)";
+    const phoneRule = (value: string) => /^\+?[0-9]{9,15}$/.test(value) || "Invalid format (ex: +32444332211)";
+    const urlRule = (value: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) || "Invalid link (ex: https://...)";
+    const imageUrlRule = (value: string) => /^(https?:\/\/.*)/i.test(value) || "Invalid link (ex: https://site.com/image)";
+    const dateRule = (value: string) => !!value || 'Please choose a date';
 
     const placeholderImage = 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg';
     const validPicture = ref(placeholderImage);
@@ -113,12 +113,12 @@ export default defineComponent({
         const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/enterprise`,
           
         );
-        if (!response.ok) throw new Error("Erreur lors du chargement des entreprises");
+        if (!response.ok) throw new Error("Error loading companies");
 
         const data = await response.json();
         enterprises.value = data.data;
       } catch (error) {
-        console.error("Erreur fetch entreprises :", error);
+        console.error("Error fetching companies:", error);
       }
     };
 
@@ -159,7 +159,7 @@ export default defineComponent({
         }, 1000);
 
       } catch (err) {
-        error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+        error.value = err instanceof Error ? err.message : 'An error occurred';
       } finally {
         loading.value = false;
       }
@@ -206,14 +206,14 @@ export default defineComponent({
     <v-card class="pa-4">
       <GoBackBtn class="mb-4" />
 
-      <v-card-title class="text-h5 font-weight-bold">Modifier Consultant</v-card-title>
+      <v-card-title class="text-h5 font-weight-bold">Edit Consultant</v-card-title>
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
             <!-- Image Preview -->
             <v-col cols="12" class="d-flex flex-column align-center">
               <v-avatar size="150">
-                <v-img :src="validPicture" alt="Photo Consultant" contain @error="setPlaceholder"></v-img>
+                <v-img :src="validPicture" alt="Consultant Photo" contain @error="setPlaceholder"></v-img>
               </v-avatar>
             </v-col>
 
@@ -221,7 +221,7 @@ export default defineComponent({
             <v-col cols="12">
               <v-text-field 
                 variant="outlined" color="primary"
-                label="Lien Photo *"
+                label="Photo Link *"
                 v-model="consultant.picture"
                 :placeholder="placeholderImage"
                 :rules="[required, imageUrlRule]"
@@ -230,26 +230,26 @@ export default defineComponent({
               />
             </v-col>
             <v-col cols="6">
-              <v-text-field label="Prénom *" v-model="consultant.surname" :rules="[required]" required variant="outlined" color="primary" />
+              <v-text-field label="First name *" v-model="consultant.surname" :rules="[required]" required variant="outlined" color="primary" />
             </v-col>
             <v-col cols="6">
-              <v-text-field label="Nom *" v-model="consultant.name" :rules="[required]" required variant="outlined" color="primary" />
-            </v-col>
-
-
-            <v-col cols="6">
-              <v-text-field label="Lien Copie CI" v-model="consultant.copyCI"  variant="outlined" color="primary" />
-            </v-col>
-            <v-col cols="6">
-              <v-text-field label="Expiration CI" v-model="consultant.expirationDateCI" type="date" variant="outlined" color="primary" />
+              <v-text-field label="Last name *" v-model="consultant.name" :rules="[required]" required variant="outlined" color="primary" />
             </v-col>
 
+
             <v-col cols="6">
-              <v-switch label="Interne" v-model="consultant.intern" color="primary" />
+              <v-text-field label="ID Copy Link" v-model="consultant.copyCI"  variant="outlined" color="primary" />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field label="ID Expiration" v-model="consultant.expirationDateCI" type="date" variant="outlined" color="primary" />
+            </v-col>
+
+            <v-col cols="6">
+              <v-switch label="Internal" v-model="consultant.intern" color="primary" />
             </v-col>
             <v-col cols="6">
               <v-autocomplete 
-                label="Entreprise *"
+                label="Company *"
                 v-model="consultant.enterprise"
                 :items="enterprises"
                 item-title="name"
@@ -265,11 +265,11 @@ export default defineComponent({
               <v-text-field label="Email *" v-model="consultant.email" :rules="[required, emailRule]" required variant="outlined" color="primary" />
             </v-col>
             <v-col cols="6">
-              <v-text-field label="Téléphone *" v-model="consultant.phone" :rules="[required, phoneRule]" required variant="outlined" color="primary" />
+              <v-text-field label="Phone *" v-model="consultant.phone" :rules="[required, phoneRule]" required variant="outlined" color="primary" />
             </v-col>
 
             <v-col cols="6">
-              <v-text-field label="Date de disponibilité *" v-model="consultant.availabilityDate" type="date" :rules="[required, dateRule]" required variant="outlined" color="primary" />
+              <v-text-field label="Availability date *" v-model="consultant.availabilityDate" type="date" :rules="[required, dateRule]" required variant="outlined" color="primary" />
             </v-col>
             <v-col cols="6">
                 <v-textarea clearable label="Note" variant="outlined" color ="primary" rows="1"
@@ -280,11 +280,11 @@ export default defineComponent({
           </v-row>
         </v-form>
       </v-card-text>
-      <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
+      <v-alert v-if="loading" type="info" class="mt-4">Loading...</v-alert>
       <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
       <v-alert v-if="success" type="success" class="mt-4">{{ success }}</v-alert>
       <v-card-actions class="d-flex justify-end">
-        <v-btn color="primary" @click="submitConsultant">Modifier</v-btn>
+        <v-btn color="primary" @click="submitConsultant">Edit</v-btn>
       </v-card-actions>
     </v-card>
 

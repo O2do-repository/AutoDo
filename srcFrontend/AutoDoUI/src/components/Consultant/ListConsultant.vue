@@ -13,9 +13,7 @@
   </v-row>
 
     <v-row justify="center">
-      <v-col cols="12" class="text-center mb-6">
-        <h2 class="purple--text">A perfect blend of genius and caffeine</h2>
-      </v-col>
+
 
       <v-col
       v-for="consultant in filteredConsultants"
@@ -103,6 +101,8 @@ interface Consultant {
   picture: string;
   enterprise: string;
   phone: string;
+  jobTitles: string[];
+
 }
 
 export default defineComponent({
@@ -121,20 +121,21 @@ export default defineComponent({
     const defaultImage = 'https://via.placeholder.com/150?text=No+Image';
 
     const search = ref('');
-    const filteredConsultants = computed(() => {
-      const term = search.value.toLowerCase();
+const filteredConsultants = computed(() => {
+  const term = search.value.toLowerCase();
 
-      return consultants.value
-        .filter((c) =>  
-          c.name.toLowerCase().includes(term) ||
-          c.surname.toLowerCase().includes(term) ||
-          c.email.toLowerCase().includes(term)
-        )
-        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name || '', 'fr', {
-        sensitivity: 'base',
-        ignorePunctuation: true,
-      }));
-    });
+  return consultants.value
+    .filter((c) =>
+      c.name.toLowerCase().includes(term) ||
+      c.surname.toLowerCase().includes(term) ||
+      c.email.toLowerCase().includes(term) ||
+      c.jobTitles?.some((t) => t.toLowerCase().includes(term))
+    )
+    .sort((a, b) => a.name.toLowerCase().localeCompare(b.name || '', 'fr', {
+      sensitivity: 'base',
+      ignorePunctuation: true,
+    }));
+});
 
 
 

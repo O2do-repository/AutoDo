@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 public class ConsultantService : IConsultantService
 {
     private readonly AutoDoDbContext _context;
@@ -11,7 +13,7 @@ public class ConsultantService : IConsultantService
     // Get all Consultants
     public List<Consultant> GetAllConsultants()
     {
-        return _context.Consultants.ToList();
+        return _context.Consultants.Include(c => c.Profiles).ToList();
     }
 
 

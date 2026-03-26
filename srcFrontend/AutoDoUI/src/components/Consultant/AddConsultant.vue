@@ -200,7 +200,7 @@
       <v-card class="pa-4">
         <GoBackBtn class="mb-4" />
 
-        <v-card-title class="text-h5 font-weight-bold">Nouveau Consultant</v-card-title>
+        <v-card-title class="text-h5 font-weight-bold">New talent</v-card-title>
         <v-card-text>
           <v-form ref="formRef">
 

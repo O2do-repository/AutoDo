@@ -41,7 +41,7 @@ onMounted(() => {
     consultant.value = JSON.parse(storedData);
     fetchProfiles();
   } else {
-    error.value = "Aucun consultant sélectionné.";
+    error.value = "No consultant selected.";
   }
 });
 
@@ -50,7 +50,7 @@ const goToAddProfile = () => {
     sessionStorage.setItem('selectedConsultantUuid', consultant.value.consultantUuid);
     router.push('/profile/add-profile');
   } else {
-    error.value = "Aucun consultant sélectionné.";
+    error.value = "No consultant selected.";
   }
 };
 
@@ -67,31 +67,31 @@ const handleProfileDeleted = ({ uuid, message }: { uuid: string; message: string
 };
 
 const headers = ref([
-  { key: 'jobTitle', title: 'Titre du poste', align: 'start' as const },
-  { key: 'experienceLevel', title: 'Expérience', align: 'start' as const },
-  { key: 'rateHour', title: 'Tarif / heure', align: 'end' as const },
-  { key: 'cv', title: 'Lien CV', align: 'center' as const },
-  { key: 'cvDate', title: 'Date CV', align: 'end' as const },
-  { key: 'skills', title: 'Compétences', align: 'start' as const },
-  { key: 'keywords', title: 'Mots-clés', align: 'start' as const },
-  { key: 'actions', title: 'Modifier', align: 'center' as const },
-  { key: 'actionsSupp', title: 'Supprimer', align: 'center' as const }
+  { key: 'jobTitle', title: 'Job Title', align: 'start' as const },
+  { key: 'experienceLevel', title: 'Experience', align: 'start' as const },
+  { key: 'rateHour', title: 'Rate / hour', align: 'end' as const },
+  { key: 'cv', title: 'CV Link', align: 'center' as const },
+  { key: 'cvDate', title: 'CV Date', align: 'end' as const },
+  { key: 'skills', title: 'Skills', align: 'start' as const },
+  { key: 'keywords', title: 'Keywords', align: 'start' as const },
+  { key: 'actions', title: 'Edit', align: 'center' as const },
+  { key: 'actionsSupp', title: 'Delete', align: 'center' as const }
 ]);
 
 const fetchProfiles = async () => {
   if (!consultant.value) {
-    error.value = "Aucun consultant trouvé.";
+    error.value = "No consultant found.";
     return;
   }
 
   try {
     const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil/consultant/${consultant.value.consultantUuid}`);
-    if (!response.ok) throw new Error('Erreur lors de la récupération des profils');
+    if (!response.ok) throw new Error('Error retrieving profiles');
 
     const { data } = await response.json();
     profiles.value = data;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : "Une erreur est survenue";
+    error.value = err instanceof Error ? err.message : "An error occurred";
   }
 };
 
@@ -103,7 +103,7 @@ const editProfile = (profile: Profile) => {
 
 <template>
   <v-container>
-    <h1 class="text-center mb-6">Liste des Profils</h1>
+    <h1 class="text-center mb-6">Profile List</h1>
 
     <v-btn @click="goToAddProfile" icon="mdi-plus" color="primary" class="mb-4"></v-btn>
 
@@ -113,7 +113,7 @@ const editProfile = (profile: Profile) => {
 
     <v-text-field
       v-model="search"
-      label="Rechercher un profil"
+      label="Search a profile"
       prepend-inner-icon="mdi-magnify"
       variant="outlined"
       hide-details
@@ -129,16 +129,16 @@ const editProfile = (profile: Profile) => {
       class="elevation-2"
     >
       <template v-slot:item.cv="{ item }">
-        <a v-if="item.cv && item.cv.trim() !== ''" :href="item.cv" target="_blank">Voir le CV</a>
-        <span v-else>Non disponible</span>
+        <a v-if="item.cv && item.cv.trim() !== ''" :href="item.cv" target="_blank">View CV</a>
+        <span v-else>Not available</span>
       </template>
 
       <template v-slot:item.skills="{ item }">
-        {{ item.skills?.length ? item.skills.map(s => s.name).join(', ') : 'Aucune compétence' }}
+        {{ item.skills?.length ? item.skills.map(s => s.name).join(', ') : 'No skills' }}
       </template>
 
       <template v-slot:item.keywords="{ item }">
-        {{ item.keywords?.length ? item.keywords.map(k => k.name).join(', ') : 'Aucun mot-clé' }}
+        {{ item.keywords?.length ? item.keywords.map(k => k.name).join(', ') : 'No keywords' }}
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -151,7 +151,7 @@ const editProfile = (profile: Profile) => {
     </v-data-table>
 
     <v-alert v-if="!profiles.length && !error" type="info" class="mt-4">
-      Aucun profil disponible.
+      No profiles available.
     </v-alert>
   </v-container>
 

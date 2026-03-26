@@ -1,10 +1,10 @@
 <template>
     <v-img
-      src="@/assets/logo.jpg" 
+      src="@/assets/logo.png" 
       alt="Logo"
       class="fixed-image"
-      width="100"
-      height="100"
+      width="150"
+      height="150"
       contain
     />
 </template>
@@ -12,8 +12,8 @@
 <style scoped>
 .fixed-image {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: -20px;
+  right: 20px;
   z-index: 1000;
 }
 </style>

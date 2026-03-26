@@ -22,7 +22,28 @@ export default defineComponent({
   setup() {
     const storedProfile = localStorage.getItem('selectedProfile');
 
-    const profile = ref<Profile>(storedProfile ? JSON.parse(storedProfile) : {
+    // Helper function to extract UUIDs from skills/keywords
+    const extractUuids = (items: any[]): string[] => {
+      if (!Array.isArray(items)) return [];
+      
+      return items.map(item => {
+        // If it's already a UUID string
+        if (typeof item === 'string') {
+          // Check if it looks like a UUID (contains hyphens and proper format)
+          if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item)) {
+            return item;
+          }
+          return null; // It's a name string, skip it
+        }
+        // If it's an object with uuid/skillUuid/keywordUuid property
+        if (typeof item === 'object' && item !== null) {
+          return item.uuid || item.skillUuid || item.keywordUuid || item.SkillUuid || item.KeywordUuid || null;
+        }
+        return null;
+      }).filter(uuid => uuid !== null) as string[];
+    };
+
+    let parsedProfile: Profile = {
       profileUuid: '',
       consultantUuid: '',
       rateHour: null,
@@ -32,12 +53,38 @@ export default defineComponent({
       experienceLevel: '',
       skills: [],
       keywords: []
-    });
+    };
+
+    if (storedProfile) {
+      try {
+        const raw = JSON.parse(storedProfile);
+        console.log('Loaded profile from localStorage:', raw); // Debug log
+        
+        parsedProfile = {
+          profileUuid: raw.profileUuid || raw.ProfileUuid || '',
+          consultantUuid: raw.consultantUuid || raw.ConsultantUuid || '',
+          rateHour: raw.rateHour || raw.RateHour || null,
+          cv: raw.cv || raw.Cv || '',
+          cvDate: raw.cvDate || raw.CvDate || '',
+          jobTitle: raw.jobTitle || raw.JobTitle || '',
+          experienceLevel: raw.experienceLevel || raw.ExperienceLevel || '',
+          skills: extractUuids(raw.skills || raw.Skills || []),
+          keywords: extractUuids(raw.keywords || raw.Keywords || [])
+        };
+        
+        console.log('Normalized profile:', parsedProfile); // Debug log
+      } catch (e) {
+        console.error('Error parsing stored profile:', e);
+      }
+    }
+
+    const profile = ref<Profile>(parsedProfile);
 
     const router = useRouter();
     const experienceLevels = ['Junior', 'Medior', 'Senior'];
     const availableSkills = ref<{ name: string; uuid: string }[]>([]);
     const availableKeywords = ref<{ name: string; uuid: string }[]>([]);
+    
     const formRef = ref<any>(null);
     const errorMessage = ref<string | null>(null);
     const placeholderCV = 'https://example.com/default-cv';
@@ -66,10 +113,12 @@ export default defineComponent({
       try {
         const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/skill`);
         const data = await res.json();
+        console.log('Skills API response:', data.data); // Debug log
         availableSkills.value = data.data.map((item: any) => ({
           name: item.name,
-          uuid: item.skillUuid
+          uuid: item.skillUuid || item.SkillUuid // Handle both camelCase and PascalCase
         }));
+        console.log('Mapped skills:', availableSkills.value); // Debug log
       } catch (error) {
         console.error('Erreur skills :', error);
       }
@@ -79,10 +128,12 @@ export default defineComponent({
       try {
         const res = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/keyword`);
         const data = await res.json();
+        console.log('Keywords API response:', data.data); // Debug log
         availableKeywords.value = data.data.map((item: any) => ({
           name: item.name,
-          uuid: item.keywordUuid
+          uuid: item.keywordUuid || item.KeywordUuid // Handle both camelCase and PascalCase
         }));
+        console.log('Mapped keywords:', availableKeywords.value); // Debug log
       } catch (error) {
         console.error('Erreur keywords :', error);
       }
@@ -105,19 +156,49 @@ export default defineComponent({
         }
 
         const { valid } = await formRef.value.validate();
-        if (!valid) return;
+        if (!valid) {
+          loading.value = false;
+          return;
+        }
 
+        // Ensure skills and keywords are valid UUID arrays
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        
+        const skillUuids = Array.isArray(profile.value.skills) 
+          ? profile.value.skills.filter(uuid => 
+              uuid && 
+              typeof uuid === 'string' && 
+              uuid.trim() !== '' &&
+              uuidRegex.test(uuid) // Only include valid UUIDs
+            )
+          : [];
+        
+        const keywordUuids = Array.isArray(profile.value.keywords)
+          ? profile.value.keywords.filter(uuid => 
+              uuid && 
+              typeof uuid === 'string' && 
+              uuid.trim() !== '' &&
+              uuidRegex.test(uuid) // Only include valid UUIDs
+            )
+          : [];
+
+        console.log('Filtered skillUuids:', skillUuids); // Debug log
+        console.log('Filtered keywordUuids:', keywordUuids); // Debug log
+
+        // Use PascalCase to match C# DTO expectations
         const payload = {
-          profileUuid: profile.value.profileUuid,
-          consultantUuid: profile.value.consultantUuid,
-          rateHour: profile.value.rateHour,
-          cv: profile.value.cv,
-          cvDate: profile.value.cvDate,
-          jobTitle: profile.value.jobTitle,
-          experienceLevel: profile.value.experienceLevel,
-          skillUuids: profile.value.skills,
-          keywordUuids: profile.value.keywords
+          ProfileUuid: profile.value.profileUuid,
+          ConsultantUuid: profile.value.consultantUuid,
+          RateHour: profile.value.rateHour,
+          Cv: profile.value.cv,
+          CvDate: profile.value.cvDate,
+          JobTitle: profile.value.jobTitle,
+          ExperienceLevel: profile.value.experienceLevel,
+          SkillUuids: skillUuids,
+          KeywordUuids: keywordUuids
         };
+
+        console.log('Sending payload:', payload); // Debug log
 
         const response = await fetchWithApiKey(`${import.meta.env.VITE_API_URL}/profil`, {
           method: 'PUT',
@@ -126,15 +207,16 @@ export default defineComponent({
         });
 
         const data = await response.json();
-        if (!response.ok) throw new Error(data.message);
+        if (!response.ok) throw new Error(data.message || 'Erreur lors de la mise à jour');
 
-        success.value = data.message;
+        success.value = data.message || 'Profil mis à jour avec succès';
         setTimeout(() => {
           router.push('/consultant/consultant-info');
         }, 1000);
 
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+        console.error('Error submitting profile:', err);
       } finally {
         loading.value = false;
       }
@@ -172,13 +254,13 @@ export default defineComponent({
 
     <v-card class="pa-4">
       <GoBackBtn class="mb-4" />
-      <v-card-title class="text-h5 font-weight-bold">Modifier le Profil</v-card-title>
+      <v-card-title class="text-h5 font-weight-bold">Edit Profile</v-card-title>
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
             <v-col cols="12">
               <v-text-field 
-                label="CV URL *" 
+                label="CV Link *" 
                 v-model="profile.cv" 
                 variant="outlined" 
                 color="primary"
@@ -189,6 +271,7 @@ export default defineComponent({
                 required 
               />
             </v-col>
+
             <v-col cols="6">
               <v-text-field
                 label="Job Title *"
@@ -199,9 +282,10 @@ export default defineComponent({
                 required
               />
             </v-col>
+
             <v-col cols="6">
               <v-select
-                label="Niveau d'expérience *"
+                label="Experience Level *"
                 v-model="profile.experienceLevel"
                 :items="experienceLevels"
                 :rules="[required]"
@@ -210,9 +294,10 @@ export default defineComponent({
                 required
               />
             </v-col>
+
             <v-col cols="6">
               <v-text-field
-                label="Tarif / heure *"
+                label="Hourly Rate (€) *"
                 v-model.number="profile.rateHour"
                 type="number"
                 :rules="[required, numberRule]"
@@ -221,9 +306,10 @@ export default defineComponent({
                 required
               />
             </v-col>
+
             <v-col cols="6">
               <v-text-field
-                label="Date du CV *"
+                label="CV Date *"
                 v-model="profile.cvDate"
                 type="date"
                 :rules="[required, dateRule]"
@@ -232,9 +318,10 @@ export default defineComponent({
                 required
               />
             </v-col>
+
             <v-col cols="12">
               <v-autocomplete 
-                label="Compétences *"
+                label="Skills *"
                 v-model="profile.skills"
                 :items="availableSkills"
                 item-title="name"
@@ -247,9 +334,10 @@ export default defineComponent({
                 color="primary"
               />
             </v-col>
+
             <v-col cols="12">
               <v-autocomplete 
-                label="Mots-clés *"
+                label="Keywords *"
                 v-model="profile.keywords"
                 :items="availableKeywords"
                 item-title="name"
@@ -266,12 +354,12 @@ export default defineComponent({
         </v-form>
       </v-card-text>
 
-      <v-alert v-if="loading" type="info" class="mt-4">Chargement en cours...</v-alert>
+      <v-alert v-if="loading" type="info" class="mt-4">Loading...</v-alert>
       <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
       <v-alert v-if="success" type="success" class="mt-4">{{ success }}</v-alert>
 
       <v-card-actions class="d-flex justify-end">
-        <v-btn color="primary" @click="submitProfile">Publier</v-btn>
+        <v-btn color="primary" @click="submitProfile" :disabled="loading">Save Changes</v-btn>
       </v-card-actions>
     </v-card>
   </v-container>
