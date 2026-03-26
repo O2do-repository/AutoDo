@@ -18,7 +18,6 @@ interface Consultant {
   picture: string;
   copyCI: string;
   comment: string;
-
 }
 
 const consultant = ref<Consultant | null>(null);
@@ -45,49 +44,45 @@ onMounted(() => {
     </v-btn>
     
     <v-card-title>
-      Informations du Consultant
+      Talent Information
     </v-card-title>
-
     <v-card-text>
       <v-row>
         <v-col cols="12">
           <v-avatar size="150">
             <v-img 
               :src="consultant.picture" 
-              alt="Photo Consultant"
+              alt="Consultant Photo"
               contain
             ></v-img>
           </v-avatar>
         </v-col>
-
         <v-col cols="12" sm="6">
-          <strong>nom et prénom :</strong>  {{ consultant.name }} {{ consultant.surname }}
+          <strong>Name:</strong>  {{ consultant.name }} {{ consultant.surname }}
         </v-col>
         <v-col cols="12" sm="6">
-          <strong>Email :</strong> {{ consultant.email }}
+          <strong>Email:</strong> {{ consultant.email }}
         </v-col>
         <v-col cols="12" sm="6">
-          <strong>Téléphone :</strong> {{ consultant.phone }}
+          <strong>Phone:</strong> {{ consultant.phone }}
         </v-col>
         <v-col cols="12" sm="6">
-          <strong>Entreprise :</strong> {{ consultant.enterprise }}
+          <strong>Company:</strong> {{ consultant.enterprise }}
         </v-col>
         <v-col cols="12" sm="6">
-          <strong>Interne :</strong> {{ consultant.intern ? 'Oui' : 'Non' }}
+          <strong>Internal:</strong> {{ consultant.intern ? 'Yes' : 'No' }}
         </v-col>
         <v-col cols="12" sm="6">
-          <strong>Date de disponibilité :</strong> {{ consultant.availabilityDate }}
+          <strong>Availability date:</strong> {{ consultant.availabilityDate }}
         </v-col>
         <v-col cols="12" sm="6">
-          <strong>Date d'expiration CI :</strong> {{ consultant.expirationDateCI }}
+          <strong>ID expiration date:</strong> {{ consultant.expirationDateCI }}
         </v-col>
-
         <v-col cols="12" sm="6">
-          <strong>Note :</strong> {{ consultant.comment }}
+          <strong>Note:</strong> {{ consultant.comment }}
         </v-col>
-
         <v-col cols="12">
-          <strong>Copie de la carte d'identité : </strong> 
+          <strong>Copy of identity card: </strong> 
           <v-btn 
             v-if="consultant.copyCI" 
             :href="consultant.copyCI" 
@@ -96,20 +91,19 @@ onMounted(() => {
             variant="outlined" 
             color="primary"
           >
-            Voir le document
+            View document
           </v-btn>
-          <span v-else>Non disponible</span>
+          <span v-else>Not available</span>
         </v-col>
       </v-row>
     </v-card-text>
-
     <v-card-actions class="d-flex justify-end">
       <v-btn color="primary" variant="tonal" icon="mdi-pencil" @click="editConsultant"></v-btn>
     </v-card-actions>
   </v-card>
 </template>
-<style scoped>
 
+<style scoped>
 .back-btn {
   font-size: 16px;
   display: flex;

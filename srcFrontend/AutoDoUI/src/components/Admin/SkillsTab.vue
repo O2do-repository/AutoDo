@@ -25,12 +25,12 @@ const fetchSkills = async () => {
     const resData = await response.json()
 
     if (!response.ok || !resData.success) {
-      throw new Error(resData.message || "Erreur lors de la récupération des compétences")
+      throw new Error(resData.message || "Error while fetching skills")
     }
 
     skills.value = resData.data
   } catch (error) {
-    console.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    console.error(error instanceof Error ? error.message : 'An error occurred')
   }
 }
 
@@ -61,7 +61,7 @@ const submitSkill = async () => {
     snackbarMessage.value = result.message 
     snackbarColor.value = 'green'
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+    error.value = err instanceof Error ? err.message : 'An error occurred'
     snackbarMessage.value = error.value
     snackbarColor.value = 'red'
   } finally {
@@ -97,7 +97,7 @@ const removeSkill = async (uuid: string) => {
     snackbarColor.value = 'green'
     dialog.value = false
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+    error.value = err instanceof Error ? err.message : 'An error occurred'
     snackbarMessage.value = error.value
     snackbarColor.value = 'red'
   } finally {
@@ -115,7 +115,7 @@ onMounted(fetchSkills)
       <v-col cols="4">
         <v-text-field 
           v-model="newSkill" 
-          label="Ajouter une compétence" 
+          label="Add a skill" 
           variant="outlined"
           @keyup.enter="submitSkill"
           hide-details
@@ -145,7 +145,7 @@ onMounted(fetchSkills)
           class="skills-card"
         >
           <v-card-title class="text-h6 py-3 px-4 bg-primary text-white d-flex align-center">
-            Compétences
+            Skills
             <v-chip class="ms-2" size="small" color="white" text-color="primary">{{ skills.length }}</v-chip>
           </v-card-title>
           
@@ -171,22 +171,22 @@ onMounted(fetchSkills)
               </v-list-item>
             </v-list>
 
-            <!-- Dialog de confirmation -->
+            <!-- Confirmation dialog -->
             <v-dialog v-model="dialog" max-width="500">
               <v-card>
-                <v-card-title class="headline">Confirmer la suppression</v-card-title>
+                <v-card-title class="headline">Confirm deletion</v-card-title>
                 <v-card-text>
-                  Êtes-vous sûr de vouloir supprimer cette compétence ?
+                  Are you sure you want to delete this skill?
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="grey" @click="dialog = false">Annuler</v-btn>
+                  <v-btn color="grey" @click="dialog = false">Cancel</v-btn>
                   <v-btn
                     color="red"
                     :loading="loading"
                     @click="() => selectedSkillIndex !== null && removeSkill(skills[selectedSkillIndex].skillUuid)"
                   >
-                    Supprimer
+                    Delete
                   </v-btn>
                 </v-card-actions>
               </v-card>

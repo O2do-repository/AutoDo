@@ -1,5 +1,3 @@
-
-
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -83,13 +81,12 @@ public class ProfileService : IProfileService
 }
 
 
-
-
-
     public async Task<Profile> UpdateProfile(Profile updatedProfile, List<Guid> skillUuids, List<Guid> keywordUuids)
     {
-        var existingProfile = _context.Profiles
-            .FirstOrDefault(p => p.ProfileUuid == updatedProfile.ProfileUuid);
+        var existingProfile = await _context.Profiles
+            .Include(p => p.Skills)
+            .Include(p => p.Keywords)
+            .FirstOrDefaultAsync(p => p.ProfileUuid == updatedProfile.ProfileUuid);
 
         if (existingProfile == null)
             throw new Exception($"Le profil avec UUID {updatedProfile.ProfileUuid} n'existe pas.");
@@ -108,21 +105,39 @@ public class ProfileService : IProfileService
         existingProfile.CVDate = updatedProfile.CVDate;
         existingProfile.ExperienceLevel = updatedProfile.ExperienceLevel;
 
-        // Mise à jour des Skills
-        existingProfile.Skills = skillUuids.Select(id => new Skill { SkillUuid = id }).ToList();
-        foreach (var skill in existingProfile.Skills)
+        existingProfile.Skills.Clear();
+        existingProfile.Keywords.Clear();
+
+        // Save to commit the deletions from the junction tables
+        await _context.SaveChangesAsync();
+
+        // ⭐ Now add the new Skills
+        if (skillUuids != null && skillUuids.Any())
         {
-            _context.Attach(skill);
+            var skills = await _context.Skills
+                .Where(s => skillUuids.Contains(s.SkillUuid))
+                .ToListAsync();
+
+            foreach (var skill in skills)
+            {
+                existingProfile.Skills.Add(skill);
+            }
         }
 
-        // Mise à jour des Keywords
-        existingProfile.Keywords = keywordUuids.Select(id => new Keyword { KeywordUuid = id }).ToList();
-        foreach (var keyword in existingProfile.Keywords)
+        // ⭐ Add the new Keywords
+        if (keywordUuids != null && keywordUuids.Any())
         {
-            _context.Attach(keyword);
+            var keywords = await _context.Keywords
+                .Where(k => keywordUuids.Contains(k.KeywordUuid))
+                .ToListAsync();
+
+            foreach (var keyword in keywords)
+            {
+                existingProfile.Keywords.Add(keyword);
+            }
         }
 
-        _context.Profiles.Update(existingProfile);
+        // Save all changes
         await _context.SaveChangesAsync();
 
         return existingProfile;

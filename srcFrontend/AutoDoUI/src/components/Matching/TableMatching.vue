@@ -215,9 +215,10 @@ onMounted(fetchMatchings);
 
 <template>
   <v-container>
-    <h1 class="text-center mb-6">Liste des Matchings</h1>
-    <v-alert type="info" variant="outlined" class="mb-4 d-flex align-center">
-      Vous devez être connecté pour accéder aux liens RFP sur le site Connecting-Expertise.
+    <h1 class="text-center mb-6">List of Matchings</h1>
+
+    <!-- <v-alert type="info" variant="outlined" class="mb-4 d-flex align-center">
+      You must be logged in to access RFP links on the Connecting-Expertise website.
 
       <v-btn
         color="info"
@@ -227,16 +228,14 @@ onMounted(fetchMatchings);
         rel="noopener noreferrer"
         size="small"
       >
-
-        Se connecter
+        Log in
       </v-btn>
-    </v-alert>
-
+    </v-alert> -->
 
     <div class="d-flex align-center mb-4">
       <v-text-field 
         v-model="search" 
-        label="Rechercher un matching" 
+        label="Search a matching" 
         prepend-inner-icon="mdi-magnify" 
         variant="outlined" 
         hide-details 
@@ -246,10 +245,10 @@ onMounted(fetchMatchings);
 
       <v-btn-group class="ml-4">
         <v-btn @click="expandAll" size="small" variant="outlined">
-          <v-icon>mdi-unfold-more-horizontal</v-icon> Tout développer
+          <v-icon>mdi-unfold-more-horizontal</v-icon> Expand all
         </v-btn>
         <v-btn @click="collapseAll" size="small" variant="outlined">
-          <v-icon>mdi-unfold-less-horizontal</v-icon> Tout réduire
+          <v-icon>mdi-unfold-less-horizontal</v-icon> Collapse all
         </v-btn>
       </v-btn-group>
     </div>
@@ -259,7 +258,7 @@ onMounted(fetchMatchings);
     </v-alert>
 
     <v-alert v-if="!profiles.length && !error" type="info" class="mt-4">
-      Aucun matching disponible.
+      No matchings available.
     </v-alert>
 
     <div v-for="group in filteredGroups" :key="group.name" class="mb-6">
@@ -282,7 +281,7 @@ onMounted(fetchMatchings);
               color="red"
               size="small"
               class="ml-1"
-              title="Matching à haut score non traité"
+              title="High-score matching not yet processed"
             >
               mdi-bell-alert
             </v-icon>
@@ -304,20 +303,18 @@ onMounted(fetchMatchings);
                 class="elevation-1 mb-4"
                 density="compact"
               >
-              <template v-slot:item.rfpReference="{ item }">
-                <div>
-                  <a
-                    :href="item.rfpUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style="color: #1976d2; text-decoration: underline;"
-                  >
-                    {{ item.rfpReference }}
-
-                  </a>
-
-                </div>
-              </template>
+                <template v-slot:item.rfpReference="{ item }">
+                  <div>
+                    <a
+                      :href="item.rfpUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style="color: #1976d2; text-decoration: underline;"
+                    >
+                      {{ item.rfpReference }}
+                    </a>
+                  </div>
+                </template>
 
                 <!-- Checkbox -->
                 <template v-slot:item.edit="{ item }">
@@ -352,10 +349,9 @@ onMounted(fetchMatchings);
                     style="width: 300px; text-align: right;"
                     class="comment-textarea"
                   />
-                  
                 </template>
 
-                <!-- Statut -->
+                <!-- Status -->
                 <template v-slot:item.statutMatching="{ item }">
                   <v-select
                     v-model="item.statutMatching"
@@ -367,17 +363,17 @@ onMounted(fetchMatchings);
                     style="max-width: 150px"
                   />
                 </template>
+
+                <!-- Feedback -->
                 <template v-slot:item.feedback="{ item }">
                   <HoverFeedback :matching-uuid="item.matchingUuid" />
                 </template>
-
-                
               </v-data-table>
 
-              <!-- Bouton Sauvegarder conditionnel -->
+              <!-- Conditional Save Button -->
               <div v-if="jobGroup.matchings.some(item => item.editable)">
                 <v-btn size="small" color="primary" @click="saveMatchingGroup(jobGroup.matchings)">
-                  Sauvegarder
+                  Save
                 </v-btn>
               </div>
             </div>
@@ -387,6 +383,7 @@ onMounted(fetchMatchings);
     </div>
   </v-container>
 </template>
+
 
 <style scoped>
 .v-container { margin: auto; max-width: 1200px; }

@@ -30,7 +30,11 @@ public class ConsultantController : ControllerBase
             Phone = consultant.Phone,
             CopyCI = consultant.CopyCI,
             Picture = consultant.Picture,
-            Comment = consultant.Comment
+            Comment = consultant.Comment,
+            JobTitles = consultant.Profiles?
+            .Select(p => p.JobTitle)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .ToList() ?? new()
         }).ToList();
 
         return Ok(new {
