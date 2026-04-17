@@ -61,6 +61,19 @@ public class RfpController : ControllerBase
             return StatusCode(500, $"Erreur d'importation : {ex.Message}");
         }
     }
+    [HttpDelete("all")]
+    public IActionResult DeleteAllRFPs()
+    {
+        try
+        {
+            _rfpService.DeleteAllRFPs();
+            return Ok("Toutes les RFPs ont été supprimées.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Une erreur est survenue.", error = ex.Message });
+        }
+    }
 
 
 }

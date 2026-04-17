@@ -18,7 +18,6 @@ builder.Configuration
 
 var configuration = builder.Configuration;
 
-// Lecture de la clé API depuis la configuration
 var apiKey = configuration["ApiKey:SecretKey"];
 if (string.IsNullOrEmpty(apiKey))
 {
@@ -42,7 +41,7 @@ builder.Services.AddScoped<IKeywordService, KeywordService>();
 builder.Services.AddScoped<IMatchingFeedbackService, MatchingFeedbackService>();
 
 
-
+// Translator service
 builder.Services.Configure<AzureTranslatorOptions>(
     builder.Configuration.GetSection("AzureTranslator"));
 builder.Services.AddScoped<ITranslationService, TranslationService>();
@@ -51,6 +50,27 @@ builder.Services.AddScoped<ITranslationService, TranslationService>();
 builder.Services.AddDbContext<AutoDoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+
+// AI service
+builder.Services.AddHttpClient();
+
+// 2. Récupération des valeurs depuis appsettings.json
+var infomaniakApiKey = builder.Configuration["Infomaniak:ApiKey"];
+var infomaniakModel = builder.Configuration["Infomaniak:Model"]; 
+var infomaniakProductId = builder.Configuration["Infomaniak:ProductId"];
+
+if (string.IsNullOrEmpty(infomaniakApiKey))
+{
+    throw new Exception("API Key manquante dans la configuration !");
+}
+
+
+builder.Services.AddScoped<IAiNormalizationService>(sp =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
+    return new AiNormalizationService(httpClient, infomaniakApiKey, infomaniakModel, infomaniakProductId);
+});
     
 
 string[] allowedOrigins =
@@ -124,5 +144,37 @@ app.MapPost("/api/validate-key", async (HttpContext context) =>
     return Results.Ok(new { valid = false });
 });
 
+Console.WriteLine(">>> TEST DE CONNEXION IA EN COURS...");
+
+using (var scope = app.Services.CreateScope())
+{
+    var aiService = scope.ServiceProvider.GetRequiredService<IAiNormalizationService>();
+    
+    try 
+    {
+        // On appelle l'IA avec des données de test simples
+        var testResult = await aiService.NormalizeAsync(
+            "Développeur C#", 
+            new List<string> { "C#", ".NET", "Azure" }, 
+            new List<string> { "Agile" }
+        );
+
+        Console.WriteLine(">>> SUCCÈS ! L'IA a répondu :");
+        Console.WriteLine($"   Titre : {testResult.NormalizedJobTitle}");
+        Console.WriteLine($"   Skills : {string.Join(", ", testResult.NormalizedSkills)}");
+        Console.WriteLine($"   Keywords : {string.Join(", ", testResult.NormalizedKeywords)}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(">>> ÉCHEC CRITIQUE DE L'IA :");
+        Console.WriteLine($"   Message : {ex.Message}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"   Détail : {ex.InnerException.Message}");
+            Console.WriteLine($"   Stack : {ex.InnerException.StackTrace}");
+        }
+        // On ne relance pas pour ne pas bloquer le serveur, mais on affiche tout
+    }
+}
 
 app.Run();

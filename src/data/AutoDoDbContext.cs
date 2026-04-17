@@ -17,11 +17,17 @@ public class AutoDoDbContext : DbContext
 
     private readonly bool _useInMemory;
 
+
+
+
     public AutoDoDbContext(DbContextOptions<AutoDoDbContext> options) : base(options)
     
     {
         //_useInMemory = true;
     }
+
+
+
 
 
 
@@ -42,6 +48,21 @@ public class AutoDoDbContext : DbContext
             entity.Property(r => r.RfpUrl).HasColumnName("RfpUrl").HasMaxLength(500);
             entity.Property(r => r.Workplace).HasColumnName("Workplace").HasMaxLength(255);
             entity.Property(r => r.Reference).HasColumnName("Reference").HasMaxLength(255);
+
+
+            entity.Property(r => r.NormalizedJobTitle)
+                .HasColumnName("NormalizedJobTitle")
+                .HasMaxLength(255)
+                .IsRequired(false); // Nullable
+
+            entity.Property(r => r.NormalizedSkillsJson)
+                .HasColumnName("NormalizedSkillsJson")
+                .HasColumnType("nvarchar(max)") // Ou "TEXT" selon votre SGBD
+                .IsRequired(false);
+
+            entity.Property(r => r.LastNormalizationDate)
+                .HasColumnName("LastNormalizationDate")
+                .IsRequired(false);
         });
 
 
@@ -93,6 +114,26 @@ public class AutoDoDbContext : DbContext
 
             entity.Property(p => p.ExperienceLevel)
                 .HasConversion(x => x.ToString(), x => (Experience)Enum.Parse(typeof(Experience), x));
+
+
+            entity.Property(p => p.NormalizedJobTitle)
+                .HasColumnName("NormalizedJobTitle")
+                .HasMaxLength(255)
+                .IsRequired(false);
+
+            entity.Property(p => p.NormalizedSkillsJson)
+                .HasColumnName("NormalizedSkillsJson")
+                .HasColumnType("nvarchar(max)")
+                .IsRequired(false);
+
+            entity.Property(p => p.NormalizedKeywordsJson)
+                .HasColumnName("NormalizedKeywordsJson")
+                .HasColumnType("nvarchar(max)")
+                .IsRequired(false);
+
+            entity.Property(p => p.LastNormalizationDate)
+                .HasColumnName("LastNormalizationDate")
+                .IsRequired(false);
 
 
         });

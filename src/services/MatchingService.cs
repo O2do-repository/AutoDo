@@ -1,5 +1,6 @@
 
 
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 
 public class MatchingService :IMatchingService
@@ -11,11 +12,29 @@ public class MatchingService :IMatchingService
     {
         _context = context;
     }
+
     public MatchingFeedback CalculateMatchingFeedback(Profile profile, RFP rfp, Guid matchingUuid)
     {
-        var (jobScore, jobFeedback) = MatchingScoring.ScoreJobTitleMatch(profile, rfp);
+        NormalizedData normProfile = null;
+        NormalizedData normRfp = null;
+
+        if (!string.IsNullOrEmpty(profile.NormalizedSkillsJson))
+            normProfile = new NormalizedData
+            {
+                NormalizedJobTitle = profile.NormalizedJobTitle,
+                NormalizedSkills = JsonSerializer.Deserialize<List<string>>(profile.NormalizedSkillsJson) ?? new()
+            };
+
+        if (!string.IsNullOrEmpty(rfp.NormalizedSkillsJson))
+            normRfp = new NormalizedData
+            {
+                NormalizedJobTitle = rfp.NormalizedJobTitle,
+                NormalizedSkills = JsonSerializer.Deserialize<List<string>>(rfp.NormalizedSkillsJson) ?? new()
+            };
+
+        var (jobScore, jobFeedback) = MatchingScoring.ScoreJobTitleMatch(profile, rfp, normProfile, normRfp);
         var (expScore, expFeedback) = MatchingScoring.ScoreExperienceMatch(profile, rfp);
-        var (skillScore, skillFeedback) = MatchingScoring.ScoreSkillsMatch(profile, rfp);
+        var (skillScore, skillFeedback) = MatchingScoring.ScoreSkillsMatch(profile, rfp, normProfile, normRfp);
         var (locScore, locFeedback) = MatchingScoring.ScoreLocationMatch(rfp);
 
         int total = jobScore + expScore + skillScore + locScore;
