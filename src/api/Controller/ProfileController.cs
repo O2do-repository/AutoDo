@@ -183,17 +183,19 @@ public class ProfileController : ControllerBase
             });
         }
     }
-    [HttpPut("translate-profile")]
+    
+    [HttpPut("normalize-all")]
     public async Task<IActionResult> UpdateAllProfiles()
     {
         try
         {
-            var updatedCount = await _profileService.UpdateAllProfiles();
+            // Appel de la nouvelle méthode qui inclut la normalisation IA
+            await _profileService.UpdateAllProfilesNormalizationAsync();
+            
             return Ok(new
             {
                 success = true,
-                message = $"Mise à jour de {updatedCount} profils terminée.",
-                count = updatedCount
+                message = "Normalisation IA de tous les profils terminée avec succès."
             });
         }
         catch (Exception ex)
@@ -201,7 +203,7 @@ public class ProfileController : ControllerBase
             return StatusCode(500, new
             {
                 success = false,
-                message = "Erreur lors de la mise à jour en masse.",
+                message = "Erreur lors de la normalisation en masse.",
                 details = ex.Message
             });
         }

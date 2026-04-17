@@ -1,101 +1,120 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
 public static class MatchingScoring
 {
-    private static readonly Regex TokenRegex = new Regex(
-        @"[a-zA-Z0-9#+.]+", 
-        RegexOptions.Compiled | RegexOptions.CultureInvariant, 
-        TimeSpan.FromMilliseconds(250));
+    // Configuration des poids maximaux
+    private const int MaxJobTitleScore = 25;
+    private const int MaxSkillsScore = 45;
+    private const int MaxLocationScore = 10;
+    private const int MaxExperienceScore = 20;
 
-    // Score basé sur la correspondance entre les intitulés de poste du profil et du RFP
-    public static (int score, string feedback) ScoreJobTitleMatch(Profile profile, RFP rfp)
+    public static (int score, string feedback) ScoreJobTitleMatch(Profile profile, RFP rfp, NormalizedData normProfile = null, NormalizedData normRfp = null)
     {
-        var rfpJobTitle = rfp.JobTitle ?? "(non renseigné)";
-        var introFeedback = $"Intitulé du profil : « {profile.JobTitleFr} / {profile.JobTitleEn} / {profile.JobTitleNl} »\n" +
-                            $"Intitulé du RFP : « {rfpJobTitle} »\n";
-
-        if (string.IsNullOrWhiteSpace(rfp.JobTitle) ||
-            (string.IsNullOrWhiteSpace(profile.JobTitleFr) &&
-            string.IsNullOrWhiteSpace(profile.JobTitleEn) &&
-            string.IsNullOrWhiteSpace(profile.JobTitleNl)))
+        if (normProfile != null && normRfp != null &&
+            !string.IsNullOrEmpty(normProfile.NormalizedJobTitle) &&
+            !string.IsNullOrEmpty(normRfp.NormalizedJobTitle))
         {
-            return (0, introFeedback + "L’intitulé de poste est manquant dans le profil ou le RFP.");
+            string pTitle = normProfile.NormalizedJobTitle;
+            string rTitle = normRfp.NormalizedJobTitle;
+
+            var pWords = pTitle.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var rWords = rTitle.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            double totalScore = rWords.Sum(rw =>
+                pWords.Max(pw => NormalizedMatchScore(rw, pw))
+            );
+            double ratio = totalScore / rWords.Length;
+
+            // Ratio mis à jour pour coller au max de 25 points
+            int score = ratio switch
+            {
+                >= 0.8 => 25, // Excellent match
+                >= 0.5 => 18, // Bon match
+                >= 0.3 => 12, // Match partiel
+                >= 0.1 => 6,  // Faible match
+                _ => 0
+            };
+
+            return (score, $"JobTitle (IA) : {pTitle} vs {rTitle} — ratio {ratio:P0} → {score}/{MaxJobTitleScore}pts");
         }
 
-        var rfpWords = TokenizeAndNormalize(rfp.JobTitle);
-        if (rfpWords.Count == 0)
-            return (0, introFeedback + "Aucun mot significatif trouvé dans l’intitulé du RFP.");
-
-        // Job titles in multiple languages
-        var profileJobWords = TokenizeAndNormalize(profile.JobTitleFr)
-            .Concat(TokenizeAndNormalize(profile.JobTitleEn))
-            .Concat(TokenizeAndNormalize(profile.JobTitleNl));
-
-        // Skills: Name + translations
-        var skillWords = profile.Skills?.SelectMany(s =>
-            TokenizeAndNormalize(s.Name)
-            .Concat(TokenizeAndNormalize(s.NameFr))
-            .Concat(TokenizeAndNormalize(s.NameEn))
-            .Concat(TokenizeAndNormalize(s.NameNl))
-        ) ?? Enumerable.Empty<string>();
-
-        // Keywords: Name + translations
-        var keywordWords = profile.Keywords?.SelectMany(k =>
-            TokenizeAndNormalize(k.Name)
-            .Concat(TokenizeAndNormalize(k.NameFr))
-            .Concat(TokenizeAndNormalize(k.NameEn))
-            .Concat(TokenizeAndNormalize(k.NameNl))
-        ) ?? Enumerable.Empty<string>();
-
-        // All unique normalized words from profile
-        var allProfileWords = profileJobWords
-            .Concat(skillWords)
-            .Concat(keywordWords)
-            .Distinct()
-            .ToList();
-
-        // Matching words
-        var matchedPairs = rfpWords
-            .SelectMany(rfpWord => allProfileWords
-                .Where(profileWord => WordsMatch(rfpWord, profileWord))
-                .Select(profileWord => (rfpWord, profileWord)))
-            .Distinct()
-            .ToList();
-
-        int matchCount = matchedPairs.Count;
-        double ratio = (double)matchCount / rfpWords.Count;
-
-        int score = ratio switch
-        {
-            >= 0.8 => 20,
-            >= 0.5 => 15,
-            >= 0.3 => 10,
-            >= 0.1 => 5,
-            _ => 0
-        };
-
-        string feedback;
-        if (matchCount > 0)
-        {
-            var detailedMatches = string.Join("\n", matchedPairs.Select(p => $"« {p.rfpWord} » (RFP) ↔ « {p.profileWord} » (profil)"));
-            feedback = $"{introFeedback}\n{matchCount} mot(s) clé trouvés sur {rfpWords.Count} dans l’intitulé du RFP.\n" +
-                    $"Détail des correspondances :\n{detailedMatches}\n" +
-                    $"Taux de correspondance : {(int)(ratio * 100)}%.";
-        }
-        else
-        {
-            feedback = $"{introFeedback}\nAucun mot clé de l’intitulé du RFP n’a été retrouvé dans le profil.";
-        }
-
-        return (score, feedback);
+        return ScoreJobTitleMatchLegacy(profile, rfp);
     }
 
+    public static (int score, string feedback) ScoreSkillsMatch(Profile profile, RFP rfp, NormalizedData normProfile = null, NormalizedData normRfp = null)
+    {
+        if (normProfile != null && normRfp != null && normRfp.NormalizedSkills.Any())
+        {
+            var profileSkills = normProfile.NormalizedSkills ?? new List<string>();
+            int totalRfpSkills = normRfp.NormalizedSkills.Count;
+
+            // Calcul détaillé des matches
+            var matchDetails = normRfp.NormalizedSkills.Select(rs =>
+            {
+                double bestScore = profileSkills.Count > 0
+                    ? profileSkills.Max(ps => NormalizedMatchScore(rs, ps))
+                    : 0.0;
+                // Seuil de validation : on considère matché si le score de similarité > 40%
+                return new { Skill = rs, Score = bestScore, IsMatch = bestScore > 0.4 };
+            }).ToList();
+
+            var matchedSkills = matchDetails.Where(m => m.IsMatch).ToList();
+            var missingSkills = matchDetails.Where(m => !m.IsMatch).ToList();
+
+            int matchCount = matchedSkills.Count;
+
+            
+            // 1. Score de base : 4 points par compétence matchée
+            // Ex: 5 skills matchées = 20 pts. 10 skills = 40 pts.
+            int baseScore = matchCount * 4;
+
+            // 2. Bonus de complétion (pour encourager le 100% ou la quasi-totalité)
+            double ratio = (double)matchCount / totalRfpSkills;
+            int bonus = 0;
+
+            if (ratio == 1.0)
+            {
+                // Match parfait : on ajoute assez pour atteindre ou approcher le max selon le nombre de skills
+                // Si peu de skills (ex: 3), 3*4=12, il faut un gros bonus. 
+                // Si beaucoup de skills (ex: 12), 12*4=48 (déjà plafonné).
+                bonus = 9; 
+            }
+            else if (ratio >= 0.8)
+            {
+                // Quasi-perfect : bonus intermédiaire
+                bonus = 5;
+            }
+            else if (ratio >= 0.5)
+            {
+                // Majorité : petit bonus
+                bonus = 2;
+            }
+
+            int finalScore = baseScore + bonus;
+
+            // Plafonnement strict à 45
+            if (finalScore > MaxSkillsScore)
+                finalScore = MaxSkillsScore;
 
 
 
-    // Score basé sur la correspondance du niveau d'expérience
+            string feedback = $"Skills (IA - Bonus) : {matchCount}/{totalRfpSkills} matchées → {finalScore}/{MaxSkillsScore}pts (Base: {baseScore} + Bonus: {bonus})\n" +
+                              $"Matchées : [{string.Join(", ", matchedSkills.Select(m => m.Skill))}]";
+            
+            if (missingSkills.Any())
+                feedback += $"\nManquantes : [{string.Join(", ", missingSkills.Select(m => m.Skill))}]";
+
+            return (finalScore, feedback);
+        }
+
+        return ScoreSkillsMatchLegacy(profile, rfp);
+    }
+
     public static (int score, string feedback) ScoreExperienceMatch(Profile profile, RFP rfp)
     {
         var inferredExperience = InferExperienceFromText(rfp.JobTitle);
@@ -104,263 +123,239 @@ public static class MatchingScoring
             : rfp.ExperienceLevel;
 
         if (finalExperience == Experience.Unspecified)
-            return (20, "Niveau d’expérience non identifiable dans le RFP (ni dans l’intitulé, ni explicitement spécifié).");
+            return (MaxExperienceScore, "Niveau d'expérience non identifiable dans le RFP (Score max attribué par défaut).");
 
         if (profile.ExperienceLevel == finalExperience)
-            return (20, $"Le profil possède exactement le niveau d’expérience requis : {finalExperience}.");
+            return (MaxExperienceScore, $"Niveau d'expérience exact : {finalExperience} → {MaxExperienceScore}/{MaxExperienceScore}pts");
 
-        return (0, $"Incohérence d’expérience : le RFP demande {finalExperience}, mais le profil indique {profile.ExperienceLevel}.");
 
+        return (0, $"Expérience incompatible : RFP demande {finalExperience}, profil indique {profile.ExperienceLevel} → 0/{MaxExperienceScore}pts");
     }
 
-
-    // Infère le niveau d'expérience à partir du texte
-    private static Experience InferExperienceFromText(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return Experience.Unspecified;
-
-        var tokens = TokenizeAndNormalize(text);
-
-        foreach (var token in tokens)
-        {
-            if (WordsMatch(token, "senior") || WordsMatch(token, "expert") || WordsMatch(token, "sr") || WordsMatch(token, "lead"))
-                return Experience.Senior;
-
-            if (WordsMatch(token, "medior") || WordsMatch(token, "confirmé"))
-                return Experience.Medior;
-
-            if (WordsMatch(token, "junior") || WordsMatch(token, "jr"))
-                return Experience.Junior;
-        }
-
-        return Experience.Unspecified;
-    }
-
-    // Score basé sur la correspondance des compétences
-   public static (int score, string feedback) ScoreSkillsMatch(Profile profile, RFP rfp)
-    {
-        var rfpSkills = rfp.Skills ?? Enumerable.Empty<string>();
-
-        // Combine and normalize all skill and keyword translations
-        var skillTokens = profile.Skills?.SelectMany(s =>
-            TokenizeAndNormalize(s.Name)
-            .Concat(TokenizeAndNormalize(s.NameFr))
-            .Concat(TokenizeAndNormalize(s.NameEn))
-            .Concat(TokenizeAndNormalize(s.NameNl))
-        ) ?? Enumerable.Empty<string>();
-
-        var keywordTokens = profile.Keywords?.SelectMany(k =>
-            TokenizeAndNormalize(k.Name)
-            .Concat(TokenizeAndNormalize(k.NameFr))
-            .Concat(TokenizeAndNormalize(k.NameEn))
-            .Concat(TokenizeAndNormalize(k.NameNl))
-        ) ?? Enumerable.Empty<string>();
-
-        var profileTokens = skillTokens
-            .Concat(keywordTokens)
-            .Distinct()
-            .ToList();
-
-        int shouldMatched = 0, niceMatched = 0;
-        int shouldTotal = 0, niceTotal = 0;
-        int unknownMatched = 0, unknownTotal = 0;
-
-        var matchedDetails = new List<string>();
-        var unmatchedDetails = new List<string>();
-
-        foreach (var rawSkill in rfpSkills)
-        {
-            var (text, importance) = ParseSkill(rawSkill);
-            var tokens = TokenizeAndNormalize(text);
-
-            bool matched = false;
-            foreach (var token in tokens)
-            {
-                var matchedProfileToken = profileTokens.FirstOrDefault(p => WordsMatch(p, token));
-                if (matchedProfileToken != null)
-                {
-                    matched = true;
-                    matchedDetails.Add($"« {text} » (RFP) ↔ « {matchedProfileToken} » (profil)");
-                    break;
-                }
-            }
-
-            if (!matched)
-            {
-                unmatchedDetails.Add($"« {text} » (RFP) → Pas trouvé dans le profil");
-            }
-
-            switch (importance)
-            {
-                case "must have":
-                case "should have":
-                    shouldTotal++;
-                    if (matched) shouldMatched++;
-                    break;
-                case "nice to have":
-                    niceTotal++;
-                    if (matched) niceMatched++;
-                    break;
-                default:
-                    unknownTotal++;
-                    if (matched) unknownMatched++;
-                    break;
-            }
-        }
-
-        int totalKnown = shouldTotal + niceTotal;
-        int matchedKnown = shouldMatched + niceMatched;
-
-        int score;
-        if (totalKnown > 0)
-        {
-            double shouldScore = shouldTotal > 0 ? (double)shouldMatched / shouldTotal * 35 : 0;
-            double niceScore = niceTotal > 0 ? (double)niceMatched / niceTotal * 5 : 0;
-            score = (int)Math.Round(shouldScore + niceScore);
-        }
-        else
-        {
-            double unknownScore = unknownTotal > 0 ? (double)unknownMatched / unknownTotal * 40 : 0;
-            score = (int)Math.Round(unknownScore);
-        }
-
-        var feedbackBuilder = new StringBuilder();
-
-        feedbackBuilder.AppendLine("Résumé :");
-        if (shouldTotal > 0)
-            feedbackBuilder.AppendLine($"- Compétences obligatoires (‘must/should have’) : {shouldMatched}/{shouldTotal} trouvées.");
-        if (niceTotal > 0)
-            feedbackBuilder.AppendLine($"- Compétences facultatives (‘nice to have’) : {niceMatched}/{niceTotal} trouvées.");
-        if (unknownTotal > 0)
-            feedbackBuilder.AppendLine($"- Compétences sans priorité précisée : {unknownMatched}/{unknownTotal} trouvées.");
-
-        feedbackBuilder.AppendLine();
-        feedbackBuilder.AppendLine("Détail des correspondances :");
-        if (matchedDetails.Any())
-            feedbackBuilder.AppendLine(string.Join("\n", matchedDetails));
-        else
-            feedbackBuilder.AppendLine("Aucune correspondance détectée.");
-
-        if (unmatchedDetails.Any())
-        {
-            feedbackBuilder.AppendLine();
-            feedbackBuilder.AppendLine("Compétences non trouvées :");
-            feedbackBuilder.AppendLine(string.Join("\n", unmatchedDetails));
-        }
-
-        return (score, feedbackBuilder.ToString().Trim());
-    }
-
-
-
-
-
-    // Extrait le texte et l’importance depuis un champ de compétence du RFP
-    private static (string text, string importance) ParseSkill(string rawSkill)
-    {
-        var lower = rawSkill.ToLowerInvariant();
-        string importance = "N/A";
-
-        if (lower.Contains("must have")) importance = "must have";
-        else if (lower.Contains("should have")) importance = "should have";
-        else if (lower.Contains("nice to have")) importance = "nice to have";
-
-        var parts = rawSkill.Split("(importance:", StringSplitOptions.RemoveEmptyEntries);
-        string skillText = parts[0].Trim();
-
-        return (skillText, importance);
-    }
-
-    // Score basé sur la localisation (actuellement détecte uniquement Bruxelles)
     public static (int score, string feedback) ScoreLocationMatch(RFP rfp)
     {
         if (string.IsNullOrWhiteSpace(rfp.Workplace))
-            return (0, "Lieu de travail non précisé dans le RFP.");
+            return (0, "Lieu de travail non précisé.");
 
-        var workplaceTokens = TokenizeAndNormalize(rfp.Workplace);
-
-        // Liste des variantes possibles de "Bruxelles"
+        var tokens = TokenizeAndNormalize(rfp.Workplace);
         var brusselsVariants = new HashSet<string>
         {
             "bruxelles", "brussel", "brussels", "saintjossetennoode", "saintjosse", "regionbruxelloise"
         };
 
-        bool isBrussels = workplaceTokens.Any(t => brusselsVariants.Contains(t));
+        bool isBrussels = tokens.Any(t => brusselsVariants.Contains(t));
         if (isBrussels)
-        {
-            return (20, $"Le lieu de travail spécifié (‘{rfp.Workplace}’) est reconnu comme étant situé dans la région de Bruxelles.");
-        }
-        else
-        {
-            return (0, $"Le lieu de travail spécifié (‘{rfp.Workplace}’) est en dehors de Bruxelles ou n’est pas reconnu comme tel.");
-        }
+            return (MaxLocationScore, $"Localisation Bruxelles détectée : '{rfp.Workplace}' → {MaxLocationScore}/{MaxLocationScore}pts");
+
+        return (0, $"Hors Bruxelles : '{rfp.Workplace}' → 0/{MaxLocationScore}pts");
     }
 
+    // --- LEGACY METHODS ---
 
-    // Tokenise un texte : met en minuscule, enlève les accents, découpe les mots, retire les petits mots
+    private static (int score, string feedback) ScoreJobTitleMatchLegacy(Profile profile, RFP rfp)
+    {
+        var rfpJobTitle = rfp.JobTitle ?? "(non renseigné)";
+        var introFeedback = $"Intitulé profil : « {profile.JobTitleFr} / {profile.JobTitleEn} / {profile.JobTitleNl} »\n" +
+                            $"Intitulé RFP : « {rfpJobTitle} »\n";
+
+        if (string.IsNullOrWhiteSpace(rfp.JobTitle) ||
+            (string.IsNullOrWhiteSpace(profile.JobTitleFr) &&
+             string.IsNullOrWhiteSpace(profile.JobTitleEn) &&
+             string.IsNullOrWhiteSpace(profile.JobTitleNl)))
+            return (0, introFeedback + "Intitulé manquant.");
+
+        var rfpWords = TokenizeAndNormalize(rfp.JobTitle);
+        if (rfpWords.Count == 0)
+            return (0, introFeedback + "Aucun mot significatif dans le titre RFP.");
+
+        var allProfileWords = TokenizeAndNormalize(profile.JobTitleFr)
+            .Concat(TokenizeAndNormalize(profile.JobTitleEn))
+            .Concat(TokenizeAndNormalize(profile.JobTitleNl))
+            .Concat(profile.Skills?.SelectMany(s =>
+                TokenizeAndNormalize(s.Name).Concat(TokenizeAndNormalize(s.NameFr))
+                .Concat(TokenizeAndNormalize(s.NameEn)).Concat(TokenizeAndNormalize(s.NameNl))
+            ) ?? Enumerable.Empty<string>())
+            .Concat(profile.Keywords?.SelectMany(k =>
+                TokenizeAndNormalize(k.Name).Concat(TokenizeAndNormalize(k.NameFr))
+                .Concat(TokenizeAndNormalize(k.NameEn)).Concat(TokenizeAndNormalize(k.NameNl))
+            ) ?? Enumerable.Empty<string>())
+            .Distinct()
+            .ToList();
+
+        var matchedPairs = rfpWords
+            .SelectMany(rw => allProfileWords
+                .Where(pw => WordsMatch(rw, pw))
+                .Select(pw => (rw, pw)))
+            .Distinct()
+            .ToList();
+
+        double ratio = (double)matchedPairs.Count / rfpWords.Count;
+
+        int score = ratio switch
+        {
+            >= 0.8 => 25,
+            >= 0.5 => 18,
+            >= 0.3 => 12,
+            >= 0.1 => 6,
+            _ => 0
+        };
+
+        string feedback = matchedPairs.Any()
+            ? $"{introFeedback}{matchedPairs.Count}/{rfpWords.Count} mots matchés ({(int)(ratio * 100)}%) → {score}pts"
+            : $"{introFeedback}Aucun mot clé trouvé.";
+
+        return (score, feedback);
+    }
+
+    private static (int score, string feedback) ScoreSkillsMatchLegacy(Profile profile, RFP rfp)
+    {
+        var rfpSkills = rfp.Skills ?? Enumerable.Empty<string>();
+
+        var profileTokens = (profile.Skills?.SelectMany(s =>
+            TokenizeAndNormalize(s.Name).Concat(TokenizeAndNormalize(s.NameFr))
+            .Concat(TokenizeAndNormalize(s.NameEn)).Concat(TokenizeAndNormalize(s.NameNl))
+        ) ?? Enumerable.Empty<string>())
+        .Concat(profile.Keywords?.SelectMany(k =>
+            TokenizeAndNormalize(k.Name).Concat(TokenizeAndNormalize(k.NameFr))
+            .Concat(TokenizeAndNormalize(k.NameEn)).Concat(TokenizeAndNormalize(k.NameNl))
+        ) ?? Enumerable.Empty<string>())
+        .Distinct()
+        .ToList();
+
+        int matched = 0, total = 0;
+        var matchedDetails = new List<string>();
+        var missingDetails = new List<string>();
+
+        foreach (var rawSkill in rfpSkills)
+        {
+            var (text, _) = ParseSkill(rawSkill);
+            var tokens = TokenizeAndNormalize(text);
+            total++;
+
+            var hit = tokens.Select(t => profileTokens.FirstOrDefault(p => WordsMatch(p, t)))
+                            .FirstOrDefault(m => m != null);
+
+            if (hit != null)
+            {
+                matched++;
+                matchedDetails.Add($"« {text} » ↔ « {hit} »");
+            }
+            else
+            {
+                missingDetails.Add($"« {text} »");
+            }
+        }
+
+        // Ancienne logique linéaire pour le fallback
+        int score = total > 0 ? (int)((double)matched / total * 45) : 0;
+
+        var fb = new StringBuilder();
+        fb.AppendLine($"Skills (Fallback) : {matched}/{total} → {score}pts");
+        if (matchedDetails.Any()) fb.AppendLine("Matchées : " + string.Join(", ", matchedDetails));
+        if (missingDetails.Any()) fb.AppendLine("Manquantes : " + string.Join(", ", missingDetails));
+
+        return (score, fb.ToString().Trim());
+    }
+
+    // --- HELPERS ---
+
+    private static readonly Regex TokenRegex = new Regex(
+        @"[a-zA-Z0-9#+.]+",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromMilliseconds(250));
+
     private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
     {
-        "and", "the", "of", "in", "on", "for", "to", "with", "by", "a", "an",
-
+        "and", "the", "of", "in", "on", "for", "to", "with", "by", "a", "an", "le", "la", "les", "un", "une", "des", "de", "du"
     };
 
     private static List<string> TokenizeAndNormalize(string input)
     {
         if (string.IsNullOrWhiteSpace(input)) return new();
 
-        var normalized = input
-            .ToLowerInvariant()
-            .Normalize(NormalizationForm.FormD);
-
+        var normalized = input.ToLowerInvariant().Normalize(NormalizationForm.FormD);
         var cleaned = new string(normalized
             .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
             .ToArray());
 
         try
         {
-            var words = TokenRegex.Matches(cleaned)
+            return TokenRegex.Matches(cleaned)
                 .Select(m => m.Value)
-                .Where(word => word.Length > 2 && !StopWords.Contains(word))
+                .Where(w => w.Length > 2 && !StopWords.Contains(w))
                 .Distinct()
                 .ToList();
-            return words;
         }
         catch (RegexMatchTimeoutException ex)
         {
-            Console.WriteLine("Regex timeout dépassé : " + ex.Message);
-            return new List<string>();
+            throw new InvalidOperationException(
+                $"Échec de la tokenisation : le temps d'analyse Regex a été dépassé pour l'entrée (longueur: {input?.Length} chars).", 
+                ex);
         }
-
     }
 
-    // Compare deux mots avec tolérance à 1 faute de frappe (Levenshtein <= 1)
-    private static bool WordsMatch(string word1, string word2)
+    private static bool WordsMatch(string w1, string w2)
     {
-        if (word1 == word2)
-            return true;
-
-        int distance = LevenshteinDistance(word1, word2);
-        return distance <= 1 && Math.Min(word1.Length, word2.Length) >= 5;
+        if (w1 == w2) return true;
+        int d = LevenshteinDistance(w1, w2);
+        return d <= 1 && Math.Min(w1.Length, w2.Length) >= 4; // Légèrement assoupli à 4 chars
     }
 
-    // Calcule la distance de Levenshtein entre deux chaînes
+    private static double NormalizedMatchScore(string a, string b)
+    {
+        var wa = a.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                  .Select(w => w.ToLowerInvariant()).ToArray();
+        var wb = b.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                  .Select(w => w.ToLowerInvariant()).ToArray();
+
+        if (WordsMatch(a.ToLowerInvariant(), b.ToLowerInvariant()))
+            return 1.0;
+
+        int matchedWords = wa.Count(w => wb.Any(w2 => WordsMatch(w, w2)));
+        if (matchedWords == 0) return 0.0;
+
+        double ratio = (double)matchedWords / Math.Max(wa.Length, wb.Length);
+        return ratio * 0.6;
+    }
+
     private static int LevenshteinDistance(string a, string b)
     {
         var dp = new int[a.Length + 1, b.Length + 1];
         for (int i = 0; i <= a.Length; i++) dp[i, 0] = i;
         for (int j = 0; j <= b.Length; j++) dp[0, j] = j;
-
         for (int i = 1; i <= a.Length; i++)
-        for (int j = 1; j <= b.Length; j++)
-            dp[i, j] = Math.Min(
-                Math.Min(dp[i - 1, j] + 1,
-                         dp[i, j - 1] + 1), 
-                         dp[i - 1, j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
-
+            for (int j = 1; j <= b.Length; j++)
+                dp[i, j] = Math.Min(
+                    Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1),
+                    dp[i - 1, j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
         return dp[a.Length, b.Length];
     }
 
-    // Helper pour convertir un tableau de caractères en chaîne
-    private static string JoinAsString(this char[] chars)
-        => new string(chars);
+    private static (string text, string importance) ParseSkill(string rawSkill)
+    {
+        var lower = rawSkill.ToLowerInvariant();
+        string importance = lower.Contains("must have") ? "must have"
+            : lower.Contains("should have") ? "should have"
+            : lower.Contains("nice to have") ? "nice to have"
+            : "N/A";
+
+        string text = rawSkill.Split("(importance:", StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+        return (text, importance);
+    }
+
+    private static Experience InferExperienceFromText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return Experience.Unspecified;
+        var tokens = TokenizeAndNormalize(text);
+        foreach (var token in tokens)
+        {
+            if (WordsMatch(token, "senior") || WordsMatch(token, "expert") || WordsMatch(token, "lead"))
+                return Experience.Senior;
+            if (WordsMatch(token, "medior") || WordsMatch(token, "confirme"))
+                return Experience.Medior;
+            if (WordsMatch(token, "junior"))
+                return Experience.Junior;
+        }
+        return Experience.Unspecified;
+    }
 }

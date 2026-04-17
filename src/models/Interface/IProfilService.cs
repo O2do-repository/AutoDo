@@ -5,6 +5,6 @@ public interface IProfileService
     Task<Profile> UpdateProfile(Profile updatedProfile, List<Guid> skillUuids, List<Guid> keywordUuids);
     void DeleteProfile(Guid profileUuid);
     List<Profile> GetProfilesByConsultant(Guid consultantUuid);
-    Task<int> UpdateAllProfiles();
+    Task UpdateAllProfilesNormalizationAsync();
     //Task<int> BackupOldProfileSkillAndKeywordData();
 }

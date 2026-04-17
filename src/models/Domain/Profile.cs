@@ -28,4 +28,17 @@ public class Profile
 
     [JsonIgnore]
     public Consultant Consultant {get; set;}
+
+    // Ajut
+    /// Titre du poste normalisé en Anglais Standard (ex: "Senior .NET Developer")
+    public string? NormalizedJobTitle { get; set; }
+
+
+    /// Liste JSON des compétences normalisées (ex: ["CSharp", "Azure", "Agile"])
+    public string? NormalizedSkillsJson { get; set; }
+    public string? NormalizedKeywordsJson { get; set; }
+
+
+    /// Date de la dernière normalisation (pour débogage et invalidation)
+    public DateTime? LastNormalizationDate { get; set; }
 }

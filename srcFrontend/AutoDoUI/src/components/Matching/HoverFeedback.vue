@@ -68,16 +68,16 @@ onMounted(fetchFeedback);
             <strong>Score total :</strong> {{ feedback.totalScore }}
 
             <v-divider class="my-2" />
-            <strong>Job Title ({{ feedback.jobTitleScore }}/20)</strong>
+            <strong>Job Title ({{ feedback.jobTitleScore }}/25)</strong>
             <div class="mb-4">{{ feedback.jobTitleFeedback }}</div>
 
             <strong>Expérience ({{ feedback.experienceScore }}/20)</strong>
             <div class="mb-4">{{ feedback.experienceFeedback }}</div>
 
-            <strong>Compétences ({{ feedback.skillsScore }}/40)</strong>
+            <strong>Compétences ({{ feedback.skillsScore }}/45)</strong>
             <div class="mb-4">{{ feedback.skillsFeedback }}</div>
 
-            <strong>Localisation ({{ feedback.locationScore }}/20)</strong>
+            <strong>Localisation ({{ feedback.locationScore }}/10)</strong>
             <div class="mb-4">{{ feedback.locationFeedback }}</div>
 
             <em class="text-grey">Dernière mise à jour : {{ new Date(feedback.lastUpdatedAt).toLocaleString('fr-FR') }}</em>
