@@ -59,6 +59,9 @@ builder.Services.AddHttpClient();
 var infomaniakApiKey = builder.Configuration["Infomaniak:ApiKey"];
 var infomaniakModel = builder.Configuration["Infomaniak:Model"]; 
 var infomaniakProductId = builder.Configuration["Infomaniak:ProductId"];
+Console.WriteLine($">>> Infomaniak ApiKey présente : {!string.IsNullOrEmpty(infomaniakApiKey)}");
+Console.WriteLine($">>> Infomaniak Model : {infomaniakModel}");
+Console.WriteLine($">>> Infomaniak ProductId : {infomaniakProductId}");
 
 if (string.IsNullOrEmpty(infomaniakApiKey))
 {
