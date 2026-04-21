@@ -29,8 +29,6 @@ public class AutoDoDbContext : DbContext
 
 
 
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configuration de RFP
@@ -104,9 +102,9 @@ public class AutoDoDbContext : DbContext
             entity.ToTable("Profile");
             entity.HasKey(p => p.ProfileUuid);
             entity.Property(p => p.ProfileUuid).HasColumnName("ProfileUuid").IsRequired();
-            entity.Property(p => p.Ratehour).HasColumnName("Ratehour");
+            entity.Property(p => p.Ratehour).HasColumnName("Ratehour").IsRequired(false);
             entity.Property(p => p.CV).HasColumnName("CV").HasMaxLength(500).IsRequired();
-            entity.Property(p => p.CVDate).HasColumnName("CVDate").IsRequired();
+            entity.Property(p => p.CVDate).HasColumnName("CVDate").IsRequired(false);
             entity.Property(p => p.JobTitle).HasColumnName("JobTitle").HasMaxLength(250).IsRequired();
             entity.Property(p => p.JobTitleFr).HasColumnName("JobTitleFr").HasMaxLength(250).IsRequired();
             entity.Property(p => p.JobTitleEn).HasColumnName("JobTitleEn").HasMaxLength(250).IsRequired();

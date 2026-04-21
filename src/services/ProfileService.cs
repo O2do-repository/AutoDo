@@ -62,7 +62,7 @@ public class ProfileService : IProfileService
         profile.Skills = fullSkills;
         profile.Keywords = fullKeywords;
 
-        // --- IA : normalisation ---
+        //  IA : normalisation
         try
         {
             var jobTitleInput = $"{profile.JobTitleFr} | {profile.JobTitleEn} | {profile.JobTitleNl}";
@@ -120,8 +120,8 @@ public class ProfileService : IProfileService
             hasCriticalChange = true;
         }
 
-        existingProfile.Ratehour = updatedProfile.Ratehour;
-        existingProfile.CV = updatedProfile.CV;
+        existingProfile.Ratehour = updatedProfile.Ratehour ?? existingProfile.Ratehour;
+        existingProfile.CVDate = updatedProfile.CVDate ?? existingProfile.CVDate;
         existingProfile.CVDate = updatedProfile.CVDate;
         existingProfile.ExperienceLevel = updatedProfile.ExperienceLevel;
 

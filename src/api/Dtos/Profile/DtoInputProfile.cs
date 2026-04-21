@@ -6,15 +6,13 @@ public class DtoInputProfile
     [Required]
     public Guid ConsultantUuid { get; set; }
 
-    [Range(0, int.MaxValue, ErrorMessage = "Le taux horaire ne peut pas être négatif.")]
-    public int RateHour { get; set; }
+    public int? RateHour { get; set; }
 
     [Required]
     [Url(ErrorMessage = "Le champ CV doit être une URL valide.")]
     public string Cv { get; set; }
 
-    [Required]
-    public DateTime CvDate { get; set; }
+    public DateTime? CvDate { get; set; }
 
     [Required]
     public string JobTitle { get; set; }

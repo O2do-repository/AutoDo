@@ -9,15 +9,13 @@ public class DtoUpdateProfile
     [Required]
     public Guid ConsultantUuid { get; set; }
 
-    [Required]
-    public int RateHour { get; set; }
+    public int? RateHour { get; set; }
 
     [Required]
     [Url(ErrorMessage = "Le champ CV doit être une URL valide.")]
     public string Cv { get; set; }
 
-    [Required]
-    public DateTime CvDate { get; set; }
+    public DateTime? CvDate { get; set; }
 
     [Required]
     public string JobTitle { get; set; }

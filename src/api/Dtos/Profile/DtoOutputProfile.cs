@@ -6,12 +6,12 @@ public class DtoOutputProfile
 
     public Guid ProfileUuid{ get; set; }
     public Guid ConsultantUuid{ get; set; }
-    public int RateHour { get; set; }
+    public int? RateHour { get; set; }
 
     public string Cv { get; set; }
     
     [JsonConverter(typeof(DateOnlyJsonConverter))]
-    public DateTime CvDate { get; set; }
+    public DateTime? CvDate { get; set; }
     public string JobTitle { get; set; }
 
     [Required]

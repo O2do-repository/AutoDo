@@ -96,7 +96,6 @@ export default defineComponent({
     const required = (v: any) => !!v || 'Champ obligatoire';
     const numberRule = (v: any) => !isNaN(v) && Number(v) >= 0 || 'Entier positif requis';
     const urlRule = (v: string) => /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(v) || "Lien invalide (ex: https://...)";
-    const dateRule = (v: string) => !!v || 'Date requise';
 
     const checkCV = () => {
       validCV.value = profile.value.cv || '';
@@ -189,9 +188,11 @@ export default defineComponent({
         const payload = {
           ProfileUuid: profile.value.profileUuid,
           ConsultantUuid: profile.value.consultantUuid,
-          RateHour: profile.value.rateHour,
+          RateHour: profile.value.rateHour != null && !isNaN(profile.value.rateHour)
+            ? Number(profile.value.rateHour)
+            : null,
           Cv: profile.value.cv,
-          CvDate: profile.value.cvDate,
+          CvDate: profile.value.cvDate?.trim() || null,
           JobTitle: profile.value.jobTitle,
           ExperienceLevel: profile.value.experienceLevel,
           SkillUuids: skillUuids,
@@ -231,7 +232,6 @@ export default defineComponent({
       required,
       numberRule,
       urlRule,
-      dateRule,
       placeholderCV,
       validCV,
       clearPlaceholder,
@@ -297,10 +297,10 @@ export default defineComponent({
 
             <v-col cols="6">
               <v-text-field
-                label="Hourly Rate (€) *"
+                label="Hourly Rate (€)"
                 v-model.number="profile.rateHour"
                 type="number"
-                :rules="[required, numberRule]"
+                :rules="[numberRule]"
                 variant="outlined"
                 color="primary"
                 required
@@ -309,10 +309,9 @@ export default defineComponent({
 
             <v-col cols="6">
               <v-text-field
-                label="CV Date *"
+                label="CV Date"
                 v-model="profile.cvDate"
                 type="date"
-                :rules="[required, dateRule]"
                 variant="outlined"
                 color="primary"
                 required
@@ -321,7 +320,7 @@ export default defineComponent({
 
             <v-col cols="12">
               <v-autocomplete 
-                label="Skills *"
+                label="Skills"
                 v-model="profile.skills"
                 :items="availableSkills"
                 item-title="name"
@@ -337,7 +336,7 @@ export default defineComponent({
 
             <v-col cols="12">
               <v-autocomplete 
-                label="Keywords *"
+                label="Keywords"
                 v-model="profile.keywords"
                 :items="availableKeywords"
                 item-title="name"

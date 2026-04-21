@@ -54,7 +54,6 @@ export default defineComponent({
     const urlRule = (value: string) =>
       /^(https?:\/\/)[^\s$.?#].[^\s]*$/.test(value) ||
       'Lien invalide (ex: https://...)';
-    const dateRule = (v: string) => !!v || 'Date requise';
 
     // Fetch Skills & Keywords
     const fetchSkills = async () => {
@@ -128,7 +127,7 @@ export default defineComponent({
           consultantUuid: profile.value.consultantUuid,
           RateHour: profile.value.RateHour,
           CV: profile.value.CV,
-          CVDate: profile.value.CVDate,
+          CVDate: profile.value.CVDate?.trim() || null,
           JobTitle: profile.value.JobTitle,
           ExperienceLevel: profile.value.ExperienceLevel,
           SkillUuids: selectedSkillUuids.value,
@@ -164,7 +163,7 @@ export default defineComponent({
       required,
       numberRule,
       urlRule,
-      dateRule,
+      
       placeholderCV,
       validCV,
       clearPlaceholder,
@@ -230,10 +229,10 @@ export default defineComponent({
             <!-- Hourly Rate -->
             <v-col cols="6">
               <v-text-field
-                label="Hourly Rate (€) *"
+                label="Hourly Rate (€)"
                 v-model.number="profile.RateHour"
                 type="number"
-                :rules="[required, numberRule]"
+                :rules="[numberRule]"
                 variant="outlined"
                 color="primary"
                 required
@@ -243,10 +242,9 @@ export default defineComponent({
             <!-- CV Date -->
             <v-col cols="6">
               <v-text-field
-                label="CV Date *"
+                label="CV Date"
                 v-model="profile.CVDate"
                 type="date"
-                :rules="[required, dateRule]"
                 variant="outlined"
                 color="primary"
                 required
@@ -256,7 +254,7 @@ export default defineComponent({
             <!-- Skills -->
             <v-col cols="12">
               <v-autocomplete
-                label="Skills *"
+                label="Skills"
                 v-model="selectedSkillUuids"
                 :items="availableSkills"
                 item-title="name"
@@ -273,7 +271,7 @@ export default defineComponent({
             <!-- Keywords -->
             <v-col cols="12">
               <v-autocomplete
-                label="Keywords *"
+                label="Keywords"
                 v-model="selectedKeywordUuids"
                 :items="availableKeywords"
                 item-title="name"
