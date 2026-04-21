@@ -9,11 +9,10 @@ public class Profile
     public Guid ProfileUuid { get; set; }
     [ForeignKey("ConsultantUuid")]
     public Guid ConsultantUuid{get;set;}
-    public int Ratehour { get; set; }
+    public int? Ratehour { get; set; }
     [Required]
     public string CV { get; set; }
-    [Required]
-    public DateTime CVDate { get; set; }
+    public DateTime? CVDate { get; set; }
     [Required]
     public string JobTitle { get; set; }
     [Required]

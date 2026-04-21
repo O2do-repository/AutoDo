@@ -27,6 +27,7 @@ public class ProfileController : ControllerBase
             Cv = profile.CV,
             CvDate = profile.CVDate,
             JobTitle = profile.JobTitle,
+            
             ExperienceLevel = profile.ExperienceLevel,
             Skills = profile.Skills ?? new List<Skill>(),
             Keywords = profile.Keywords ?? new List<Keyword>()
@@ -183,7 +184,7 @@ public class ProfileController : ControllerBase
             });
         }
     }
-    
+
     [HttpPut("normalize-all")]
     public async Task<IActionResult> UpdateAllProfiles()
     {
