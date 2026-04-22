@@ -92,5 +92,40 @@ public class SkillService : ISkillService
 
         await _context.SaveChangesAsync();
     }
+    public async Task<(int Added, int Skipped, List<string> SkippedNames)> AddBulkSkills(IEnumerable<string> names)
+    {
+        var added = 0;
+        var skipped = 0;
+        var skippedNames = new List<string>();
 
+        var existingNames = _context.Skills
+            .Select(s => s.Name.ToLower())
+            .ToHashSet();
+
+        foreach (var name in names.Where(n => !string.IsNullOrWhiteSpace(n)))
+        {
+            if (existingNames.Contains(name.ToLower()))
+            {
+                skipped++;
+                skippedNames.Add(name);
+                continue;
+            }
+
+            var skill = new Skill
+            {
+                SkillUuid = Guid.NewGuid(),
+                Name = name,
+                NameEn = name,
+                NameFr = name,
+                NameNl = name
+            };
+
+            _context.Skills.Add(skill);
+            existingNames.Add(name.ToLower());
+            added++;
+        }
+
+        await _context.SaveChangesAsync();
+        return (added, skipped, skippedNames);
+    }
 }

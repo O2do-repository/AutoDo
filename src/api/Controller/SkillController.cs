@@ -128,5 +128,25 @@ public class SkillController : ControllerBase
             });
         }
     }
+    [HttpPost("bulk")]
+    public async Task<IActionResult> CreateBulkSkills([FromBody] List<string> names)
+    {
+        if (names == null || names.Count == 0)
+            return BadRequest(new { success = false, message = "La liste est vide." });
 
+        try
+        {
+            var result = await _skillService.AddBulkSkills(names);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = $"{result.Added} compétence(s) ajoutée(s), {result.Skipped} ignorée(s).",
+                data = result
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
 }
