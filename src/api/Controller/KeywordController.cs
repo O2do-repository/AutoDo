@@ -126,4 +126,25 @@ public class KeywordController : ControllerBase
             });
         }
     }
+    [HttpPost("bulk")]
+    public async Task<IActionResult> CreateBulkKeywords([FromBody] List<string> names)
+    {
+        if (names == null || names.Count == 0)
+            return BadRequest(new { success = false, message = "La liste est vide." });
+
+        try
+        {
+            var result = await _keywordService.AddBulkKeywords(names);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = $"{result.Added} compétence(s) ajoutée(s), {result.Skipped} ignorée(s).",
+                data = result
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
 }
